@@ -1,6 +1,6 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import '../teature_detail/teature_detail_page.dart';
 
 class Home extends StatelessWidget {
   @override
@@ -72,7 +72,12 @@ class TeatureCell extends StatelessWidget {
         ],
       ),
       onTap: () {
-        // TODO: Add Navigation.
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (BuildContext context) => TeatureDetail(index: index),
+          ),
+        );
       },
     );
   }
