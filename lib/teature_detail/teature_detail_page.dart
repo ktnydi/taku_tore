@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import '../comment/comment_page.dart';
 
 class TeatureDetail extends StatelessWidget {
   TeatureDetail({this.index});
@@ -149,7 +150,14 @@ class Content extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (BuildContext context) => Comment(),
+                      ),
+                    );
+                  },
                 ),
               )
             ],
