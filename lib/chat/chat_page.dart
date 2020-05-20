@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../chat_room/chat_room_page.dart';
 
 class Chat extends StatelessWidget {
   @override
@@ -63,6 +64,12 @@ class ChatCell extends StatelessWidget {
       ),
       onTap: () {
         // TODO: Add Navigation.
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (BuildContext context) => ChatRoom(),
+          ),
+        );
       },
     );
   }
