@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../setting_name/setting_name_page.dart';
+import '../setting_email/setting_email_page.dart';
 
 class Setting extends StatelessWidget {
   @override
@@ -195,7 +196,12 @@ class AccountSetting extends StatelessWidget {
               size: 15,
             ),
             onTap: () {
-              // TODO: Add Navigation.
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (BuildContext context) => SettingEmail(),
+                ),
+              );
             },
           ),
           ListTile(
