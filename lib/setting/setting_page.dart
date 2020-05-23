@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../setting_name/setting_name_page.dart';
 import '../setting_email/setting_email_page.dart';
 import '../setting_password/setting_password_page.dart';
+import '../bookmark/bookmark_page.dart';
 
 class Setting extends StatelessWidget {
   @override
@@ -263,6 +264,12 @@ class Bookmark extends StatelessWidget {
             ),
             onTap: () {
               // TODO: Add Navigation.
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (BuildContext context) => BookmarkList(),
+                ),
+              );
             },
           ),
         ],
