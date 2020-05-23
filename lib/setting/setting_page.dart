@@ -3,6 +3,7 @@ import '../setting_name/setting_name_page.dart';
 import '../setting_email/setting_email_page.dart';
 import '../setting_password/setting_password_page.dart';
 import '../bookmark/bookmark_page.dart';
+import '../remove_user/remove_user_page.dart';
 
 class Setting extends StatelessWidget {
   @override
@@ -296,7 +297,12 @@ class Danger extends StatelessWidget {
               size: 15,
             ),
             onTap: () {
-              // TODO: Add Navigation.
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (BuildContext context) => RemoveUser(),
+                ),
+              );
             },
           ),
           ListTile(
