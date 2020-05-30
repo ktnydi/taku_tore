@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../setting_teacher/setting_teacher_page.dart';
 import '../setting_name/setting_name_page.dart';
 import '../setting_email/setting_email_page.dart';
 import '../setting_password/setting_password_page.dart';
@@ -103,7 +104,13 @@ class CurrentAccount extends StatelessWidget {
                       ),
                     ),
                     onPressed: () {
-                      // TODO: Add processing for becoming teature.
+                      // TODO: Add processing for becoming teacher.
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (BuildContext context) => SettingTeacher(),
+                        ),
+                      );
                     },
                   ),
                 )
