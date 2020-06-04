@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../setting_teacher/setting_teacher_page.dart';
 import '../setting_name/setting_name_page.dart';
 import '../setting_email/setting_email_page.dart';
@@ -287,6 +288,8 @@ class Bookmark extends StatelessWidget {
 }
 
 class Danger extends StatelessWidget {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -322,6 +325,30 @@ class Danger extends StatelessWidget {
             ),
             onTap: () {
               // TODO: Add logout processing.
+              showDialog(
+                context: context,
+                child: AlertDialog(
+                  title: Text('ログアウトしますか?'),
+                  actions: <Widget>[
+                    FlatButton(
+                      child: Text('キャンセル'),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                    FlatButton(
+                      child: Text(
+                        'ログアウト',
+                        style: TextStyle(
+                          color: Colors.redAccent,
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _auth.signOut();
+                      },
+                    ),
+                  ],
+                ),
+              );
             },
           ),
         ],
