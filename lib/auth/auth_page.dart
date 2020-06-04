@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../login/login_page.dart';
 
 class Auth extends StatefulWidget {
   @override
@@ -37,6 +38,15 @@ class _AuthState extends State<Auth> {
                   ),
                   onPressed: () {
                     // TODO: Implement navigator to login page.
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (BuildContext context) {
+                          return Login();
+                        },
+                        fullscreenDialog: true,
+                      ),
+                    );
                   },
                 ),
               ),
