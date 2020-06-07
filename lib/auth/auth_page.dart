@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../login/login_page.dart';
+import '../signup/signup_page.dart';
 
 class Auth extends StatefulWidget {
   @override
@@ -62,6 +63,13 @@ class _AuthState extends State<Auth> {
                   ),
                   onPressed: () {
                     // TODO: Implement navigator to register page.
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (BuildContext context) => SignUp(),
+                        fullscreenDialog: true,
+                      ),
+                    );
                   },
                 ),
               ),
