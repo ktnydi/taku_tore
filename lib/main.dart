@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import './auth/auth_page.dart';
 import './bottom_tab_navigator.dart';
@@ -11,6 +12,7 @@ void main() {
 
 class MyApp extends StatelessWidget {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final Firestore _store = Firestore.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -25,10 +27,22 @@ class MyApp extends StatelessWidget {
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           // TODO: Fix following processing called twice.
           if (snapshot.data != null) {
-            FirebaseUser currentUser = snapshot.data;
-            return Provider<Object>.value(
-              value: currentUser,
-              child: BottomTabNavigator(),
+            final String currentUserUid = snapshot.data.uid;
+
+            return FutureBuilder(
+              future: _store.document('users/$currentUserUid').get(),
+              builder: (BuildContext context, AsyncSnapshot snapshot) {
+                if (snapshot.data != null) {
+                  final userSnapshot = snapshot.data;
+                  final currentUser = userSnapshot.data;
+
+                  return Provider<Map<String, dynamic>>.value(
+                    value: currentUser,
+                    child: BottomTabNavigator(),
+                  );
+                }
+                return Container();
+              },
             );
           }
 
