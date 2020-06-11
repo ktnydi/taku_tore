@@ -29,11 +29,11 @@ class MyApp extends StatelessWidget {
           if (snapshot.data != null) {
             final String currentUserUid = snapshot.data.uid;
 
-            return FutureBuilder(
-              future: _store.document('users/$currentUserUid').get(),
-              builder: (BuildContext context, AsyncSnapshot snapshot) {
+            return StreamBuilder(
+              stream: _store.document('users/$currentUserUid').snapshots(),
+              builder: (context, snapshot) {
                 if (snapshot.data != null) {
-                  final userSnapshot = snapshot.data;
+                  DocumentSnapshot userSnapshot = snapshot.data;
                   final currentUser = userSnapshot.data;
 
                   return Provider<Map<String, dynamic>>.value(
