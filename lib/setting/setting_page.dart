@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:provider/provider.dart';
 import '../setting_teacher/setting_teacher_page.dart';
 import '../setting_name/setting_name_page.dart';
 import '../setting_email/setting_email_page.dart';
@@ -26,15 +30,99 @@ class Setting extends StatelessWidget {
   }
 }
 
-class CurrentAccount extends StatelessWidget {
+class CurrentAccount extends StatefulWidget {
+  @override
+  _CurrentAccountState createState() => _CurrentAccountState();
+}
+
+class _CurrentAccountState extends State<CurrentAccount> {
+  final picker = ImagePicker();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final Firestore _store = Firestore.instance;
+  final FirebaseStorage _storage = FirebaseStorage.instance;
+
   final TextStyle _sectionTitleStyle = TextStyle(
     fontSize: 18,
     fontWeight: FontWeight.bold,
     color: Colors.black54,
   );
 
+  void uploadImage() async {
+    try {
+      // 端末から画像データを取得
+      final PickedFile pickedFile =
+          await picker.getImage(source: ImageSource.gallery);
+      if (pickedFile == null) {
+        return;
+      }
+      final imageData = await pickedFile.readAsBytes();
+
+      // Firebase Storageに画像をアップロード
+      final FirebaseUser currentUser = await _auth.currentUser();
+      final path = '/images/${currentUser.uid}.jpg';
+      final StorageReference storageRef = _storage.ref().child(path);
+      final metaData = StorageMetadata(contentType: "image/jpg");
+      final StorageUploadTask uploadTask = storageRef.putData(
+        imageData,
+        metaData,
+      );
+
+      // 画像の保存完了時にFirestoreにURLを保存する。
+      StorageTaskSnapshot snapshot = await uploadTask.onComplete;
+      String photoURL = await snapshot.ref.getDownloadURL();
+      updateCurrentUserIcon(photoURL: photoURL);
+      Navigator.pop(context);
+    } catch (error) {
+      print(error);
+    }
+  }
+
+  void resetUserIcon() async {
+    try {
+      StorageReference photoRef = _storage.ref().child('/images/default.jpg');
+      String photoURL = await photoRef.getDownloadURL();
+      updateCurrentUserIcon(photoURL: photoURL);
+      Navigator.pop(context);
+    } catch (error) {
+      print(error);
+    }
+  }
+
+  void updateCurrentUserIcon({photoURL}) async {
+    FirebaseUser currentUser = await _auth.currentUser();
+    DocumentReference imgDocRef = _store.document('users/${currentUser.uid}');
+    await imgDocRef.updateData({
+      'photoURL': photoURL,
+    });
+  }
+
+  void changeAvatar() {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              ListTile(
+                title: Text('ギャラリー'),
+                onTap: uploadImage,
+              ),
+              ListTile(
+                title: Text('デフォルトに戻す'),
+                onTap: resetUserIcon,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final currentUser = Provider.of<Map<String, dynamic>>(context);
+
     return Container(
       child: Column(
         children: <Widget>[
@@ -51,12 +139,16 @@ class CurrentAccount extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 Container(
-                  child: CircleAvatar(
-                    radius: 50,
-                    child: Text(
-                      'アリス'[0],
-                    ),
-                  ),
+                  child: StreamBuilder<Object>(
+                      stream: null,
+                      builder: (context, snapshot) {
+                        return CircleAvatar(
+                          radius: 50,
+                          backgroundImage:
+                              NetworkImage(currentUser['photoURL']),
+                          backgroundColor: Colors.transparent,
+                        );
+                      }),
                 ),
                 SizedBox(height: 10),
                 Text(
@@ -88,6 +180,8 @@ class CurrentAccount extends StatelessWidget {
                     ),
                     onPressed: () {
                       // TODO: Add processing for changing avatar.
+//                      uploadImage();
+                      changeAvatar();
                     },
                   ),
                 ),
