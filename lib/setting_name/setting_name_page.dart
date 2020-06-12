@@ -1,26 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SettingName extends StatefulWidget {
+  SettingName({this.currentUser});
+
+  final Map<String, dynamic> currentUser;
+
   @override
   _SettingNameState createState() => _SettingNameState();
 }
 
 class _SettingNameState extends State<SettingName>
     with TickerProviderStateMixin {
-  final TextEditingController _currentNameController =
-      TextEditingController(text: 'アリス');
+  final Firestore _store = Firestore.instance;
   final TextEditingController _newNameController = TextEditingController();
   bool isDisabled = true;
 
   @override
   void dispose() {
     final _controllers = <TextEditingController>[
-      _currentNameController,
       _newNameController,
     ];
 
     _controllers.forEach((_controller) => _controller.dispose());
     super.dispose();
+  }
+
+  void updateName({newName}) async {
+    try {
+      _store.document('users/${widget.currentUser['uid']}').updateData({
+        'displayName': newName,
+      });
+      Navigator.pop(context);
+    } catch (error) {
+      print(error);
+    }
   }
 
   @override
@@ -45,11 +59,13 @@ class _SettingNameState extends State<SettingName>
                 fontWeight: FontWeight.bold,
               ),
             ),
-            TextField(
-              controller: _currentNameController,
-              readOnly: true,
-              decoration: InputDecoration(
-                border: InputBorder.none,
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: Text(
+                widget.currentUser['displayName'],
+                style: TextStyle(
+                  fontSize: 17,
+                ),
               ),
             ),
             SizedBox(height: 10),
@@ -82,21 +98,18 @@ class _SettingNameState extends State<SettingName>
               minWidth: double.infinity,
               height: 50,
               child: RaisedButton(
-                disabledColor: Colors.black45,
-                child: Text(
-                  '更新',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                  disabledColor: Colors.black45,
+                  child: Text(
+                    '更新',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
-                ),
-                onPressed: isDisabled
-                    ? null
-                    : () {
-                        // TODO: Implement processing for updating name.
-                      },
-              ),
+                  onPressed: isDisabled
+                      ? null
+                      : () => updateName(newName: _newNameController.text)),
             ),
           ],
         ),

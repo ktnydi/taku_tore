@@ -227,6 +227,8 @@ class AccountSetting extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentUser = Provider.of<Map<String, dynamic>>(context);
+
     return Container(
       child: Column(
         children: <Widget>[
@@ -249,7 +251,7 @@ class AccountSetting extends StatelessWidget {
                 SizedBox(width: 10),
                 Flexible(
                   child: Text(
-                    'アリス',
+                    currentUser['displayName'],
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -268,7 +270,9 @@ class AccountSetting extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (BuildContext context) => SettingName(),
+                  builder: (BuildContext context) => SettingName(
+                    currentUser: currentUser,
+                  ),
                 ),
               );
             },

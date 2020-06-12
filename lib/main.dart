@@ -35,6 +35,7 @@ class MyApp extends StatelessWidget {
                 if (snapshot.data != null) {
                   DocumentSnapshot userSnapshot = snapshot.data;
                   final currentUser = userSnapshot.data;
+                  currentUser['uid'] = currentUserUid;
 
                   return Provider<Map<String, dynamic>>.value(
                     value: currentUser,
