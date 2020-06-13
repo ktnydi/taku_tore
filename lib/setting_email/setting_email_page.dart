@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SettingEmail extends StatelessWidget {
   @override
@@ -18,24 +19,26 @@ class SettingEmail extends StatelessWidget {
 }
 
 class UpdateEmailForm extends StatefulWidget {
+  UpdateEmailForm({this.currentUser});
+
+  final Map<String, dynamic> currentUser;
   @override
   _UpdateEmailFormState createState() => _UpdateEmailFormState();
 }
 
 class _UpdateEmailFormState extends State<UpdateEmailForm>
     with TickerProviderStateMixin {
-  final TextEditingController _currentEmailController =
-      TextEditingController(text: 'alice@example.com');
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   final TextEditingController _newEmailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool isDisabled = true;
+  bool isUpdating = false;
 
   @override
   void dispose() {
     // TODO: implement dispose
     final List<TextEditingController> _controllers = [
-      _currentEmailController,
       _newEmailController,
       _passwordController,
     ];
@@ -46,7 +49,6 @@ class _UpdateEmailFormState extends State<UpdateEmailForm>
 
   void judgeValidTextField() {
     final List<TextEditingController> _controllers = [
-      _currentEmailController,
       _newEmailController,
       _passwordController,
     ];
@@ -58,6 +60,47 @@ class _UpdateEmailFormState extends State<UpdateEmailForm>
     setState(() {
       isDisabled = !isValid;
     });
+  }
+
+  void updateEmail({newEmail, password}) async {
+    setState(() {
+      isUpdating = true;
+    });
+    FirebaseUser user = await FirebaseAuth.instance.currentUser();
+
+    try {
+      AuthCredential credential = EmailAuthProvider.getCredential(
+        email: user.email,
+        password: password,
+      );
+      AuthResult authResult =
+          await user.reauthenticateWithCredential(credential);
+
+      await authResult.user.updateEmail(newEmail);
+
+      Navigator.pop(context);
+    } catch (error) {
+      showDialog(
+        barrierDismissible: false,
+        context: context,
+        child: AlertDialog(
+          title: Text('エラー'),
+          content: Text(error.message),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('閉じる'),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
+      );
+    } finally {
+      setState(() {
+        isUpdating = false;
+      });
+    }
   }
 
   @override
@@ -77,13 +120,23 @@ class _UpdateEmailFormState extends State<UpdateEmailForm>
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                TextFormField(
-                  controller: _currentEmailController,
-                  readOnly: true,
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                  ),
-                ),
+                FutureBuilder(
+                    future: _auth.currentUser(),
+                    builder: (context, snapshot) {
+                      if (snapshot.data != null) {
+                        final FirebaseUser currentUser = snapshot.data;
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          child: Text(
+                            currentUser.email,
+                            style: TextStyle(
+                              fontSize: 17,
+                            ),
+                          ),
+                        );
+                      }
+                      return Container();
+                    }),
                 SizedBox(height: 10),
                 Text(
                   '新規',
@@ -125,25 +178,33 @@ class _UpdateEmailFormState extends State<UpdateEmailForm>
                   onChanged: (_) => this.judgeValidTextField(),
                 ),
                 SizedBox(height: 30),
-                ButtonTheme(
-                  minWidth: double.infinity,
-                  height: 50,
-                  child: RaisedButton(
-                    disabledColor: Colors.black45,
-                    child: Text(
-                      '更新',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    onPressed: isDisabled
-                        ? null
-                        : () {
-                            // TODO: Implement processing for updating email.
-                          },
-                  ),
+                Center(
+                  child: !isUpdating
+                      ? ButtonTheme(
+                          minWidth: double.infinity,
+                          height: 50,
+                          child: RaisedButton(
+                            disabledColor: Colors.black45,
+                            child: Text(
+                              '更新',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            onPressed: isDisabled
+                                ? null
+                                : () {
+                                    // TODO: Implement processing for updating email.
+                                    updateEmail(
+                                      newEmail: _newEmailController.text,
+                                      password: _passwordController.text,
+                                    );
+                                  },
+                          ),
+                        )
+                      : CircularProgressIndicator(),
                 ),
               ],
             ),

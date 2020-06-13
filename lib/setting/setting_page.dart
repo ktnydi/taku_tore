@@ -218,7 +218,13 @@ class _CurrentAccountState extends State<CurrentAccount> {
   }
 }
 
-class AccountSetting extends StatelessWidget {
+class AccountSetting extends StatefulWidget {
+  @override
+  _AccountSettingState createState() => _AccountSettingState();
+}
+
+class _AccountSettingState extends State<AccountSetting> {
+  FirebaseAuth _auth = FirebaseAuth.instance;
   final TextStyle _sectionTitleStyle = TextStyle(
     fontSize: 18,
     fontWeight: FontWeight.bold,
@@ -289,13 +295,23 @@ class AccountSetting extends StatelessWidget {
                 ),
                 SizedBox(width: 10),
                 Flexible(
-                  child: Text(
-                    'alice@example.com',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: Colors.black54,
-                    ),
+                  child: FutureBuilder(
+                    future: _auth.currentUser(),
+                    builder: (context, snapshot) {
+                      if (snapshot.data != null) {
+                        FirebaseUser user = snapshot.data;
+
+                        return Text(
+                          user.email,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: Colors.black54,
+                          ),
+                        );
+                      }
+                      return Container();
+                    },
                   ),
                 ),
               ],
@@ -304,13 +320,18 @@ class AccountSetting extends StatelessWidget {
               Icons.arrow_forward_ios,
               size: 15,
             ),
-            onTap: () {
-              Navigator.push(
+            onTap: () async {
+              await Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (BuildContext context) => SettingEmail(),
                 ),
               );
+
+              // 以下を指定しないと表示しているメールアドレスが更新されない。
+              setState(() {
+                _auth = FirebaseAuth.instance;
+              });
             },
           ),
           ListTile(
