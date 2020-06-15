@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SettingTeacher extends StatefulWidget {
   @override
@@ -6,6 +7,7 @@ class SettingTeacher extends StatefulWidget {
 }
 
 class _SettingTeacherState extends State<SettingTeacher> {
+  bool isLoading = false;
   final TextEditingController _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
@@ -13,6 +15,53 @@ class _SettingTeacherState extends State<SettingTeacher> {
   void dispose() {
     _passwordController.dispose();
     super.dispose();
+  }
+
+  void nextStep() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    await confirmPassword(_passwordController.text);
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  Future confirmPassword(password) async {
+    FirebaseUser user = await FirebaseAuth.instance.currentUser();
+
+    try {
+      AuthCredential credential = EmailAuthProvider.getCredential(
+        email: user.email,
+        password: password,
+      );
+      await user.reauthenticateWithCredential(credential);
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (BuildContext context) => BecomeTeacher(),
+        ),
+      );
+    } catch (error) {
+      showDialog(
+        context: context,
+        child: AlertDialog(
+          title: Text('エラー'),
+          content: Text(error.message),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('閉じる'),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   @override
@@ -37,48 +86,66 @@ class _SettingTeacherState extends State<SettingTeacher> {
             ),
             onPressed: () {
               if (_formKey.currentState.validate()) {
-                // TODO: Implement processing for becoming teacher.
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (BuildContext context) => BecomeTeacher(),
-                  ),
-                );
+                nextStep();
                 return null;
               }
             },
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text('続けるには現在のパスワードを入力してください。'),
-              SizedBox(height: 20),
-              Text(
-                'パスワード',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
+      body: Stack(
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text('続けるには現在のパスワードを入力してください。'),
+                  SizedBox(height: 20),
+                  Text(
+                    'パスワード',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  TextFormField(
+                    controller: _passwordController,
+                    obscureText: true,
+                    autofocus: true,
+                    validator: (value) {
+                      if (value.trim().isEmpty) {
+                        return '入力してください';
+                      }
+                      return null;
+                    },
+                  ),
+                ],
               ),
-              TextFormField(
-                controller: _passwordController,
-                obscureText: true,
-                autofocus: true,
-                validator: (value) {
-                  if (value.trim().isEmpty) {
-                    return '入力してください';
-                  }
-                  return null;
-                },
-              ),
-            ],
+            ),
           ),
-        ),
+          Container(
+            child: isLoading
+                ? Container(
+                    color: Colors.black26,
+                    child: Center(
+                      child: Container(
+                        width: 150,
+                        height: 150,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      ),
+                    ),
+                  )
+                : Container(),
+          ),
+        ],
       ),
     );
   }
