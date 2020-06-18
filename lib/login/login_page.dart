@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
+import '../user_model.dart';
 
 class Login extends StatefulWidget {
   @override
@@ -10,7 +11,6 @@ class _LoginState extends State<Login> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
   bool isLoading = false;
 
   @override
@@ -22,55 +22,6 @@ class _LoginState extends State<Login> {
       _passwordController,
     ];
     _controllers.forEach((_controller) => _controller.dispose());
-  }
-
-  void login() async {
-    if (_formKey.currentState.validate()) {
-      setState(() {
-        isLoading = true;
-      });
-
-      // TODO: success
-      try {
-        AuthResult _result = await _auth.signInWithEmailAndPassword(
-          email: _emailController.text,
-          password: _passwordController.text,
-        );
-        if (_result.user != null) {
-          Navigator.pop(context);
-        }
-      } catch (error) {
-        _authDialog(error.message);
-      } finally {
-        setState(() {
-          isLoading = false;
-        });
-      }
-    }
-    // TODO: failure
-  }
-
-  Future<void> _authDialog(message) async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('エラー'),
-          content: SingleChildScrollView(
-            child: Text(message),
-          ),
-          actions: <Widget>[
-            FlatButton(
-              child: Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
   }
 
   @override
@@ -155,15 +106,43 @@ class _LoginState extends State<Login> {
                             minWidth: double.infinity,
                             height: 50,
                             textTheme: ButtonTextTheme.primary,
-                            child: RaisedButton(
-                              child: Text(
-                                'ログイン',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 17,
-                                ),
-                              ),
-                              onPressed: login,
+                            child: Consumer<UserModel>(
+                              builder: (_, model, __) {
+                                return RaisedButton(
+                                  child: Text(
+                                    'ログイン',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 17,
+                                    ),
+                                  ),
+                                  onPressed: () async {
+                                    try {
+                                      await model.loginWithEmail(
+                                        email: _emailController.text,
+                                        password: _passwordController.text,
+                                      );
+                                      Navigator.pop(context);
+                                    } catch (error) {
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title: Text(error.toString()),
+                                            actions: <Widget>[
+                                              FlatButton(
+                                                child: Text('OK'),
+                                                onPressed: () =>
+                                                    Navigator.pop(context),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    }
+                                  },
+                                );
+                              },
                             ),
                           )
                         : CircularProgressIndicator(),

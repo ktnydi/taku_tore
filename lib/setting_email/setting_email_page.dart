@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
+import '../user_model.dart';
 
 class SettingEmail extends StatelessWidget {
   @override
@@ -28,7 +29,6 @@ class UpdateEmailForm extends StatefulWidget {
 
 class _UpdateEmailFormState extends State<UpdateEmailForm>
     with TickerProviderStateMixin {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
   final TextEditingController _newEmailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -62,155 +62,143 @@ class _UpdateEmailFormState extends State<UpdateEmailForm>
     });
   }
 
-  void updateEmail({newEmail, password}) async {
-    setState(() {
-      isUpdating = true;
-    });
-    FirebaseUser user = await FirebaseAuth.instance.currentUser();
-
-    try {
-      AuthCredential credential = EmailAuthProvider.getCredential(
-        email: user.email,
-        password: password,
-      );
-      AuthResult authResult =
-          await user.reauthenticateWithCredential(credential);
-
-      await authResult.user.updateEmail(newEmail);
-
-      Navigator.pop(context);
-    } catch (error) {
-      showDialog(
-        barrierDismissible: false,
-        context: context,
-        child: AlertDialog(
-          title: Text('エラー'),
-          content: Text(error.message),
-          actions: <Widget>[
-            FlatButton(
-              child: Text('閉じる'),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        ),
-      );
-    } finally {
-      setState(() {
-        isUpdating = false;
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: EdgeInsets.all(16),
-        child: SafeArea(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  '現在',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
+    return Consumer<UserModel>(builder: (_, model, __) {
+      return SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: SafeArea(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    '現在',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                FutureBuilder(
-                    future: _auth.currentUser(),
-                    builder: (context, snapshot) {
-                      if (snapshot.data != null) {
-                        final FirebaseUser currentUser = snapshot.data;
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          child: Text(
-                            currentUser.email,
-                            style: TextStyle(
-                              fontSize: 17,
-                            ),
-                          ),
-                        );
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: Text(
+                      model.user.email,
+                      style: TextStyle(
+                        fontSize: 17,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    '新規',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  TextFormField(
+                    controller: _newEmailController,
+                    validator: (value) {
+                      if (value.trim().isEmpty) {
+                        return '入力してください。';
                       }
-                      return Container();
-                    }),
-                SizedBox(height: 10),
-                Text(
-                  '新規',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                TextFormField(
-                  controller: _newEmailController,
-                  validator: (value) {
-                    if (value.trim().isEmpty) {
-                      return '入力してください。';
-                    }
 
-                    return null;
-                  },
-                  decoration: InputDecoration(
-                    hintText: 'メールアドレス',
+                      return null;
+                    },
+                    decoration: InputDecoration(
+                      hintText: 'メールアドレス',
+                    ),
+                    onChanged: (_) => this.judgeValidTextField(),
                   ),
-                  onChanged: (_) => this.judgeValidTextField(),
-                ),
-                SizedBox(height: 30),
-                Text(
-                  '現在のパスワード',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
+                  SizedBox(height: 30),
+                  Text(
+                    '現在のパスワード',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                TextFormField(
-                  controller: _passwordController,
-                  validator: (value) {
-                    if (value.trim().isEmpty) {
-                      return '入力してください。';
-                    }
+                  TextFormField(
+                    controller: _passwordController,
+                    validator: (value) {
+                      if (value.trim().isEmpty) {
+                        return '入力してください。';
+                      }
 
-                    return null;
-                  },
-                  obscureText: true,
-                  onChanged: (_) => this.judgeValidTextField(),
-                ),
-                SizedBox(height: 30),
-                Center(
-                  child: !isUpdating
-                      ? ButtonTheme(
-                          minWidth: double.infinity,
-                          height: 50,
-                          child: RaisedButton(
-                            disabledColor: Colors.black45,
-                            child: Text(
-                              '更新',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                      return null;
+                    },
+                    obscureText: true,
+                    onChanged: (_) => this.judgeValidTextField(),
+                  ),
+                  SizedBox(height: 30),
+                  Center(
+                    child: !isUpdating
+                        ? ButtonTheme(
+                            minWidth: double.infinity,
+                            height: 50,
+                            child: RaisedButton(
+                              disabledColor: Colors.black45,
+                              child: Text(
+                                '更新',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
                               ),
+                              onPressed: isDisabled
+                                  ? null
+                                  : () async {
+                                      // TODO: Implement processing for updating email.
+                                      try {
+                                        await model.updateEmail(
+                                          email: _newEmailController.text,
+                                          password: _passwordController.text,
+                                        );
+                                        await showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              title: Text('メールアドレスを更新しました。'),
+                                              actions: <Widget>[
+                                                FlatButton(
+                                                  child: Text('OK'),
+                                                  onPressed: () =>
+                                                      Navigator.pop(context),
+                                                ),
+                                              ],
+                                            );
+                                          },
+                                        );
+                                        model.checkUserSignIn();
+                                        Navigator.pop(context);
+                                      } catch (error) {
+                                        showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              title: Text(error.toString()),
+                                              actions: <Widget>[
+                                                FlatButton(
+                                                  child: Text('OK'),
+                                                  onPressed: () =>
+                                                      Navigator.pop(context),
+                                                ),
+                                              ],
+                                            );
+                                          },
+                                        );
+                                      }
+                                    },
                             ),
-                            onPressed: isDisabled
-                                ? null
-                                : () {
-                                    // TODO: Implement processing for updating email.
-                                    updateEmail(
-                                      newEmail: _newEmailController.text,
-                                      password: _passwordController.text,
-                                    );
-                                  },
-                          ),
-                        )
-                      : CircularProgressIndicator(),
-                ),
-              ],
+                          )
+                        : CircularProgressIndicator(),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
+    });
   }
 }

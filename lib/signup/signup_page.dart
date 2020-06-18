@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:provider/provider.dart';
+import '../user_model.dart';
 
 class SignUp extends StatefulWidget {
   @override
@@ -13,9 +12,6 @@ class _SignUpState extends State<SignUp> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final Firestore _store = Firestore.instance;
-  final FirebaseStorage _storage = FirebaseStorage.instance;
   bool isObscureText = true;
   bool isLoading = false;
 
@@ -29,64 +25,6 @@ class _SignUpState extends State<SignUp> {
       _passwordController,
     ];
     _controllers.forEach((_controller) => _controller.dispose());
-  }
-
-  void signup() async {
-    if (_formKey.currentState.validate()) {
-      setState(() {
-        isLoading = true;
-      });
-
-      try {
-        StorageReference photoRef =
-            FirebaseStorage.instance.ref().child('/images/default.jpg');
-        String photoURL = await photoRef.getDownloadURL();
-        AuthResult _result = await _auth.createUserWithEmailAndPassword(
-          email: _emailController.text,
-          password: _passwordController.text,
-        );
-        if (_result.user != null) {
-          FirebaseUser currentUser = _result.user;
-          await _store.document('users/${currentUser.uid}').setData({
-            'displayName': _nameController.text,
-            'photoURL': photoURL,
-            'about': '',
-            'isTeacher': false,
-            'createdAt': FieldValue.serverTimestamp(),
-          });
-          Navigator.pop(context);
-        }
-      } catch (error) {
-        _authDialog(error.message);
-      } finally {
-        setState(() {
-          isLoading = false;
-        });
-      }
-    }
-  }
-
-  Future<void> _authDialog(message) async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('エラー'),
-          content: SingleChildScrollView(
-            child: Text(message),
-          ),
-          actions: <Widget>[
-            FlatButton(
-              child: Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
   }
 
   @override
@@ -206,15 +144,44 @@ class _SignUpState extends State<SignUp> {
                             minWidth: double.infinity,
                             height: 50,
                             textTheme: ButtonTextTheme.primary,
-                            child: RaisedButton(
-                              child: Text(
-                                'アカウント作成',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 17,
-                                ),
-                              ),
-                              onPressed: signup,
+                            child: Consumer<UserModel>(
+                              builder: (_, model, __) {
+                                return RaisedButton(
+                                  child: Text(
+                                    'アカウント作成',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 17,
+                                    ),
+                                  ),
+                                  onPressed: () async {
+                                    try {
+                                      await model.signUpWithEmail(
+                                        name: _nameController.text,
+                                        email: _emailController.text,
+                                        password: _passwordController.text,
+                                      );
+                                      Navigator.pop(context);
+                                    } catch (error) {
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title: Text(error.toString()),
+                                            actions: <Widget>[
+                                              FlatButton(
+                                                child: Text('OK'),
+                                                onPressed: () =>
+                                                    Navigator.pop(context),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    }
+                                  },
+                                );
+                              },
                             ),
                           )
                         : CircularProgressIndicator(),
