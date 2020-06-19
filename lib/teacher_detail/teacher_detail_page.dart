@@ -1,14 +1,13 @@
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import '../comment/comment_page.dart';
+import '../user.dart';
 
-class TeatureDetail extends StatelessWidget {
-  TeatureDetail({this.index});
+class TeacherDetail extends StatelessWidget {
+  TeacherDetail({this.teacher});
 
-  final int index;
-
+  final User teacher;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,7 +25,7 @@ class TeatureDetail extends StatelessWidget {
           child: SafeArea(
             child: Column(
               children: <Widget>[
-                TeatureImage(),
+                TeacherImage(),
                 Content(),
               ],
             ),
@@ -37,7 +36,7 @@ class TeatureDetail extends StatelessWidget {
   }
 }
 
-class TeatureImage extends StatelessWidget {
+class TeacherImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Stack(

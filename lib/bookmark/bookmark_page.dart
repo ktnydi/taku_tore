@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../teature_detail/teature_detail_page.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import '../teacher_detail/teacher_detail_page.dart';
 
 class BookmarkList extends StatefulWidget {
   @override
@@ -83,7 +83,7 @@ class BookmarkCell extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (BuildContext context) => TeatureDetail(index: index),
+            builder: (BuildContext context) => TeacherDetail(),
           ),
         );
       },
