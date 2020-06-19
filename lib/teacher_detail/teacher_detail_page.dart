@@ -1,33 +1,120 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../user.dart';
+import '../user_model.dart';
+import 'teacher_detail_model.dart';
 
 class TeacherDetail extends StatelessWidget {
   TeacherDetail({this.teacher});
 
   final User teacher;
+
+  Future addBookmark({
+    @required TeacherDetailModel model,
+    @required BuildContext context,
+  }) async {
+    try {
+      model.teacher = teacher;
+
+      await model.addBookmark();
+
+      model.checkBookmark(teacher: teacher);
+    } catch (error) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(error.toString()),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('OK'),
+                onPressed: () => Navigator.pop(context),
+              )
+            ],
+          );
+        },
+      );
+    }
+  }
+
+  Future deleteBookmark({
+    @required TeacherDetailModel model,
+    @required BuildContext context,
+  }) async {
+    try {
+      model.teacher = teacher;
+
+      await model.deleteBookmark();
+
+      model.checkBookmark(teacher: teacher);
+    } catch (error) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(error.toString()),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('OK'),
+                onPressed: () => Navigator.pop(context),
+              )
+            ],
+          );
+        },
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.bookmark_border),
-            onPressed: () {},
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Container(
-          width: double.infinity,
-          child: SafeArea(
-            child: Column(
-              children: <Widget>[
-                TeacherImage(teacher: teacher),
-                Content(
-                  teacher: teacher,
-                ),
-              ],
+    return ChangeNotifierProvider<TeacherDetailModel>(
+      create: (_) => TeacherDetailModel()..checkBookmark(teacher: teacher),
+      child: Scaffold(
+        appBar: AppBar(
+          actions: <Widget>[
+            Consumer2<UserModel, TeacherDetailModel>(
+              builder: (_, userModel, teacherDetailModel, __) {
+                if (teacher.uid == userModel.user.uid) {
+                  return Container();
+                }
+
+                return IconButton(
+                  icon: Icon(
+                    teacherDetailModel.isBookmarked
+                        ? Icons.bookmark
+                        : Icons.bookmark_border,
+                  ),
+                  onPressed: () async {
+                    if (teacherDetailModel.isBookmarked) {
+                      await deleteBookmark(
+                        model: teacherDetailModel,
+                        context: context,
+                      );
+                    } else {
+                      await addBookmark(
+                        model: teacherDetailModel,
+                        context: context,
+                      );
+                    }
+                  },
+                );
+              },
+            ),
+          ],
+        ),
+        body: SingleChildScrollView(
+          child: Container(
+            width: double.infinity,
+            child: SafeArea(
+              child: Column(
+                children: <Widget>[
+                  TeacherImage(teacher: teacher),
+                  Content(
+                    teacher: teacher,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
