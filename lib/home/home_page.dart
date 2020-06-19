@@ -1,82 +1,57 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import '../teature_detail/teature_detail_page.dart';
+import 'package:provider/provider.dart';
+import '../teacher_detail/teacher_detail_page.dart';
+import 'home_model.dart';
 
 class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: TeatureList(),
+      body: ChangeNotifierProvider<HomeModel>(
+        create: (_) => HomeModel()..fetchTeachers(),
+        child: TeacherList(),
+      ),
     );
   }
 }
 
-class TeatureList extends StatelessWidget {
+class TeacherList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemBuilder: (BuildContext context, int index) {
-        return TeatureCell(index: index);
-      },
-      itemCount: 20,
-    );
-  }
-}
-
-class TeatureCell extends StatelessWidget {
-  TeatureCell({this.index});
-
-  final int index;
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      contentPadding: EdgeInsets.symmetric(
-        vertical: 10.0,
-        horizontal: 15.0,
-      ),
-      leading: CircleAvatar(
-        child: Text('アリス'[0]),
-        radius: 25,
-      ),
-      title: Text(
-        'ここにタイトルが入ります。ここにタイトルが入ります。ここにタイトルが入ります。',
-        maxLines: 2,
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text('アリス'),
-          Row(
-            children: <Widget>[
-              RatingBar(
-                initialRating: 3.5,
-                allowHalfRating: true,
-                itemSize: 20,
-                itemBuilder: (BuildContext context, int index) {
-                  return Icon(
-                    Icons.star,
-                    color: Colors.amber,
-                  );
-                },
-                onRatingUpdate: (_) {},
+    return Consumer<HomeModel>(
+      builder: (_, model, __) {
+        final listTiles = model.teachers.map(
+          (teacher) {
+            return ListTile(
+              contentPadding: EdgeInsets.all(15),
+              leading: CircleAvatar(
+                backgroundImage: NetworkImage(teacher.photoURL),
+                radius: 25,
               ),
-              SizedBox(width: 5),
-              Text('3.5'),
-              SizedBox(width: 5),
-              Text('(123)'),
-            ],
-          ),
-        ],
-      ),
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (BuildContext context) => TeatureDetail(index: index),
-          ),
+              title: Text(
+                teacher.displayName,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 17,
+                ),
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (BuildContext context) => TeacherDetail(
+                      teacher: teacher,
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        ).toList();
+        return ListView.separated(
+          separatorBuilder: (context, index) => Divider(height: 1),
+          itemBuilder: (context, index) => listTiles[index],
+          itemCount: listTiles.length,
         );
       },
     );
