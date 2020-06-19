@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
+import '../user_model.dart';
 
 class SettingTeacher extends StatefulWidget {
   @override
@@ -17,53 +18,6 @@ class _SettingTeacherState extends State<SettingTeacher> {
     super.dispose();
   }
 
-  void nextStep() async {
-    setState(() {
-      isLoading = true;
-    });
-
-    await confirmPassword(_passwordController.text);
-
-    setState(() {
-      isLoading = false;
-    });
-  }
-
-  Future confirmPassword(password) async {
-    FirebaseUser user = await FirebaseAuth.instance.currentUser();
-
-    try {
-      AuthCredential credential = EmailAuthProvider.getCredential(
-        email: user.email,
-        password: password,
-      );
-      await user.reauthenticateWithCredential(credential);
-
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (BuildContext context) => BecomeTeacher(),
-        ),
-      );
-    } catch (error) {
-      showDialog(
-        context: context,
-        child: AlertDialog(
-          title: Text('エラー'),
-          content: Text(error.message),
-          actions: <Widget>[
-            FlatButton(
-              child: Text('閉じる'),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        ),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -75,22 +29,49 @@ class _SettingTeacherState extends State<SettingTeacher> {
           ),
         ),
         actions: <Widget>[
-          FlatButton(
-            child: Text(
-              '次へ',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 17,
-                color: Colors.white,
+          Consumer<UserModel>(builder: (_, model, __) {
+            return FlatButton(
+              child: Text(
+                '次へ',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 17,
+                  color: Colors.white,
+                ),
               ),
-            ),
-            onPressed: () {
-              if (_formKey.currentState.validate()) {
-                nextStep();
-                return null;
-              }
-            },
-          ),
+              onPressed: () async {
+                try {
+                  if (_formKey.currentState.validate()) {
+                    setState(() => isLoading = true);
+                    await model.confirmPassword(_passwordController.text);
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (BuildContext context) => BecomeTeacher(),
+                      ),
+                    );
+                  }
+                } catch (error) {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text(error.toString()),
+                        actions: <Widget>[
+                          FlatButton(
+                            child: Text('OK'),
+                            onPressed: () => Navigator.pop(context),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                } finally {
+                  setState(() => isLoading = false);
+                }
+              },
+            );
+          }),
         ],
       ),
       body: Stack(
@@ -158,29 +139,10 @@ class BecomeTeacher extends StatefulWidget {
 
 class _BecomeTeacherState extends State<BecomeTeacher>
     with TickerProviderStateMixin {
-  TextEditingController _aboutController = TextEditingController();
-  TextEditingController _canDoController = TextEditingController();
-  TextEditingController _recommendController = TextEditingController();
+  String about = '';
+  String canDo = '';
+  String recommend = '';
   final _formKey = GlobalKey<FormState>();
-
-  @override
-  void dispose() {
-    // TODO: implement dispose
-    super.dispose();
-    List<TextEditingController> _controllers = [
-      _aboutController,
-      _canDoController,
-      _recommendController,
-    ];
-    _controllers.forEach((_controller) => _controller.dispose());
-  }
-
-  void _submit() {
-    if (_formKey.currentState.validate()) {
-      // TODO: Implement processing for registering as teacher.
-    }
-    // TODO: Implement processing when failure.
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -193,16 +155,60 @@ class _BecomeTeacherState extends State<BecomeTeacher>
           ),
         ),
         actions: <Widget>[
-          FlatButton(
-            child: Text(
-              '登録',
-              style: TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            onPressed: this._submit,
+          Consumer<UserModel>(
+            builder: (_, model, __) {
+              return FlatButton(
+                child: Text(
+                  '登録',
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                onPressed: () async {
+                  try {
+                    if (_formKey.currentState.validate()) {
+                      model.registerAsTeacher(
+                        about: about,
+                        canDo: canDo,
+                        recommend: recommend,
+                      );
+                      await showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text('講師に登録しました。'),
+                            actions: <Widget>[
+                              FlatButton(
+                                child: Text('OK'),
+                                onPressed: () => Navigator.pop(context),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                      Navigator.pop(context);
+                    }
+                  } catch (error) {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text(error.toString()),
+                          actions: <Widget>[
+                            FlatButton(
+                              child: Text('OK'),
+                              onPressed: () => Navigator.pop(context),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  }
+                },
+              );
+            },
           ),
         ],
       ),
@@ -215,44 +221,48 @@ class _BecomeTeacherState extends State<BecomeTeacher>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 30,
-                    ),
-                    child: Center(
-                      child: Column(
-                        children: <Widget>[
-                          Container(
-                            width: 120,
-                            height: 120,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(80),
-                              boxShadow: <BoxShadow>[
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
-                                  offset: Offset(0, 1),
-                                  blurRadius: 10,
-                                ),
-                              ],
-                              image: DecorationImage(
-                                fit: BoxFit.cover,
-                                image: NetworkImage(
-                                  'https://images.pexels.com/photos/3963122/pexels-photo-3963122.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500',
+                  Consumer<UserModel>(
+                    builder: (_, model, __) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 30,
+                        ),
+                        child: Center(
+                          child: Column(
+                            children: <Widget>[
+                              Container(
+                                width: 120,
+                                height: 120,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(80),
+                                  boxShadow: <BoxShadow>[
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.2),
+                                      offset: Offset(0, 1),
+                                      blurRadius: 10,
+                                    ),
+                                  ],
+                                  image: DecorationImage(
+                                    fit: BoxFit.cover,
+                                    image: NetworkImage(
+                                      model.user.photoURL,
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
+                              SizedBox(height: 10),
+                              Text(
+                                model.user.displayName,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 17,
+                                ),
+                              ),
+                            ],
                           ),
-                          SizedBox(height: 10),
-                          Text(
-                            'アリス',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 17,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                        ),
+                      );
+                    },
                   ),
                   Text(
                     '自己紹介',
@@ -271,9 +281,7 @@ class _BecomeTeacherState extends State<BecomeTeacher>
                   ),
                   SizedBox(height: 20),
                   TextFormField(
-                    controller: _aboutController,
                     validator: (value) {
-                      print(value);
                       if (value.trim().isEmpty) {
                         return '入力してください。';
                       }
@@ -292,6 +300,7 @@ class _BecomeTeacherState extends State<BecomeTeacher>
                       filled: true,
                       fillColor: Colors.black.withOpacity(0.05),
                     ),
+                    onChanged: (value) => about = value,
                   ),
                   SizedBox(height: 30),
                   Text(
@@ -311,9 +320,7 @@ class _BecomeTeacherState extends State<BecomeTeacher>
                   ),
                   SizedBox(height: 20),
                   TextFormField(
-                    controller: _canDoController,
                     validator: (value) {
-                      print(value);
                       if (value.trim().isEmpty) {
                         return '入力してください。';
                       }
@@ -332,6 +339,7 @@ class _BecomeTeacherState extends State<BecomeTeacher>
                       filled: true,
                       fillColor: Colors.black.withOpacity(0.05),
                     ),
+                    onChanged: (value) => canDo = value,
                   ),
                   SizedBox(height: 30),
                   Text(
@@ -351,9 +359,7 @@ class _BecomeTeacherState extends State<BecomeTeacher>
                   ),
                   SizedBox(height: 20),
                   TextFormField(
-                    controller: _recommendController,
                     validator: (value) {
-                      print(value);
                       if (value.trim().isEmpty) {
                         return '入力してください。';
                       }
@@ -372,6 +378,7 @@ class _BecomeTeacherState extends State<BecomeTeacher>
                       filled: true,
                       fillColor: Colors.black.withOpacity(0.05),
                     ),
+                    onChanged: (value) => recommend = value,
                   ),
                 ],
               ),

@@ -33,6 +33,7 @@ class CurrentAccount extends StatefulWidget {
 }
 
 class _CurrentAccountState extends State<CurrentAccount> {
+  String password = '';
   final TextStyle _sectionTitleStyle = TextStyle(
     fontSize: 18,
     fontWeight: FontWeight.bold,
@@ -137,7 +138,7 @@ class _CurrentAccountState extends State<CurrentAccount> {
                       height: 50,
                       child: FlatButton(
                         child: Text(
-                          '講師になる',
+                          model.user.isTeacher ? '講師を止める' : '講師になる',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -146,13 +147,64 @@ class _CurrentAccountState extends State<CurrentAccount> {
                         ),
                         onPressed: () {
                           // TODO: Add processing for becoming teacher.
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (BuildContext context) =>
-                                  SettingTeacher(),
-                            ),
-                          );
+                          if (!model.user.isTeacher) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (BuildContext context) =>
+                                    SettingTeacher(),
+                              ),
+                            );
+                          } else {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: Text('講師を止める'),
+                                  content: TextField(
+                                    onChanged: (value) => password = value,
+                                    decoration: InputDecoration(
+                                      hintText: 'パスワード',
+                                      filled: true,
+                                      fillColor: Colors.black.withOpacity(0.05),
+                                    ),
+                                  ),
+                                  actions: <Widget>[
+                                    FlatButton(
+                                      child: Text('キャンセル'),
+                                      onPressed: () => Navigator.pop(context),
+                                    ),
+                                    FlatButton(
+                                      child: Text('OK'),
+                                      onPressed: () async {
+                                        try {
+                                          await model.removeAsTeacher(
+                                            password: password,
+                                          );
+                                        } catch (error) {
+                                          showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return AlertDialog(
+                                                title: Text(error.toString()),
+                                                actions: <Widget>[
+                                                  FlatButton(
+                                                    child: Text('OK'),
+                                                    onPressed: () =>
+                                                        Navigator.pop(context),
+                                                  ),
+                                                ],
+                                              );
+                                            },
+                                          );
+                                        }
+                                      },
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          }
                         },
                       ),
                     )
