@@ -1,7 +1,5 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import '../comment/comment_page.dart';
 import '../user.dart';
 
 class TeacherDetail extends StatelessWidget {
@@ -25,8 +23,10 @@ class TeacherDetail extends StatelessWidget {
           child: SafeArea(
             child: Column(
               children: <Widget>[
-                TeacherImage(),
-                Content(),
+                TeacherImage(teacher: teacher),
+                Content(
+                  teacher: teacher,
+                ),
               ],
             ),
           ),
@@ -37,6 +37,9 @@ class TeacherDetail extends StatelessWidget {
 }
 
 class TeacherImage extends StatelessWidget {
+  TeacherImage({this.teacher});
+
+  final User teacher;
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -49,7 +52,7 @@ class TeacherImage extends StatelessWidget {
             image: DecorationImage(
               fit: BoxFit.cover,
               image: NetworkImage(
-                'https://images.pexels.com/photos/3963122/pexels-photo-3963122.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500',
+                teacher.photoURL,
               ),
             ),
           ),
@@ -75,7 +78,7 @@ class TeacherImage extends StatelessWidget {
             image: DecorationImage(
               fit: BoxFit.cover,
               image: NetworkImage(
-                'https://images.pexels.com/photos/3963122/pexels-photo-3963122.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500',
+                teacher.photoURL,
               ),
             ),
           ),
@@ -86,6 +89,10 @@ class TeacherImage extends StatelessWidget {
 }
 
 class Content extends StatelessWidget {
+  Content({this.teacher});
+
+  final User teacher;
+
   TextStyle _label() {
     return TextStyle(
       fontWeight: FontWeight.bold,
@@ -107,72 +114,14 @@ class Content extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            'ここにタイトルが入ります。ここにタイトルが入ります。ここにタイトルが入ります。',
+            teacher.displayName,
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 20,
             ),
           ),
-          SizedBox(height: 15),
-          Divider(),
-          SizedBox(height: 5),
-          Row(
-            children: <Widget>[
-              Text(
-                '3.5',
-                style: TextStyle(
-                  fontSize: 20,
-                  color: Colors.black54,
-                ),
-              ),
-              SizedBox(width: 5),
-              RatingBar(
-                initialRating: 3.5,
-                allowHalfRating: true,
-                itemSize: 25,
-                itemBuilder: (BuildContext context, int index) {
-                  return Icon(
-                    Icons.star,
-                    color: Colors.amber,
-                  );
-                },
-                onRatingUpdate: (_) {},
-              ),
-              Spacer(),
-              ButtonTheme(
-                padding: EdgeInsets.symmetric(horizontal: 0.0),
-                child: FlatButton(
-                  child: Text(
-                    'コメントを見る',
-                    style: TextStyle(
-                      color: Theme.of(context).primaryColor,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (BuildContext context) => Comment(),
-                      ),
-                    );
-                  },
-                ),
-              )
-            ],
-          ),
           SizedBox(height: 5),
           Divider(),
-          SizedBox(height: 15),
-          Text(
-            '名前 / 年齢',
-            style: _label(),
-          ),
-          SizedBox(height: 5),
-          Text(
-            'アリス / 28',
-            style: _description(),
-          ),
           SizedBox(height: 15),
           Text(
             '自己紹介',
@@ -180,7 +129,7 @@ class Content extends StatelessWidget {
           ),
           SizedBox(height: 5),
           Text(
-            'ここにテキストが入ります。ここにテキストが入ります。ここにテキストが入ります。',
+            teacher.about,
             style: _description(),
           ),
           SizedBox(height: 15),
@@ -190,7 +139,7 @@ class Content extends StatelessWidget {
           ),
           SizedBox(height: 5),
           Text(
-            'ここにテキストが入ります。ここにテキストが入ります。ここにテキストが入ります。',
+            teacher.canDo,
             style: _description(),
           ),
           SizedBox(height: 15),
@@ -200,7 +149,7 @@ class Content extends StatelessWidget {
           ),
           SizedBox(height: 5),
           Text(
-            'ここにテキストが入ります。ここにテキストが入ります。ここにテキストが入ります。',
+            teacher.recommend,
             style: _description(),
           ),
           SizedBox(height: 15),
