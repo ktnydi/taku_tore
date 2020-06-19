@@ -134,6 +134,17 @@ class UserModel extends ChangeNotifier {
     return photoURL;
   }
 
+  Future<AuthResult> confirmPassword(password) async {
+    FirebaseUser user = await FirebaseAuth.instance.currentUser();
+    AuthResult result = await user.reauthenticateWithCredential(
+      EmailAuthProvider.getCredential(
+        email: user.email,
+        password: password,
+      ),
+    );
+    return result;
+  }
+
   Future updateName({@required String name}) async {
     if (name.length > 20) {
       throw ('名前が長すぎます。');
@@ -177,5 +188,30 @@ class UserModel extends ChangeNotifier {
     );
 
     await result.user.updatePassword(newPassword);
+  }
+
+  Future registerAsTeacher({
+    @required String about,
+    @required String canDo,
+    @required String recommend,
+  }) async {
+    final doc = Firestore.instance.collection('users').document(this.user.uid);
+
+    await doc.updateData({
+      'isTeacher': true,
+      'about': about,
+      'canDo': canDo,
+      'recommend': recommend,
+    });
+  }
+
+  Future removeAsTeacher({@required String password}) async {
+    await confirmPassword(password);
+
+    final doc = Firestore.instance.collection('users').document(this.user.uid);
+
+    await doc.updateData({
+      'isTeacher': false,
+    });
   }
 }
