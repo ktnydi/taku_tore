@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:provider/provider.dart';
 import '../teacher_detail/teacher_detail_page.dart';
+import 'bookmark_model.dart';
 
 class BookmarkList extends StatefulWidget {
   @override
@@ -10,83 +11,64 @@ class BookmarkList extends StatefulWidget {
 class _BookmarkListState extends State<BookmarkList> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'ブックマーク',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
+    return ChangeNotifierProvider<BookmarkModel>(
+      create: (_) => BookmarkModel()..fetchBookmarks(),
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            'ブックマーク',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
-      ),
-      body: ListView.builder(
-        itemBuilder: (BuildContext context, int index) {
-          return BookmarkCell(index: index);
-        },
-        itemCount: 5,
-      ),
-    );
-  }
-}
+        body: Consumer<BookmarkModel>(
+          builder: (_, model, __) {
+            if (model.teachers.isEmpty) {
+              return Center(
+                child: Text(
+                  'ブックマークはありません。',
+                ),
+              );
+            }
 
-class BookmarkCell extends StatelessWidget {
-  BookmarkCell({
-    this.index,
-  });
-
-  final int index;
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      contentPadding: EdgeInsets.symmetric(
-        vertical: 10.0,
-        horizontal: 15.0,
-      ),
-      leading: CircleAvatar(
-        child: Text('アリス'[0]),
-        radius: 25,
-      ),
-      title: Text(
-        'ここにタイトルが入ります。ここにタイトルが入ります。ここにタイトルが入ります。',
-        maxLines: 2,
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
+            final listTiles = model.teachers.map(
+              (teacher) {
+                return ListTile(
+                  contentPadding: EdgeInsets.all(15),
+                  leading: CircleAvatar(
+                    backgroundImage: NetworkImage(teacher.photoURL),
+                    radius: 25,
+                  ),
+                  title: Text(
+                    teacher.displayName,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 17,
+                    ),
+                  ),
+                  onTap: () async {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (BuildContext context) => TeacherDetail(
+                          teacher: teacher,
+                        ),
+                      ),
+                    );
+                    model.fetchBookmarks();
+                  },
+                );
+              },
+            ).toList();
+            return ListView.separated(
+              separatorBuilder: (context, index) => Divider(height: 1),
+              itemBuilder: (context, index) => listTiles[index],
+              itemCount: listTiles.length,
+            );
+          },
         ),
       ),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text('アリス'),
-          Row(
-            children: <Widget>[
-              RatingBar(
-                initialRating: 3.5,
-                allowHalfRating: true,
-                itemSize: 20,
-                itemBuilder: (BuildContext context, int index) {
-                  return Icon(
-                    Icons.star,
-                    color: Colors.amber,
-                  );
-                },
-                onRatingUpdate: (_) {},
-              ),
-              SizedBox(width: 5),
-              Text('3.5'),
-              SizedBox(width: 5),
-              Text('(123)'),
-            ],
-          ),
-        ],
-      ),
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (BuildContext context) => TeacherDetail(),
-          ),
-        );
-      },
     );
   }
 }
