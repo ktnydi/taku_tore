@@ -6,6 +6,7 @@ import '../user.dart';
 class TeacherDetailModel extends ChangeNotifier {
   User teacher;
   bool isBookmarked = false;
+  bool isAlreadyExist = false;
 
   Future checkBookmark({User teacher}) async {
     final currentUser = await FirebaseAuth.instance.currentUser();
@@ -20,6 +21,19 @@ class TeacherDetailModel extends ChangeNotifier {
     final docs = await query.getDocuments();
     this.isBookmarked = docs.documents.isNotEmpty;
     notifyListeners();
+  }
+
+  Future checkRoom({User teacher}) async {
+    final currentUser = await FirebaseAuth.instance.currentUser();
+    final roomQuery = Firestore.instance
+        .collection('users')
+        .document(currentUser.uid)
+        .collection('rooms')
+        .where('member.teacherId', isEqualTo: teacher.uid);
+
+    final docs = await roomQuery.getDocuments();
+    final isExist = docs.documents.isNotEmpty;
+    this.isAlreadyExist = isExist;
   }
 
   Future addBookmark() async {
@@ -53,5 +67,33 @@ class TeacherDetailModel extends ChangeNotifier {
         .collection('bookmarks')
         .document(docId)
         .delete();
+  }
+
+  Future addRoom() async {
+    final currentUser = await FirebaseAuth.instance.currentUser();
+
+    if (teacher.uid == currentUser.uid) {
+      throw ('自分には相談できません。');
+    }
+
+    final roomRef = Firestore.instance
+        .collection('users')
+        .document(currentUser.uid)
+        .collection('rooms');
+
+    final roomQuery = roomRef.where('member.teacherId', isEqualTo: teacher.uid);
+    final docs = await roomQuery.getDocuments();
+    final isExist = docs.documents.isNotEmpty;
+
+    if (isExist) {
+      throw ('すでに相談済みです。');
+    }
+
+    await roomRef.add({
+      'member': {
+        'teacherId': teacher.uid,
+        'studentId': currentUser.uid,
+      },
+    });
   }
 }
