@@ -1,11 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../chat_room/chat_room_page.dart';
+import '../chat/chat_model.dart';
+import '../room.dart';
+import '../user.dart';
+import '../user_model.dart';
 
 class Chat extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: ChatList(),
+    return ChangeNotifierProvider<ChatModel>(
+      create: (_) => ChatModel()..fetchRooms(),
+      child: Scaffold(
+        body: ChatList(),
+      ),
     );
   }
 }
@@ -13,61 +21,60 @@ class Chat extends StatelessWidget {
 class ChatList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemBuilder: (BuildContext context, int index) {
-        return ChatCell();
+    return Consumer2<UserModel, ChatModel>(
+      builder: (_, userModel, chatModel, __) {
+        if (chatModel.rooms.isEmpty) {
+          return Center(
+            child: Text(
+              '相談中の講師はありません。',
+            ),
+          );
+        }
+
+        final listTiles = chatModel.rooms.map(
+          (room) {
+            return userModel.user.uid == room.teacher.uid
+                ? ChatCell(user: room.student, room: room)
+                : ChatCell(user: room.teacher, room: room);
+          },
+        ).toList();
+        return ListView.separated(
+          separatorBuilder: (context, index) => Divider(height: 1),
+          itemBuilder: (context, index) => listTiles[index],
+          itemCount: listTiles.length,
+        );
       },
-      itemCount: 3,
     );
   }
 }
 
 class ChatCell extends StatelessWidget {
+  ChatCell({@required this.user, @required this.room});
+
+  final User user;
+  final Room room;
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      contentPadding: EdgeInsets.symmetric(
-        vertical: 10.0,
-        horizontal: 15.0,
-      ),
+      contentPadding: EdgeInsets.all(15),
       leading: CircleAvatar(
-        child: Text('ボブ'[0]),
+        backgroundImage: NetworkImage(user.photoURL),
+        backgroundColor: Colors.transparent,
         radius: 25,
       ),
-      title: Row(
-        children: <Widget>[
-          Flexible(
-            child: Text(
-              'ボブ',
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          SizedBox(width: 10),
-          Flexible(
-            flex: 0,
-            child: Text(
-              '11:02',
-              style: TextStyle(
-                color: Colors.black54,
-              ),
-            ),
-          ),
-        ],
-      ),
-      subtitle: Text(
-        'ここにテキストが入ります。ここにテキストが入ります。ここにテキストが入ります。',
-        maxLines: 2,
+      title: Text(
+        user.displayName,
         overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+        ),
       ),
       onTap: () {
         // TODO: Add Navigation.
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (BuildContext context) => ChatRoom(),
+            builder: (BuildContext context) => ChatRoom(user: user, room: room),
           ),
         );
       },
