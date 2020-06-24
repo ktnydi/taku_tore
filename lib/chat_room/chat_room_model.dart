@@ -6,7 +6,8 @@ import '../room.dart';
 import '../user.dart';
 
 class ChatRoomModel extends ChangeNotifier {
-  List<Message> messages = [];
+  Future<List<Message>> messagesAsFuture;
+  Stream<List<Message>> messagesAsStream;
   Room room;
 
   Future<User> fetchUserFromFirebase({@required String userId}) async {
@@ -24,18 +25,23 @@ class ChatRoomModel extends ChangeNotifier {
     );
   }
 
-  Future fetchMessages({Room room}) async {
-    final user = await FirebaseAuth.instance.currentUser();
+  Future fetchMessagesAsStream({Room room}) async {
+    final currentUser = await FirebaseAuth.instance.currentUser();
     final collection = Firestore.instance
         .collection('users')
-        .document(user.uid)
+        .document(currentUser.uid)
         .collection('rooms')
         .document(room.documentId)
         .collection('messages')
-        .orderBy('createdAt', descending: false);
+        .orderBy('createdAt', descending: true);
 
     final messages = collection.snapshots().asyncMap((snapshot) {
-      return Future.wait(
+      final isUploading = snapshot.metadata.hasPendingWrites;
+      if (isUploading) {
+        return this.messagesAsFuture;
+      }
+
+      return this.messagesAsFuture = Future.wait(
         snapshot.documents.map(
           (doc) async {
             final fromUser =
@@ -52,10 +58,8 @@ class ChatRoomModel extends ChangeNotifier {
       );
     });
 
-    messages.listen((messages) {
-      this.messages = messages;
-      notifyListeners();
-    });
+    this.messagesAsStream = messages;
+    notifyListeners();
   }
 
   Future addMessage({String text}) async {
@@ -75,6 +79,33 @@ class ChatRoomModel extends ChangeNotifier {
       'toUid': to,
       'content': text,
       'createdAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  Future addMessageWithTransition({String text}) async {
+    final currentUser = await FirebaseAuth.instance.currentUser();
+    final document = Firestore.instance
+        .collection('users')
+        .document(currentUser.uid)
+        .collection('rooms')
+        .document(room.documentId)
+        .collection('messages')
+        .document();
+    final from = currentUser.uid;
+    final to = this.room.student.uid == currentUser.uid
+        ? this.room.teacher.uid
+        : this.room.student.uid;
+
+    await Firestore.instance.runTransaction((transaction) async {
+      await transaction.set(
+        document,
+        {
+          'fromUid': from,
+          'toUid': to,
+          'content': text,
+          'createdAt': FieldValue.serverTimestamp(),
+        },
+      );
     });
   }
 }
