@@ -1,12 +1,43 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'user.dart';
 
 class UserModel extends ChangeNotifier {
   User user;
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+
+  Future confirmNotification() async {
+    await _firebaseMessaging.requestNotificationPermissions(
+      const IosNotificationSettings(
+        sound: true,
+        badge: true,
+        alert: true,
+        provisional: false,
+      ),
+    );
+
+    _firebaseMessaging.onIosSettingsRegistered.listen(
+      (IosNotificationSettings settings) {
+        print("Settings registered: $settings");
+      },
+    );
+
+    _firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message) async {
+        print("onMessage: $message");
+      },
+      onLaunch: (Map<String, dynamic> message) async {
+        print("onLaunch: $message");
+      },
+      onResume: (Map<String, dynamic> message) async {
+        print("onResume: $message");
+      },
+    );
+  }
 
   void checkUserSignIn() {
     FirebaseAuth.instance.onAuthStateChanged.listen((user) async {
@@ -56,10 +87,12 @@ class UserModel extends ChangeNotifier {
       final path = '/images/default.jpg';
       final photoRef = FirebaseStorage.instance.ref().child(path);
       String photoURL = await photoRef.getDownloadURL();
+      final deviceToken = await _firebaseMessaging.getToken();
       await Firestore.instance.document('users/${result.user.uid}').setData({
         'displayName': name,
         'photoURL': photoURL,
         'isTeacher': false,
+        'deviceToken': deviceToken,
         'createdAt': FieldValue.serverTimestamp(),
       });
     }
