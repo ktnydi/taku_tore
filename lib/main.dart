@@ -13,7 +13,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<UserModel>(
-      create: (_) => UserModel()..checkUserSignIn(),
+      create: (_) => UserModel()
+        ..checkUserSignIn()
+        ..confirmNotification(),
       child: Consumer<UserModel>(
         builder: (_, model, __) {
           return MaterialApp(
