@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import './home/home_page.dart';
-import './chat/chat_page.dart';
-import './setting/setting_page.dart';
+import 'presentation/chat/chat_page.dart';
+import 'presentation/home/home_page.dart';
+import 'presentation/setting/setting_page.dart';
 
 class BottomTabNavigator extends StatefulWidget {
   @override
