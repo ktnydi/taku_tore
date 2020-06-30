@@ -21,7 +21,23 @@ class MyApp extends StatelessWidget {
           return MaterialApp(
             title: 'Flutter Demo',
             theme: ThemeData(
-              primarySwatch: Colors.blue,
+              primaryColor: Colors.red,
+              appBarTheme: AppBarTheme(
+                brightness: Brightness.light,
+                color: Theme.of(context).scaffoldBackgroundColor,
+                elevation: 0.0,
+                iconTheme: IconThemeData(
+                  color: Colors.red,
+                ),
+                textTheme: TextTheme(
+                  headline6: TextStyle(
+                    color: Colors.red,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              primarySwatch: Colors.red,
               visualDensity: VisualDensity.adaptivePlatformDensity,
             ),
             home: model.user != null ? BottomTabNavigator() : Auth(),
