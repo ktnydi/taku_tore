@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'presentation/auth/auth_page.dart';
 import 'bottom_tab_navigator.dart';
+import 'presentation/common/loading.dart';
 import 'user_model.dart';
 
 void main() {
@@ -40,7 +41,12 @@ class MyApp extends StatelessWidget {
               primarySwatch: Colors.red,
               visualDensity: VisualDensity.adaptivePlatformDensity,
             ),
-            home: model.user != null ? BottomTabNavigator() : Auth(),
+            home: Stack(
+              children: <Widget>[
+                model.user != null ? BottomTabNavigator() : Auth(),
+                Loading(model.isLoading),
+              ],
+            ),
           );
         },
       ),

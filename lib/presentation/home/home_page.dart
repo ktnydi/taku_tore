@@ -20,6 +20,12 @@ class TeacherList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<HomeModel>(
       builder: (_, model, __) {
+        if (model.isLoading) {
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+
         final listTiles = model.teachers.map(
           (teacher) {
             return ListTile(

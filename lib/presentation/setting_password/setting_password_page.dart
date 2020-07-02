@@ -1,20 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../common/loading.dart';
 import '../../user_model.dart';
 
 class SettingPassword extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'パスワードの更新',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-      body: CurrentPasswordSection(),
+    return Consumer<UserModel>(
+      builder: (_, model, __) {
+        return Stack(
+          children: <Widget>[
+            Scaffold(
+              appBar: AppBar(
+                title: Text(
+                  'パスワードの更新',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              body: CurrentPasswordSection(),
+            ),
+            Loading(model.isLoading),
+          ],
+        );
+      },
     );
   }
 }
@@ -182,6 +192,7 @@ class _CurrentPasswordSectionState extends State<CurrentPasswordSection> {
                                         model.checkUserSignIn();
                                         Navigator.pop(context);
                                       } catch (error) {
+                                        model.endLoading();
                                         showDialog(
                                           context: context,
                                           builder: (BuildContext context) {

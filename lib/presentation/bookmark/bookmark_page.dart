@@ -24,6 +24,12 @@ class _BookmarkListState extends State<BookmarkList> {
         ),
         body: Consumer<BookmarkModel>(
           builder: (_, model, __) {
+            if (model.isLoading) {
+              return Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+
             if (model.teachers.isEmpty) {
               return Center(
                 child: Text(

@@ -23,6 +23,11 @@ class ChatList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer2<UserModel, ChatModel>(
       builder: (_, userModel, chatModel, __) {
+        if (chatModel.isLoading) {
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        }
         if (chatModel.rooms.isEmpty) {
           return Center(
             child: Text(

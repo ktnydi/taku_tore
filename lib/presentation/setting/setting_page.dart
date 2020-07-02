@@ -114,6 +114,7 @@ class _CurrentAccountState extends State<CurrentAccount> {
                             );
                             model.checkUserSignIn();
                           } catch (error) {
+                            model.endLoading();
                             showDialog(
                               context: context,
                               builder: (BuildContext context) {
