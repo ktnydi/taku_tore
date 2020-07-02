@@ -6,6 +6,17 @@ import '../../domain/user.dart';
 
 class ChatModel extends ChangeNotifier {
   List<Room> rooms = [];
+  bool isLoading = false;
+
+  void beginLoading() {
+    isLoading = true;
+    notifyListeners();
+  }
+
+  void endLoading() {
+    isLoading = false;
+    notifyListeners();
+  }
 
   Future<User> fetchUserFromFirebase({@required String userId}) async {
     final userRef = Firestore.instance.collection('users').document(userId);
@@ -23,6 +34,7 @@ class ChatModel extends ChangeNotifier {
   }
 
   Future fetchRooms() async {
+    beginLoading();
     final currentUser = await FirebaseAuth.instance.currentUser();
 
     final roomRef = Firestore.instance
@@ -47,5 +59,6 @@ class ChatModel extends ChangeNotifier {
     );
     this.rooms = await rooms;
     notifyListeners();
+    endLoading();
   }
 }

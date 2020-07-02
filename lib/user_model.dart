@@ -9,6 +9,17 @@ import 'domain/user.dart';
 class UserModel extends ChangeNotifier {
   User user;
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  bool isLoading = false;
+
+  void beginLoading() async {
+    isLoading = true;
+    notifyListeners();
+  }
+
+  void endLoading() async {
+    isLoading = false;
+    notifyListeners();
+  }
 
   Future confirmNotification() async {
     await _firebaseMessaging.requestNotificationPermissions(
@@ -74,6 +85,7 @@ class UserModel extends ChangeNotifier {
     @required String email,
     @required String password,
   }) async {
+    beginLoading();
     if (name.length > 20) {
       throw ('名前が長すぎます。');
     }
@@ -96,16 +108,19 @@ class UserModel extends ChangeNotifier {
         'createdAt': FieldValue.serverTimestamp(),
       });
     }
+    endLoading();
   }
 
   Future loginWithEmail({
     @required String email,
     @required String password,
   }) async {
+    beginLoading();
     await FirebaseAuth.instance.signInWithEmailAndPassword(
       email: email,
       password: password,
     );
+    endLoading();
   }
 
   Future signOut() async {
@@ -144,6 +159,9 @@ class UserModel extends ChangeNotifier {
     if (pickedFile == null) {
       return null;
     }
+
+    beginLoading();
+
     final imageData = await pickedFile.readAsBytes();
 
     // Firebase Storageに画像をアップロード
@@ -164,10 +182,13 @@ class UserModel extends ChangeNotifier {
     await doc.updateData({
       'photoURL': photoURL,
     });
+
+    endLoading();
     return photoURL;
   }
 
   Future<AuthResult> confirmPassword(password) async {
+    beginLoading();
     FirebaseUser user = await FirebaseAuth.instance.currentUser();
     AuthResult result = await user.reauthenticateWithCredential(
       EmailAuthProvider.getCredential(
@@ -175,10 +196,13 @@ class UserModel extends ChangeNotifier {
         password: password,
       ),
     );
+    endLoading();
     return result;
   }
 
   Future updateName({@required String name}) async {
+    beginLoading();
+
     if (name.length > 20) {
       throw ('名前が長すぎます。');
     }
@@ -187,12 +211,16 @@ class UserModel extends ChangeNotifier {
     await doc.updateData({
       'displayName': name,
     });
+
+    endLoading();
   }
 
   Future updateEmail({
     @required String email,
     @required String password,
   }) async {
+    beginLoading();
+
     FirebaseUser user = await FirebaseAuth.instance.currentUser();
     AuthResult result = await user.reauthenticateWithCredential(
       EmailAuthProvider.getCredential(
@@ -201,6 +229,8 @@ class UserModel extends ChangeNotifier {
       ),
     );
     await result.user.updateEmail(email);
+
+    endLoading();
   }
 
   Future updatePassword({
@@ -208,6 +238,8 @@ class UserModel extends ChangeNotifier {
     @required String newPassword,
     @required String newPasswordConfirm,
   }) async {
+    beginLoading();
+
     if (newPassword != newPasswordConfirm) {
       throw ('新しいパスワードを一致させてください。');
     }
@@ -221,6 +253,7 @@ class UserModel extends ChangeNotifier {
     );
 
     await result.user.updatePassword(newPassword);
+    endLoading();
   }
 
   Future registerAsTeacher({
@@ -228,6 +261,7 @@ class UserModel extends ChangeNotifier {
     @required String canDo,
     @required String recommend,
   }) async {
+    beginLoading();
     final doc = Firestore.instance.collection('users').document(this.user.uid);
 
     await doc.updateData({
@@ -236,6 +270,7 @@ class UserModel extends ChangeNotifier {
       'canDo': canDo,
       'recommend': recommend,
     });
+    endLoading();
   }
 
   Future removeAsTeacher({@required String password}) async {

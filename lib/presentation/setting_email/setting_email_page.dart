@@ -1,20 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../common/loading.dart';
 import '../../user_model.dart';
 
 class SettingEmail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'メールアドレスの変更',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-      body: UpdateEmailForm(),
+    return Consumer<UserModel>(
+      builder: (_, model, __) {
+        return Stack(
+          children: <Widget>[
+            Scaffold(
+              appBar: AppBar(
+                title: Text(
+                  'メールアドレスの変更',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              body: UpdateEmailForm(),
+            ),
+            Loading(model.isLoading),
+          ],
+        );
+      },
     );
   }
 }
@@ -172,6 +182,7 @@ class _UpdateEmailFormState extends State<UpdateEmailForm>
                                         model.checkUserSignIn();
                                         Navigator.pop(context);
                                       } catch (error) {
+                                        model.endLoading();
                                         showDialog(
                                           context: context,
                                           builder: (BuildContext context) {

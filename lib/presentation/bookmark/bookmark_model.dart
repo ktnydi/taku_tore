@@ -5,8 +5,20 @@ import '../../domain/user.dart';
 
 class BookmarkModel extends ChangeNotifier {
   List<User> teachers = [];
+  bool isLoading = false;
+
+  void beginLoading() {
+    isLoading = true;
+    notifyListeners();
+  }
+
+  Future endLoading() async {
+    isLoading = false;
+    notifyListeners();
+  }
 
   Future fetchBookmarks() async {
+    beginLoading();
     final user = await FirebaseAuth.instance.currentUser();
     final collection = Firestore.instance
         .collection('users')
@@ -32,5 +44,6 @@ class BookmarkModel extends ChangeNotifier {
     );
     this.teachers = await teachers;
     notifyListeners();
+    await endLoading();
   }
 }

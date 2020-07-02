@@ -4,8 +4,20 @@ import '../../domain/user.dart';
 
 class HomeModel extends ChangeNotifier {
   List<User> teachers = [];
+  bool isLoading = false;
+
+  void beginLoading() {
+    isLoading = true;
+    notifyListeners();
+  }
+
+  void endLoading() {
+    isLoading = false;
+    notifyListeners();
+  }
 
   Future fetchTeachers() async {
+    beginLoading();
     final query = Firestore.instance
         .collection('users')
         .where('isTeacher', isEqualTo: true);
@@ -24,5 +36,6 @@ class HomeModel extends ChangeNotifier {
     }).toList();
     this.teachers = teachers;
     notifyListeners();
+    endLoading();
   }
 }
