@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../user_model.dart';
 import '../setting_teacher/setting_teacher_page.dart';
+import '../remove_teacher/remove_teacher_page.dart';
 import '../setting_name/setting_name_page.dart';
 import '../setting_email/setting_email_page.dart';
 import '../setting_password/setting_password_page.dart';
@@ -157,53 +158,12 @@ class _CurrentAccountState extends State<CurrentAccount> {
                               ),
                             );
                           } else {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: Text('講師を止める'),
-                                  content: TextField(
-                                    onChanged: (value) => password = value,
-                                    decoration: InputDecoration(
-                                      hintText: 'パスワード',
-                                      filled: true,
-                                      fillColor: Colors.black.withOpacity(0.05),
-                                    ),
-                                  ),
-                                  actions: <Widget>[
-                                    FlatButton(
-                                      child: Text('キャンセル'),
-                                      onPressed: () => Navigator.pop(context),
-                                    ),
-                                    FlatButton(
-                                      child: Text('OK'),
-                                      onPressed: () async {
-                                        try {
-                                          await model.removeAsTeacher(
-                                            password: password,
-                                          );
-                                        } catch (error) {
-                                          showDialog(
-                                            context: context,
-                                            builder: (BuildContext context) {
-                                              return AlertDialog(
-                                                title: Text(error.toString()),
-                                                actions: <Widget>[
-                                                  FlatButton(
-                                                    child: Text('OK'),
-                                                    onPressed: () =>
-                                                        Navigator.pop(context),
-                                                  ),
-                                                ],
-                                              );
-                                            },
-                                          );
-                                        }
-                                      },
-                                    ),
-                                  ],
-                                );
-                              },
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (BuildContext context) =>
+                                    RemoveTeacher(),
+                              ),
                             );
                           }
                         },
