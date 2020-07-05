@@ -5,8 +5,26 @@ import '../../domain/user.dart';
 
 class TeacherDetailModel extends ChangeNotifier {
   User teacher;
+  bool isAuthor = false;
   bool isBookmarked = false;
   bool isAlreadyExist = false;
+  bool isLoading = false;
+
+  void beginLoading() {
+    this.isLoading = true;
+    notifyListeners();
+  }
+
+  void endLoading() {
+    this.isLoading = false;
+    notifyListeners();
+  }
+
+  Future checkAuthor({User teacher}) async {
+    final currentUser = await FirebaseAuth.instance.currentUser();
+    this.isAuthor = teacher.uid == currentUser.uid;
+    notifyListeners();
+  }
 
   Future checkBookmark({User teacher}) async {
     final currentUser = await FirebaseAuth.instance.currentUser();
@@ -34,6 +52,8 @@ class TeacherDetailModel extends ChangeNotifier {
     final docs = await roomQuery.getDocuments();
     final isExist = docs.documents.isNotEmpty;
     this.isAlreadyExist = isExist;
+
+    notifyListeners();
   }
 
   Future addBookmark() async {
@@ -70,6 +90,8 @@ class TeacherDetailModel extends ChangeNotifier {
   }
 
   Future addRoom() async {
+    beginLoading();
+
     final currentUser = await FirebaseAuth.instance.currentUser();
 
     if (teacher.uid == currentUser.uid) {
@@ -95,5 +117,7 @@ class TeacherDetailModel extends ChangeNotifier {
         'studentId': currentUser.uid,
       },
     });
+
+    endLoading();
   }
 }
