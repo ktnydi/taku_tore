@@ -1,5 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'setting_teacher_model.dart';
 import '../common/loading.dart';
 import '../../user_model.dart';
 
@@ -119,26 +121,13 @@ class _SettingTeacherState extends State<SettingTeacher> {
   }
 }
 
-class BecomeTeacher extends StatefulWidget {
-  @override
-  _BecomeTeacherState createState() => _BecomeTeacherState();
-}
-
-class _BecomeTeacherState extends State<BecomeTeacher>
-    with TickerProviderStateMixin {
-  String about = '';
-  String canDo = '';
-  String recommend = '';
+class BecomeTeacher extends StatelessWidget {
   final _formKey = GlobalKey<FormState>();
 
-  Future registerAsTeacher(UserModel model) async {
+  Future registerAsTeacher(context, SettingTeacherModel model) async {
     try {
       if (_formKey.currentState.validate()) {
-        await model.registerAsTeacher(
-          about: about,
-          canDo: canDo,
-          recommend: recommend,
-        );
+        await model.registerAsTeacher();
         await showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -176,203 +165,59 @@ class _BecomeTeacherState extends State<BecomeTeacher>
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<UserModel>(
-      builder: (_, model, __) {
-        return Stack(
-          children: <Widget>[
-            Scaffold(
-              appBar: AppBar(
-                title: Text(
-                  '講師に登録',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                actions: <Widget>[
-                  FlatButton(
-                    child: Text(
-                      '登録',
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).primaryColor,
-                      ),
+    return ChangeNotifierProvider<SettingTeacherModel>(
+      create: (_) => SettingTeacherModel(),
+      child: Consumer<SettingTeacherModel>(
+        builder: (_, model, __) {
+          return Stack(
+            children: <Widget>[
+              Scaffold(
+                appBar: AppBar(
+                  title: Text(
+                    '講師に登録',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
                     ),
-                    onPressed: () async {
-                      await registerAsTeacher(model);
-                    },
                   ),
-                ],
-              ),
-              body: SingleChildScrollView(
-                child: SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Form(
-                      key: _formKey,
+                  actions: <Widget>[
+                    FlatButton(
+                      child: Text(
+                        '登録',
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      textColor: Theme.of(context).primaryColor,
+                      disabledTextColor: Colors.black38,
+                      onPressed: !model.disabled()
+                          ? () async {
+                              await registerAsTeacher(context, model);
+                            }
+                          : null,
+                    ),
+                  ],
+                ),
+                body: SingleChildScrollView(
+                  child: SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.all(15.0),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          Consumer<UserModel>(
-                            builder: (_, model, __) {
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 30,
-                                ),
-                                child: Center(
-                                  child: Column(
-                                    children: <Widget>[
-                                      Container(
-                                        width: 120,
-                                        height: 120,
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(80),
-                                          boxShadow: <BoxShadow>[
-                                            BoxShadow(
-                                              color:
-                                                  Colors.black.withOpacity(0.2),
-                                              offset: Offset(0, 1),
-                                              blurRadius: 10,
-                                            ),
-                                          ],
-                                          image: DecorationImage(
-                                            fit: BoxFit.cover,
-                                            image: NetworkImage(
-                                              model.user.photoURL,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      SizedBox(height: 10),
-                                      Text(
-                                        model.user.displayName,
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 17,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                          Text(
-                            '自己紹介',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
+                          Form(
+                            key: _formKey,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Title(),
+                                SizedBox(height: 20),
+                                CanDo(),
+                                SizedBox(height: 20),
+                                Recommend(),
+                                SizedBox(height: 20),
+                                About(),
+                              ],
                             ),
-                          ),
-                          SizedBox(height: 5),
-                          Text(
-                            'あなたの経歴、活動、趣味など',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.black54,
-                            ),
-                          ),
-                          SizedBox(height: 20),
-                          TextFormField(
-                            validator: (value) {
-                              if (value.trim().isEmpty) {
-                                return '入力してください。';
-                              }
-                              return null;
-                            },
-                            minLines: 3,
-                            maxLines: 10,
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(8),
-                                ),
-                                borderSide: BorderSide.none,
-                              ),
-                              hintText: '自己紹介を追加',
-                              filled: true,
-                              fillColor: Colors.black.withOpacity(0.05),
-                            ),
-                            onChanged: (value) => about = value,
-                          ),
-                          SizedBox(height: 30),
-                          Text(
-                            'できること',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          SizedBox(height: 5),
-                          Text(
-                            'フィットネス講師としてできることについて',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.black54,
-                            ),
-                          ),
-                          SizedBox(height: 20),
-                          TextFormField(
-                            validator: (value) {
-                              if (value.trim().isEmpty) {
-                                return '入力してください。';
-                              }
-                              return null;
-                            },
-                            minLines: 3,
-                            maxLines: 10,
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(8),
-                                ),
-                                borderSide: BorderSide.none,
-                              ),
-                              hintText: 'できることを追加',
-                              filled: true,
-                              fillColor: Colors.black.withOpacity(0.05),
-                            ),
-                            onChanged: (value) => canDo = value,
-                          ),
-                          SizedBox(height: 30),
-                          Text(
-                            'こんな方におすすめ',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          SizedBox(height: 5),
-                          Text(
-                            'どのユーザーにお勧めしたいか',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.black54,
-                            ),
-                          ),
-                          SizedBox(height: 20),
-                          TextFormField(
-                            validator: (value) {
-                              if (value.trim().isEmpty) {
-                                return '入力してください。';
-                              }
-                              return null;
-                            },
-                            minLines: 3,
-                            maxLines: 10,
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(8),
-                                ),
-                                borderSide: BorderSide.none,
-                              ),
-                              hintText: 'こんな方におすすめを追加',
-                              filled: true,
-                              fillColor: Colors.black.withOpacity(0.05),
-                            ),
-                            onChanged: (value) => recommend = value,
                           ),
                         ],
                       ),
@@ -380,11 +225,244 @@ class _BecomeTeacherState extends State<BecomeTeacher>
                   ),
                 ),
               ),
+              Loading(model.isLoading),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class Title extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<SettingTeacherModel>(
+      builder: (_, model, __) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              'サービスタイトル',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            Loading(model.isLoading),
+            SizedBox(height: 10),
+            TextFormField(
+              validator: (value) {
+                if (value.trim().isEmpty) {
+                  return '入力してください。';
+                }
+                if (value.length > 80) {
+                  return '80文字以内にしてください。';
+                }
+                return null;
+              },
+              minLines: 1,
+              maxLines: 10,
+              keyboardType: TextInputType.text,
+              decoration: InputDecoration(
+                contentPadding: EdgeInsets.all(10),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(8),
+                  ),
+                  borderSide: BorderSide.none,
+                ),
+                hintText: 'タイトル',
+                filled: true,
+                fillColor: Colors.black.withOpacity(0.05),
+              ),
+              onChanged: (value) => model.title = value,
+            ),
+            SizedBox(height: 10),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                '${model.title.length}/80',
+                style: TextStyle(
+                  color: Colors.black54,
+                ),
+              ),
+            ),
           ],
         );
       },
     );
+  }
+}
+
+class About extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<SettingTeacherModel>(
+      builder: (_, model, __) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              '自己紹介',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 10),
+            TextFormField(
+              validator: (value) {
+                if (value.trim().isEmpty) {
+                  return '入力してください。';
+                }
+                if (value.length > 500) {
+                  return '500文字以内にしてください。';
+                }
+                return null;
+              },
+              minLines: 5,
+              maxLines: 10,
+              decoration: InputDecoration(
+                contentPadding: EdgeInsets.all(10),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(8),
+                  ),
+                  borderSide: BorderSide.none,
+                ),
+                hintText: '経歴、趣味など',
+                filled: true,
+                fillColor: Colors.black.withOpacity(0.05),
+              ),
+              onChanged: (value) => model.about = value,
+            ),
+            SizedBox(height: 10),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                '${model.about.length}/500',
+                style: TextStyle(
+                  color: Colors.black54,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class CanDo extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<SettingTeacherModel>(
+      builder: (_, model, __) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              'サービス内容',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 10),
+            TextFormField(
+              validator: (value) {
+                if (value.trim().isEmpty) {
+                  return '入力してください。';
+                }
+                if (value.length > 500) {
+                  return '500文字以内にしてください。';
+                }
+                return null;
+              },
+              minLines: 5,
+              maxLines: 10,
+              decoration: InputDecoration(
+                contentPadding: EdgeInsets.all(10),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(8),
+                  ),
+                  borderSide: BorderSide.none,
+                ),
+                hintText: '内容',
+                filled: true,
+                fillColor: Colors.black.withOpacity(0.05),
+              ),
+              onChanged: (value) => model.canDo = value,
+            ),
+            SizedBox(height: 10),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                '${model.canDo.length}/500',
+                style: TextStyle(
+                  color: Colors.black54,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class Recommend extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<SettingTeacherModel>(builder: (_, model, __) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            'こんな方におすすめ',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 10),
+          TextFormField(
+            validator: (value) {
+              if (value.trim().isEmpty) {
+                return '入力してください。';
+              }
+              if (value.length > 500) {
+                return '500文字以内にしてください。';
+              }
+              return null;
+            },
+            minLines: 5,
+            maxLines: 10,
+            decoration: InputDecoration(
+              contentPadding: EdgeInsets.all(8),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.all(
+                  Radius.circular(8),
+                ),
+                borderSide: BorderSide.none,
+              ),
+              hintText: 'おすすめのユーザー',
+              filled: true,
+              fillColor: Colors.black.withOpacity(0.05),
+            ),
+            onChanged: (value) => model.recommend = value,
+          ),
+          SizedBox(height: 10),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              '${model.recommend.length}/500',
+              style: TextStyle(
+                color: Colors.black54,
+              ),
+            ),
+          ),
+        ],
+      );
+    });
   }
 }
