@@ -29,6 +29,7 @@ class HomeModel extends ChangeNotifier {
         photoURL: doc['photoURL'],
         isTeacher: doc['isTeacher'],
         createdAt: doc['createdAt'],
+        title: doc['title'],
         about: doc['about'],
         canDo: doc['canDo'],
         recommend: doc['recommend'],

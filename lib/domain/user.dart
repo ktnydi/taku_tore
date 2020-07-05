@@ -8,6 +8,7 @@ class User {
     @required this.photoURL,
     @required this.isTeacher,
     this.email,
+    this.title,
     this.about,
     this.canDo,
     this.recommend,
@@ -19,6 +20,7 @@ class User {
   final String photoURL;
   final bool isTeacher;
   final String email;
+  final String title;
   final String about;
   final String canDo;
   final String recommend;
