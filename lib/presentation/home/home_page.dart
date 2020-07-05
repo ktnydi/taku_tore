@@ -29,18 +29,18 @@ class TeacherList extends StatelessWidget {
         final listTiles = model.teachers.map(
           (teacher) {
             return ListTile(
-              contentPadding: EdgeInsets.all(15),
               leading: CircleAvatar(
+                backgroundColor: Colors.transparent,
                 backgroundImage: NetworkImage(teacher.photoURL),
                 radius: 25,
               ),
               title: Text(
-                teacher.displayName,
+                teacher.title,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 17,
                 ),
               ),
+              subtitle: Text(teacher.displayName),
               onTap: () {
                 Navigator.push(
                   context,
