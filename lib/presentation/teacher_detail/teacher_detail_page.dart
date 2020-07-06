@@ -265,7 +265,9 @@ class FloatingButton extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                         fullscreenDialog: true,
-                        builder: (BuildContext context) => Review(),
+                        builder: (BuildContext context) => Review(
+                          teacher: teacher,
+                        ),
                       ),
                     );
                   },

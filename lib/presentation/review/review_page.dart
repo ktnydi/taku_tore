@@ -1,13 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:provider/provider.dart';
+import '../../domain/user.dart';
 import 'review_model.dart';
 
 class Review extends StatelessWidget {
+  Review({this.teacher});
+
+  final User teacher;
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => ReviewModel(),
+      create: (_) {
+        final reviewModel = ReviewModel();
+        reviewModel.teacher = teacher;
+        return reviewModel;
+      },
       child: GestureDetector(
         onTap: () {
           FocusScope.of(context).unfocus();
