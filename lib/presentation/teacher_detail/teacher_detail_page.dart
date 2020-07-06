@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../domain/user.dart';
 import '../../user_model.dart';
+import '../review/review_page.dart';
 import 'teacher_detail_model.dart';
 
 class TeacherDetail extends StatelessWidget {
@@ -260,6 +261,13 @@ class FloatingButton extends StatelessWidget {
                   }
                 : () {
                     // TODO: write review
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        fullscreenDialog: true,
+                        builder: (BuildContext context) => Review(),
+                      ),
+                    );
                   },
             child: !model.isLoading
                 ? Text(
