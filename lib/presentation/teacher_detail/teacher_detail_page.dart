@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:provider/provider.dart';
@@ -76,6 +75,7 @@ class TeacherDetail extends StatelessWidget {
         ..checkAuthor(teacher: teacher)
         ..checkBookmark(teacher: teacher)
         ..checkRoom(teacher: teacher)
+        ..checkReview(teacher: teacher)
         ..fetchReviews(teacher: teacher)
         ..scrollListener(),
       child: Scaffold(
@@ -156,14 +156,26 @@ class TeacherDetail extends StatelessWidget {
           },
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-        floatingActionButton: FloatingButton(teacher),
+        floatingActionButton: Consumer<TeacherDetailModel>(
+          builder: (_, model, __) {
+            if (model.isLoading || model.isAuthor) {
+              return Container();
+            }
+
+            if (model.isAlreadyExist) {
+              return ReviewButton(teacher);
+            }
+
+            return ConsultButton(teacher);
+          },
+        ),
       ),
     );
   }
 }
 
-class FloatingButton extends StatelessWidget {
-  FloatingButton(this.teacher);
+class ConsultButton extends StatelessWidget {
+  ConsultButton(this.teacher);
 
   final User teacher;
 
@@ -254,40 +266,21 @@ class FloatingButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<TeacherDetailModel>(
       builder: (_, model, __) {
-        if (model.isAuthor) {
-          return Container();
-        }
-
         const horizontalMargin = 30;
         return ButtonTheme(
           minWidth: MediaQuery.of(context).size.width - horizontalMargin,
           height: 50,
           child: FlatButton(
-            color: !model.isAlreadyExist
-                ? Theme.of(context).primaryColor
-                : Colors.amber,
+            color: Theme.of(context).primaryColor,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(25.0),
             ),
-            onPressed: !model.isAlreadyExist
-                ? () async {
-                    await consult(context: context, model: model);
-                  }
-                : () {
-                    // TODO: write review
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        fullscreenDialog: true,
-                        builder: (BuildContext context) => Review(
-                          teacher: teacher,
-                        ),
-                      ),
-                    );
-                  },
+            onPressed: () async {
+              await consult(context: context, model: model);
+            },
             child: !model.isLoading
                 ? Text(
-                    !model.isAlreadyExist ? '相談する' : 'レビューを書く',
+                    '相談する',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 17,
@@ -297,6 +290,55 @@ class FloatingButton extends StatelessWidget {
                 : CircularProgressIndicator(
                     backgroundColor: Colors.white,
                   ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class ReviewButton extends StatelessWidget {
+  ReviewButton(this.teacher);
+
+  final User teacher;
+  final horizontalMargin = 30;
+
+  @override
+  Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width - horizontalMargin;
+
+    return Consumer<TeacherDetailModel>(
+      builder: (_, model, __) {
+        return ButtonTheme(
+          minWidth: width,
+          height: 50,
+          child: FlatButton(
+            color: Colors.amber,
+            disabledColor: Colors.grey,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(25.0),
+            ),
+            onPressed: !model.isAlreadyReviewed
+                ? () async {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        fullscreenDialog: true,
+                        builder: (BuildContext context) => Review(
+                          teacher: teacher,
+                        ),
+                      ),
+                    );
+                  }
+                : null,
+            child: Text(
+              !model.isAlreadyReviewed ? 'レビューを書く' : 'レビュー済み',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 17,
+                color: Colors.white,
+              ),
+            ),
           ),
         );
       },
