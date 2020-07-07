@@ -12,6 +12,7 @@ class TeacherDetailModel extends ChangeNotifier {
   bool isAuthor = false;
   bool isBookmarked = false;
   bool isAlreadyExist = false;
+  bool isAlreadyReviewed = false;
   bool isLoading = false;
 
   void beginLoading() {
@@ -57,6 +58,7 @@ class TeacherDetailModel extends ChangeNotifier {
   }
 
   Future checkRoom({User teacher}) async {
+    beginLoading();
     final currentUser = await FirebaseAuth.instance.currentUser();
     final roomQuery = Firestore.instance
         .collection('users')
@@ -67,6 +69,21 @@ class TeacherDetailModel extends ChangeNotifier {
     final docs = await roomQuery.getDocuments();
     final isExist = docs.documents.isNotEmpty;
     this.isAlreadyExist = isExist;
+
+    endLoading();
+    notifyListeners();
+  }
+
+  Future checkReview({User teacher}) async {
+    final currentUser = await FirebaseAuth.instance.currentUser();
+    final query = Firestore.instance
+        .collection('users')
+        .document(teacher.uid)
+        .collection('reviews')
+        .where('fromUid', isEqualTo: currentUser.uid);
+    final docs = await query.getDocuments();
+    final isExist = docs.documents.isNotEmpty;
+    this.isAlreadyReviewed = isExist;
 
     notifyListeners();
   }
