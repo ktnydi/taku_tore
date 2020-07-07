@@ -27,6 +27,7 @@ dependencies:
   provider: ^4.1.2
   flutter_rating_bar: ^3.0.1+1
   image_picker: ^0.6.7+1
+  timeago: ^2.0.26
 
   # firebase
   firebase_core: ^0.4.5

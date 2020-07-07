@@ -1,10 +1,14 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:takutore/domain/review.dart';
 import '../../domain/user.dart';
 
 class TeacherDetailModel extends ChangeNotifier {
   User teacher;
+  ScrollController scrollController = ScrollController();
+  List<Review> reviews = [];
+  List<DocumentSnapshot> reviewDocList = [];
   bool isAuthor = false;
   bool isBookmarked = false;
   bool isAlreadyExist = false;
@@ -18,6 +22,17 @@ class TeacherDetailModel extends ChangeNotifier {
   void endLoading() {
     this.isLoading = false;
     notifyListeners();
+  }
+
+  void scrollListener() {
+    this.scrollController.addListener(() async {
+      final currentScrollPosition = scrollController.offset;
+      final maxScrollExtent = scrollController.position.maxScrollExtent;
+
+      if (currentScrollPosition == maxScrollExtent) {
+        await addReviews();
+      }
+    });
   }
 
   Future checkAuthor({User teacher}) async {
@@ -87,6 +102,73 @@ class TeacherDetailModel extends ChangeNotifier {
         .collection('bookmarks')
         .document(docId)
         .delete();
+  }
+
+  Future fetchReviews({User teacher}) async {
+    final collection = Firestore.instance
+        .collection('users')
+        .document(teacher.uid)
+        .collection('reviews')
+        .orderBy('createdAt', descending: true)
+        .limit(2);
+    final docs = await collection.getDocuments();
+
+    this.reviewDocList = docs.documents;
+
+    final reviews = await Future.wait(
+      docs.documents.map((doc) async {
+        final document =
+            Firestore.instance.collection('users').document(doc['fromUid']);
+        final data = await document.get();
+        final fromUser = User(
+          uid: data['uid'],
+          displayName: data['displayName'],
+          photoURL: data['photoURL'],
+          isTeacher: data['isTeacher'],
+          createdAt: data['createdAt'],
+        );
+        return Review(doc, fromUser);
+      }),
+    );
+    this.reviews = reviews;
+
+    notifyListeners();
+  }
+
+  Future addReviews() async {
+    if (reviews.isEmpty) {
+      return;
+    }
+    final collection = Firestore.instance
+        .collection('users')
+        .document(teacher.uid)
+        .collection('reviews')
+        .orderBy('createdAt', descending: true)
+        .startAfterDocument(reviewDocList[reviewDocList.length - 1])
+        .limit(10);
+    final docs = await collection.getDocuments();
+
+    this.reviewDocList = [...this.reviewDocList, ...docs.documents];
+
+    final extraReviews = await Future.wait(
+      docs.documents.map((doc) async {
+        final document =
+            Firestore.instance.collection('users').document(doc['fromUid']);
+        final data = await document.get();
+        final fromUser = User(
+          uid: data['uid'],
+          displayName: data['displayName'],
+          photoURL: data['photoURL'],
+          isTeacher: data['isTeacher'],
+          createdAt: data['createdAt'],
+        );
+        return Review(doc, fromUser);
+      }).toList(),
+    );
+
+    this.reviews = [...this.reviews, ...extraReviews];
+
+    notifyListeners();
   }
 
   Future addRoom() async {
