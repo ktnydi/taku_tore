@@ -1,5 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:provider/provider.dart';
+import 'package:timeago/timeago.dart';
 import '../../domain/user.dart';
 import '../../user_model.dart';
 import '../review/review_page.dart';
@@ -72,7 +75,9 @@ class TeacherDetail extends StatelessWidget {
       create: (_) => TeacherDetailModel()
         ..checkAuthor(teacher: teacher)
         ..checkBookmark(teacher: teacher)
-        ..checkRoom(teacher: teacher),
+        ..checkRoom(teacher: teacher)
+        ..fetchReviews(teacher: teacher)
+        ..scrollListener(),
       child: Scaffold(
         extendBodyBehindAppBar: true,
         appBar: AppBar(
@@ -133,13 +138,22 @@ class TeacherDetail extends StatelessWidget {
             ],
           ),
         ),
-        body: SingleChildScrollView(
-          child: Column(
-            children: <Widget>[
-              Header(teacher: teacher),
-              Content(teacher: teacher),
-            ],
-          ),
+        body: Consumer<TeacherDetailModel>(
+          builder: (_, model, __) {
+            return SingleChildScrollView(
+              controller: model.scrollController,
+              child: Padding(
+                padding: EdgeInsets.only(bottom: 100),
+                child: Column(
+                  children: <Widget>[
+                    Header(teacher: teacher),
+                    Content(teacher: teacher),
+                    ReviewList(),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         floatingActionButton: FloatingButton(teacher),
@@ -326,7 +340,7 @@ class Content extends StatelessWidget {
           padding: const EdgeInsets.only(
             top: 15,
             right: 15,
-            bottom: 100,
+            bottom: 0,
             left: 15,
           ),
           child: Column(
@@ -436,6 +450,136 @@ class Description extends StatelessWidget {
           style: _description(),
         ),
       ],
+    );
+  }
+}
+
+class ReviewList extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(horizontal: 15),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Divider(
+            height: 30,
+          ),
+          Text(
+            'レビュー',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(
+            height: 10,
+          ),
+          Consumer<TeacherDetailModel>(
+            builder: (_, model, __) {
+              if (model.reviews.isEmpty) {
+                return Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(8)),
+                    color: Colors.white,
+                  ),
+                  child: Row(
+                    children: <Widget>[
+                      CircleAvatar(
+                        child: Icon(
+                          Icons.person_outline,
+                          color: Colors.white,
+                        ),
+                        backgroundColor: Colors.black12,
+                      ),
+                      SizedBox(width: 15),
+                      Expanded(
+                        child: Center(
+                          child: Text(
+                            'レビューはまだありません。',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black45,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+              return ListBody(
+                children: model.reviews.map(
+                  (review) {
+                    return Container(
+                      margin: EdgeInsets.only(bottom: 10),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(8)),
+                        color: Colors.white,
+                      ),
+                      child: ListTile(
+                        contentPadding: EdgeInsets.all(10),
+                        leading: CircleAvatar(
+                          backgroundColor: Colors.transparent,
+                          backgroundImage: NetworkImage(
+                            review.fromUser.photoURL,
+                          ),
+                        ),
+                        title: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            RatingBarIndicator(
+                              rating: review.rating,
+                              itemBuilder: (context, index) => Icon(
+                                Icons.star,
+                                color: Colors.amber,
+                              ),
+                              itemCount: 5,
+                              itemSize: 20,
+                            ),
+                            SizedBox(height: 5),
+                            Text(
+                              review.comment,
+                              style: TextStyle(
+                                fontSize: 16,
+                              ),
+                            ),
+                            SizedBox(height: 5),
+                            Row(
+                              children: <Widget>[
+                                Flexible(
+                                  child: Text(
+                                    review.fromUser.displayName,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      color: Colors.black54,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ),
+                                Text(
+                                  '・${format(review.createdAt.toDate())}',
+                                  style: TextStyle(
+                                    color: Colors.black54,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ).toList(),
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 }
