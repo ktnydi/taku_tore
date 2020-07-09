@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'user.dart';
 
@@ -7,9 +8,15 @@ class Room {
     @required this.documentId,
     @required this.teacher,
     @required this.student,
+    @required this.lastMessage,
+    @required this.updatedAt,
+    @required this.createdAt,
   });
 
   final String documentId;
   final User teacher;
   final User student;
+  final String lastMessage;
+  final Timestamp updatedAt;
+  final Timestamp createdAt;
 }

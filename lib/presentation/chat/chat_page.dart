@@ -49,11 +49,21 @@ class Chat extends StatelessWidget {
                 ),
               ),
               Expanded(
-                child: TabBarView(
-                  children: <Widget>[
-                    ChatList(),
-                    ChatList(),
-                  ],
+                child: Consumer<ChatModel>(
+                  builder: (_, model, __) {
+                    if (model.isLoading) {
+                      return Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+
+                    return TabBarView(
+                      children: <Widget>[
+                        ChatList(rooms: model.teacherRooms),
+                        ChatList(rooms: model.studentRooms),
+                      ],
+                    );
+                  },
                 ),
               ),
             ],
@@ -65,26 +75,25 @@ class Chat extends StatelessWidget {
 }
 
 class ChatList extends StatelessWidget {
+  ChatList({@required this.rooms});
+
+  final List<Room> rooms;
+
   @override
   Widget build(BuildContext context) {
-    return Consumer2<UserModel, ChatModel>(
-      builder: (_, userModel, chatModel, __) {
-        if (chatModel.isLoading) {
-          return Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-        if (chatModel.rooms.isEmpty) {
+    return Consumer<UserModel>(
+      builder: (_, model, __) {
+        if (this.rooms.isEmpty) {
           return Center(
             child: Text(
-              '相談中の講師はありません。',
+              'チャットルームはありません。',
             ),
           );
         }
 
-        final listTiles = chatModel.rooms.map(
+        final listTiles = this.rooms.map(
           (room) {
-            return userModel.user.uid == room.teacher.uid
+            return model.user.uid == room.teacher.uid
                 ? ChatCell(user: room.student, room: room)
                 : ChatCell(user: room.teacher, room: room);
           },
@@ -156,7 +165,7 @@ class ChatCell extends StatelessWidget {
                   ),
                   SizedBox(width: 10),
                   Text(
-                    format(DateTime.now().subtract(Duration(hours: 3))),
+                    format(room.updatedAt.toDate()),
                     style: TextStyle(
                       color: Colors.black54,
                       fontSize: 14,
@@ -165,7 +174,7 @@ class ChatCell extends StatelessWidget {
                 ],
               ),
               subtitle: Text(
-                'メッセージメッセージメッセージメッセージメッセージメッセージメッセージメッセージメッセージメッセージ',
+                room.lastMessage,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(

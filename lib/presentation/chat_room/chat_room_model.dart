@@ -26,10 +26,7 @@ class ChatRoomModel extends ChangeNotifier {
   }
 
   Future fetchMessagesAsStream({Room room}) async {
-    final currentUser = await FirebaseAuth.instance.currentUser();
     final collection = Firestore.instance
-        .collection('users')
-        .document(currentUser.uid)
         .collection('rooms')
         .document(room.documentId)
         .collection('messages')
@@ -62,50 +59,23 @@ class ChatRoomModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future addMessage({String text}) async {
+  Future addMessageWithTransition({String text}) async {
     final currentUser = await FirebaseAuth.instance.currentUser();
     final collection = Firestore.instance
-        .collection('users')
-        .document(currentUser.uid)
         .collection('rooms')
         .document(room.documentId)
         .collection('messages');
+
     final from = currentUser.uid;
     final to = this.room.student.uid == currentUser.uid
         ? this.room.teacher.uid
         : this.room.student.uid;
+
     await collection.add({
       'fromUid': from,
       'toUid': to,
       'content': text,
       'createdAt': FieldValue.serverTimestamp(),
-    });
-  }
-
-  Future addMessageWithTransition({String text}) async {
-    final currentUser = await FirebaseAuth.instance.currentUser();
-    final document = Firestore.instance
-        .collection('users')
-        .document(currentUser.uid)
-        .collection('rooms')
-        .document(room.documentId)
-        .collection('messages')
-        .document();
-    final from = currentUser.uid;
-    final to = this.room.student.uid == currentUser.uid
-        ? this.room.teacher.uid
-        : this.room.student.uid;
-
-    await Firestore.instance.runTransaction((transaction) async {
-      await transaction.set(
-        document,
-        {
-          'fromUid': from,
-          'toUid': to,
-          'content': text,
-          'createdAt': FieldValue.serverTimestamp(),
-        },
-      );
     });
   }
 }
