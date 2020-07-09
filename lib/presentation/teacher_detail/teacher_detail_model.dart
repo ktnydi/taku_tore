@@ -57,23 +57,6 @@ class TeacherDetailModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future checkRoom({User teacher}) async {
-    beginLoading();
-    final currentUser = await FirebaseAuth.instance.currentUser();
-    final roomQuery = Firestore.instance
-        .collection('users')
-        .document(currentUser.uid)
-        .collection('rooms')
-        .where('member.teacherId', isEqualTo: teacher.uid);
-
-    final docs = await roomQuery.getDocuments();
-    final isExist = docs.documents.isNotEmpty;
-    this.isAlreadyExist = isExist;
-
-    endLoading();
-    notifyListeners();
-  }
-
   Future checkReview({User teacher}) async {
     final currentUser = await FirebaseAuth.instance.currentUser();
     final query = Firestore.instance
@@ -188,6 +171,21 @@ class TeacherDetailModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future checkRoom({User teacher}) async {
+    beginLoading();
+    final currentUser = await FirebaseAuth.instance.currentUser();
+
+    final query = Firestore.instance
+        .collection('rooms')
+        .where('member.teacherID', isEqualTo: teacher.uid)
+        .where('member.studentID', isEqualTo: currentUser.uid);
+    final docs = await query.getDocuments();
+    this.isAlreadyExist = docs.documents.isNotEmpty;
+
+    endLoading();
+    notifyListeners();
+  }
+
   Future addRoom() async {
     beginLoading();
 
@@ -197,25 +195,18 @@ class TeacherDetailModel extends ChangeNotifier {
       throw ('自分には相談できません。');
     }
 
-    final roomRef = Firestore.instance
-        .collection('users')
-        .document(currentUser.uid)
-        .collection('rooms');
-
-    final roomQuery = roomRef.where('member.teacherId', isEqualTo: teacher.uid);
-    final docs = await roomQuery.getDocuments();
-    final isExist = docs.documents.isNotEmpty;
-
-    if (isExist) {
-      throw ('すでに相談済みです。');
-    }
-
-    await roomRef.add({
-      'member': {
-        'teacherId': teacher.uid,
-        'studentId': currentUser.uid,
+    final collection = Firestore.instance.collection('rooms');
+    collection.add(
+      {
+        'member': {
+          'teacherID': this.teacher.uid,
+          'studentID': currentUser.uid,
+        },
+        'lastMessage': '',
+        'updatedAt': FieldValue.serverTimestamp(),
+        'createdAt': FieldValue.serverTimestamp(),
       },
-    });
+    );
 
     endLoading();
   }
