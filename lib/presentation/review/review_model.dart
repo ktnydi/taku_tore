@@ -46,17 +46,46 @@ class ReviewModel extends ChangeNotifier {
 
     final currentUser = await FirebaseAuth.instance.currentUser();
 
-    final collection = Firestore.instance
-        .collection('users')
-        .document(this._teacher.uid)
-        .collection('reviews');
+    final userRef =
+        Firestore.instance.collection('users').document(this._teacher.uid);
 
-    await collection.add({
-      'rating': this._rating,
-      'comment': this._comment,
-      'fromUid': currentUser.uid,
-      'createdAt': FieldValue.serverTimestamp(),
-    });
+    final reviewRef = userRef.collection('reviews').document();
+
+    await Firestore.instance.runTransaction(
+      (transaction) async {
+        final doc = await transaction.get(userRef);
+
+        if (!doc.exists) {
+          return;
+        }
+
+        final int oldNumRatings = doc.data['numRatings'];
+        final double oldAvgRating = doc.data['avgRating'].toDouble();
+
+        final int newNumRatings = oldNumRatings + 1;
+        final double oldRatingTotal = oldAvgRating * oldNumRatings;
+        final double newRatingTotal = oldRatingTotal + this._rating;
+        final double newAvgRating = newRatingTotal / newNumRatings;
+
+        await transaction.update(
+          userRef,
+          {
+            'avgRating': (newAvgRating * 10.0).floor() / 10.0,
+            'numRatings': newNumRatings,
+          },
+        );
+
+        await transaction.set(
+          reviewRef,
+          {
+            'rating': this._rating,
+            'comment': this._comment,
+            'fromUid': currentUser.uid,
+            'createdAt': FieldValue.serverTimestamp(),
+          },
+        );
+      },
+    );
 
     endLoading();
   }

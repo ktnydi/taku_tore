@@ -63,6 +63,8 @@ class SettingTeacherModel extends ChangeNotifier {
       'about': this._about,
       'canDo': this._canDo,
       'recommend': this._recommend,
+      'avgRating': 0.0,
+      'numRatings': 0.0,
     });
     endLoading();
   }
