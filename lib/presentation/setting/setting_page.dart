@@ -13,16 +13,21 @@ class Setting extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView(
-        children: <Widget>[
-          CurrentAccount(),
-          SizedBox(height: 20),
-          AccountSetting(),
-          SizedBox(height: 20),
-          Bookmark(),
-          SizedBox(height: 20),
-          Danger(),
-        ],
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 15),
+          child: Column(
+            children: <Widget>[
+              CurrentAccount(),
+              SizedBox(height: 15),
+              AccountSetting(),
+              SizedBox(height: 15),
+              Bookmark(),
+              SizedBox(height: 15),
+              Danger(),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -46,131 +51,135 @@ class _CurrentAccountState extends State<CurrentAccount> {
     return Consumer<UserModel>(
       builder: (_, model, __) {
         return Container(
+          padding: EdgeInsets.symmetric(horizontal: 15),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              ListTile(
-                title: Text(
-                  'ログイン中のアカウント',
-                  style: _sectionTitleStyle,
-                ),
+              Text(
+                'ログイン中のアカウント',
+                style: _sectionTitleStyle,
               ),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    Container(
-                      child: CircleAvatar(
-                        radius: 50,
-                        backgroundImage: NetworkImage(model.user.photoURL),
-                        backgroundColor: Colors.transparent,
-                      ),
+              SizedBox(height: 20),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Container(
+                    child: CircleAvatar(
+                      radius: 50,
+                      backgroundImage: NetworkImage(model.user.photoURL),
+                      backgroundColor: Colors.transparent,
                     ),
-                    SizedBox(height: 10),
-                    Text(
-                      model.user.displayName,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                      ),
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    model.user.displayName,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
                     ),
-                    SizedBox(height: 5),
-                    Text(
-                      model.user.email,
-                      style: TextStyle(
-                        color: Colors.black54,
-                      ),
+                  ),
+                  SizedBox(height: 5),
+                  Text(
+                    model.user.email,
+                    style: TextStyle(
+                      color: Colors.black54,
                     ),
-                    SizedBox(height: 15),
-                    ButtonTheme(
-                      minWidth: double.infinity,
-                      height: 50,
-                      child: RaisedButton(
-                        child: Text(
-                          '画像を変更',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
+                  ),
+                  SizedBox(height: 15),
+                  ButtonTheme(
+                    minWidth: double.infinity,
+                    height: 50,
+                    child: FlatButton(
+                      color: Theme.of(context).primaryColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      child: Text(
+                        '画像を変更',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
-                        onPressed: () async {
-                          try {
-                            String photoURL = await model.uploadImage();
-                            if (photoURL == null) return;
-                            await showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: Text('画像を更新しました。'),
-                                  actions: <Widget>[
-                                    FlatButton(
-                                      child: Text('OK'),
-                                      onPressed: () => Navigator.pop(context),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                            model.checkUserSignIn();
-                          } catch (error) {
-                            model.endLoading();
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: Text(error.toString()),
-                                  actions: <Widget>[
-                                    FlatButton(
-                                      child: Text('OK'),
-                                      onPressed: () => Navigator.pop(context),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          }
-                        },
                       ),
+                      onPressed: () async {
+                        try {
+                          String photoURL = await model.uploadImage();
+                          if (photoURL == null) return;
+                          await showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text('画像を更新しました。'),
+                                actions: <Widget>[
+                                  FlatButton(
+                                    child: Text('OK'),
+                                    onPressed: () => Navigator.pop(context),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                          model.checkUserSignIn();
+                        } catch (error) {
+                          model.endLoading();
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text(error.toString()),
+                                actions: <Widget>[
+                                  FlatButton(
+                                    child: Text('OK'),
+                                    onPressed: () => Navigator.pop(context),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        }
+                      },
                     ),
-                    SizedBox(height: 5),
-                    ButtonTheme(
-                      minWidth: double.infinity,
-                      height: 50,
-                      child: FlatButton(
-                        child: Text(
-                          model.user.isTeacher ? '講師を止める' : '講師になる',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).primaryColor,
-                          ),
-                        ),
-                        onPressed: () {
-                          // TODO: Add processing for becoming teacher.
-                          if (!model.user.isTeacher) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (BuildContext context) =>
-                                    SettingTeacher(),
-                              ),
-                            );
-                          } else {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (BuildContext context) =>
-                                    RemoveTeacher(),
-                              ),
-                            );
-                          }
-                        },
+                  ),
+                  SizedBox(height: 15),
+                  ButtonTheme(
+                    minWidth: double.infinity,
+                    height: 50,
+                    child: FlatButton(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(25),
                       ),
-                    )
-                  ],
-                ),
+                      child: Text(
+                        model.user.isTeacher ? '講師を止める' : '講師になる',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                      onPressed: () {
+                        // TODO: Add processing for becoming teacher.
+                        if (!model.user.isTeacher) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (BuildContext context) =>
+                                  SettingTeacher(),
+                            ),
+                          );
+                        } else {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (BuildContext context) =>
+                                  RemoveTeacher(),
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                  )
+                ],
               ),
             ],
           ),
@@ -180,127 +189,68 @@ class _CurrentAccountState extends State<CurrentAccount> {
   }
 }
 
-class AccountSetting extends StatefulWidget {
-  @override
-  _AccountSettingState createState() => _AccountSettingState();
-}
-
-class _AccountSettingState extends State<AccountSetting> {
-  final TextStyle _sectionTitleStyle = TextStyle(
-    fontSize: 18,
-    fontWeight: FontWeight.bold,
-    color: Colors.black54,
-  );
-
+class AccountSetting extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<UserModel>(
       builder: (_, model, __) {
-        return Container(
-          child: Column(
-            children: <Widget>[
-              ListTile(
-                title: Text(
-                  'アカウント設定',
-                  style: _sectionTitleStyle,
+        return Section(
+          title: SectionTitle(title: 'アカウント設定'),
+          children: <Widget>[
+            SectionCell(
+              title: Text(
+                'ユーザー名',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              ListTile(
-                title: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Text(
-                      'ユーザー名',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(width: 10),
-                    Flexible(
-                      child: Text(
-                        model.user.displayName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: Colors.black54,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                trailing: Icon(
-                  Icons.arrow_forward_ios,
-                  size: 15,
-                ),
-                onTap: () {
-                  // TODO: Add Navigation.
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (BuildContext context) => SettingName(),
-                    ),
-                  );
-                },
-              ),
-              ListTile(
-                title: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Text(
-                      'メールアドレス',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(width: 10),
-                    Flexible(
-                      child: Text(
-                        model.user.email,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: Colors.black54,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                trailing: Icon(
-                  Icons.arrow_forward_ios,
-                  size: 15,
-                ),
-                onTap: () async {
-                  await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (BuildContext context) => SettingEmail(),
-                    ),
-                  );
-                },
-              ),
-              ListTile(
-                title: Text(
-                  'パスワード',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
+              content: model.user.displayName,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (BuildContext context) => SettingName(),
                   ),
+                );
+              },
+            ),
+            SectionCell(
+              title: Text(
+                'メールアドレス',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
                 ),
-                trailing: Icon(
-                  Icons.arrow_forward_ios,
-                  size: 15,
-                ),
-                onTap: () {
-                  // TODO: Add Navigation.
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (BuildContext context) => SettingPassword(),
-                    ),
-                  );
-                },
               ),
-            ],
-          ),
+              content: model.user.email,
+              onTap: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (BuildContext context) => SettingEmail(),
+                  ),
+                );
+              },
+            ),
+            SectionCell(
+              title: Text(
+                'パスワード',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (BuildContext context) => SettingPassword(),
+                  ),
+                );
+              },
+            ),
+          ],
         );
       },
     );
@@ -308,67 +258,79 @@ class _AccountSettingState extends State<AccountSetting> {
 }
 
 class Bookmark extends StatelessWidget {
-  final TextStyle _sectionTitleStyle = TextStyle(
-    fontSize: 18,
-    fontWeight: FontWeight.bold,
-    color: Colors.black54,
-  );
-
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Column(
-        children: <Widget>[
-          ListTile(
-            title: Text(
-              'ブックマーク',
-              style: _sectionTitleStyle,
+    return Section(
+      title: SectionTitle(title: 'ブックマーク'),
+      children: <Widget>[
+        SectionCell(
+          title: Text(
+            'ブックマーク',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
             ),
           ),
-          ListTile(
-            title: Text(
-              '保存した講師を見る',
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (BuildContext context) => BookmarkList(),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class Danger extends StatelessWidget {
+  void _logoutDialog(BuildContext context, UserModel model) {
+    showDialog(
+      context: context,
+      child: AlertDialog(
+        title: Text('ログアウトしますか?'),
+        actions: <Widget>[
+          FlatButton(
+            child: Text(
+              'キャンセル',
               style: TextStyle(
-                fontWeight: FontWeight.bold,
+                color: Colors.blueAccent,
               ),
             ),
-            trailing: Icon(
-              Icons.arrow_forward_ios,
-              size: 15,
+            onPressed: () => Navigator.pop(context),
+          ),
+          FlatButton(
+            child: Text(
+              'ログアウト',
+              style: TextStyle(
+                color: Colors.redAccent,
+              ),
             ),
-            onTap: () {
-              // TODO: Add Navigation.
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (BuildContext context) => BookmarkList(),
-                ),
-              );
+            onPressed: () {
+              Navigator.pop(context);
+              model.signOut();
             },
           ),
         ],
       ),
     );
   }
-}
 
-class Danger extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Consumer<UserModel>(builder: (_, model, __) {
-      return Container(
-        child: Column(
+    return Consumer<UserModel>(
+      builder: (_, model, __) {
+        return Section(
           children: <Widget>[
-            ListTile(
+            SectionCell(
               title: Text(
                 'アカウント削除',
                 style: TextStyle(
+                  fontSize: 15,
                   fontWeight: FontWeight.bold,
                 ),
-              ),
-              trailing: Icon(
-                Icons.arrow_forward_ios,
-                size: 15,
               ),
               onTap: () {
                 Navigator.push(
@@ -379,45 +341,144 @@ class Danger extends StatelessWidget {
                 );
               },
             ),
-            ListTile(
+            SectionCell(
               title: Text(
                 'ログアウト',
                 style: TextStyle(
+                  color: Colors.red,
+                  fontSize: 15,
                   fontWeight: FontWeight.bold,
-                  color: Colors.redAccent,
                 ),
               ),
               onTap: () {
-                // TODO: Add logout processing.
-                showDialog(
-                  context: context,
-                  child: AlertDialog(
-                    title: Text('ログアウトしますか?'),
-                    actions: <Widget>[
-                      FlatButton(
-                        child: Text('キャンセル'),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                      FlatButton(
-                        child: Text(
-                          'ログアウト',
-                          style: TextStyle(
-                            color: Colors.redAccent,
-                          ),
-                        ),
-                        onPressed: () {
-                          Navigator.pop(context);
-                          model.signOut();
-                        },
-                      ),
-                    ],
-                  ),
-                );
+                _logoutDialog(context, model);
               },
             ),
           ],
+        );
+      },
+    );
+  }
+}
+
+class SectionTitle extends StatelessWidget {
+  SectionTitle({@required this.title});
+
+  final String title;
+  @override
+  Widget build(BuildContext context) {
+    final TextStyle _sectionTitleStyle = TextStyle(
+      fontSize: 18,
+      fontWeight: FontWeight.bold,
+      color: Colors.black54,
+    );
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 15,
+        vertical: 10,
+      ),
+      child: Text(
+        title,
+        style: _sectionTitleStyle,
+      ),
+    );
+  }
+}
+
+class SectionCell extends StatelessWidget {
+  SectionCell({
+    this.title,
+    this.content = '',
+    this.onTap,
+  });
+
+  final Widget title;
+  final String content;
+  final void Function() onTap;
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<UserModel>(
+      builder: (_, model, __) {
+        return ListTile(
+          dense: true,
+          contentPadding: EdgeInsets.symmetric(
+            vertical: 0,
+            horizontal: 15,
+          ),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              title,
+              SizedBox(width: 10),
+              Flexible(
+                child: Text(
+                  this.content,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Colors.black54,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          trailing: Icon(
+            Icons.arrow_forward_ios,
+            size: 15,
+          ),
+          onTap: this.onTap,
+        );
+      },
+    );
+  }
+}
+
+class Section extends StatelessWidget {
+  Section({
+    this.title,
+    this.children,
+  });
+
+  final Widget title;
+  final List<Widget> children;
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        title ?? Container(),
+        Flexible(
+          child: Ink(
+            color: Colors.white,
+            child: ListView.separated(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              itemBuilder: (context, index) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    index == 0 ? Divider(height: 1) : Container(),
+                    children[index],
+                    index == children.length - 1
+                        ? Divider(height: 1)
+                        : Container(),
+                  ],
+                );
+              },
+              itemCount: children.length,
+              separatorBuilder: (context, index) {
+                return Padding(
+                  padding: const EdgeInsets.only(left: 15),
+                  child: Divider(height: 1),
+                );
+              },
+            ),
+          ),
         ),
-      );
-    });
+      ],
+    );
   }
 }
