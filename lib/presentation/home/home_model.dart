@@ -33,6 +33,8 @@ class HomeModel extends ChangeNotifier {
         about: doc['about'],
         canDo: doc['canDo'],
         recommend: doc['recommend'],
+        avgRating: doc['avgRating'].toDouble(),
+        numRatings: doc['numRatings'],
       );
     }).toList();
     this.teachers = teachers;

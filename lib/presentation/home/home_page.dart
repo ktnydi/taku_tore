@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:provider/provider.dart';
 import '../teacher_detail/teacher_detail_page.dart';
 import 'home_model.dart';
@@ -40,7 +41,34 @@ class TeacherList extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              subtitle: Text(teacher.displayName),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(teacher.displayName),
+                  Row(
+                    children: <Widget>[
+                      RatingBarIndicator(
+                        rating: teacher.avgRating.toDouble(),
+                        itemBuilder: (context, index) => Icon(
+                          Icons.star,
+                          color: Colors.amber,
+                        ),
+                        itemCount: 5,
+                        itemSize: 20,
+                      ),
+                      SizedBox(width: 3),
+                      Text(
+                        '${teacher.avgRating}',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(width: 3),
+                      Text('(${teacher.numRatings})'),
+                    ],
+                  ),
+                ],
+              ),
               onTap: () {
                 Navigator.push(
                   context,
