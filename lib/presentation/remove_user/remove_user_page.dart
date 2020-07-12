@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../atoms/rounded_button.dart';
 import '../../user_model.dart';
 
 class RemoveUser extends StatelessWidget {
@@ -31,73 +32,69 @@ class RemoveUser extends StatelessWidget {
             ),
             SizedBox(height: 30),
             Consumer<UserModel>(builder: (_, model, __) {
-              return ButtonTheme(
-                minWidth: double.infinity,
-                height: 50,
-                buttonColor: Colors.white,
-                child: RaisedButton(
-                  textColor: Colors.redAccent,
-                  child: Text(
-                    'アカウントを削除する',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+              return RoundedButton(
+                textColor: Colors.redAccent,
+                color: Colors.white,
+                child: Text(
+                  'アカウントを削除する',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
                   ),
-                  onPressed: () {
-                    // TODO: Implement processing for removing account.
-                    try {
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            title: Text('本当に削除しますか？'),
-                            actions: <Widget>[
-                              FlatButton(
-                                child: Text('キャンセル'),
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                              ),
-                              FlatButton(
-                                child: Text(
-                                  '削除する',
-                                  style: TextStyle(
-                                    color: Colors.redAccent,
-                                  ),
-                                ),
-                                onPressed: () async {
-                                  await model.removeUser();
-                                  // Dialogを閉じる。
-                                  Navigator.pop(context);
-                                  // 前のスクリーンに戻る。
-                                  Navigator.pop(context);
-                                },
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                    } catch (error) {
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            title: Text(error.toString()),
-                            actions: <Widget>[
-                              FlatButton(
-                                child: Text('OK'),
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                    }
-                  },
                 ),
+                onPressed: () {
+                  // TODO: Implement processing for removing account.
+                  try {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text('本当に削除しますか？'),
+                          actions: <Widget>[
+                            FlatButton(
+                              child: Text('キャンセル'),
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                            ),
+                            FlatButton(
+                              child: Text(
+                                '削除する',
+                                style: TextStyle(
+                                  color: Colors.redAccent,
+                                ),
+                              ),
+                              onPressed: () async {
+                                await model.removeUser();
+                                // Dialogを閉じる。
+                                Navigator.pop(context);
+                                // 前のスクリーンに戻る。
+                                Navigator.pop(context);
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  } catch (error) {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text(error.toString()),
+                          actions: <Widget>[
+                            FlatButton(
+                              child: Text('OK'),
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  }
+                },
               );
             }),
           ],

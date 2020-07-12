@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:takutore/atoms/rounded_button.dart';
 import '../../user_model.dart';
 import '../setting_teacher/setting_teacher_page.dart';
 import '../remove_teacher/remove_teacher_page.dart';
@@ -86,98 +87,82 @@ class _CurrentAccountState extends State<CurrentAccount> {
                     ),
                   ),
                   SizedBox(height: 15),
-                  ButtonTheme(
-                    minWidth: double.infinity,
-                    height: 50,
-                    child: FlatButton(
-                      color: Theme.of(context).primaryColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(25),
+                  RoundedButton(
+                    color: Theme.of(context).primaryColor,
+                    child: Text(
+                      '画像を変更',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
-                      child: Text(
-                        '画像を変更',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                      onPressed: () async {
-                        try {
-                          String photoURL = await model.uploadImage();
-                          if (photoURL == null) return;
-                          await showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: Text('画像を更新しました。'),
-                                actions: <Widget>[
-                                  FlatButton(
-                                    child: Text('OK'),
-                                    onPressed: () => Navigator.pop(context),
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                          model.checkUserSignIn();
-                        } catch (error) {
-                          model.endLoading();
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: Text(error.toString()),
-                                actions: <Widget>[
-                                  FlatButton(
-                                    child: Text('OK'),
-                                    onPressed: () => Navigator.pop(context),
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        }
-                      },
                     ),
+                    onPressed: () async {
+                      try {
+                        String photoURL = await model.uploadImage();
+                        if (photoURL == null) return;
+                        await showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text('画像を更新しました。'),
+                              actions: <Widget>[
+                                FlatButton(
+                                  child: Text('OK'),
+                                  onPressed: () => Navigator.pop(context),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                        model.checkUserSignIn();
+                      } catch (error) {
+                        model.endLoading();
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text(error.toString()),
+                              actions: <Widget>[
+                                FlatButton(
+                                  child: Text('OK'),
+                                  onPressed: () => Navigator.pop(context),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      }
+                    },
                   ),
                   SizedBox(height: 15),
-                  ButtonTheme(
-                    minWidth: double.infinity,
-                    height: 50,
-                    child: FlatButton(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(25),
+                  RoundedButton(
+                    child: Text(
+                      model.user.isTeacher ? '講師を止める' : '講師になる',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).primaryColor,
                       ),
-                      child: Text(
-                        model.user.isTeacher ? '講師を止める' : '講師になる',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).primaryColor,
-                        ),
-                      ),
-                      onPressed: () {
-                        // TODO: Add processing for becoming teacher.
-                        if (!model.user.isTeacher) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (BuildContext context) =>
-                                  SettingTeacher(),
-                            ),
-                          );
-                        } else {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (BuildContext context) =>
-                                  RemoveTeacher(),
-                            ),
-                          );
-                        }
-                      },
                     ),
+                    onPressed: () {
+                      // TODO: Add processing for becoming teacher.
+                      if (!model.user.isTeacher) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (BuildContext context) => SettingTeacher(),
+                          ),
+                        );
+                      } else {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (BuildContext context) => RemoveTeacher(),
+                          ),
+                        );
+                      }
+                    },
                   )
                 ],
               ),

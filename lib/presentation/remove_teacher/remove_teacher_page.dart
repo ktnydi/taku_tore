@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../atoms/rounded_button.dart';
 import '../common/loading.dart';
 import 'remove_teacher_model.dart';
 
@@ -147,42 +148,34 @@ class RemoveTeacher extends StatelessWidget {
                           Column(
                             children: <Widget>[
                               SizedBox(height: 25),
-                              ButtonTheme(
-                                minWidth: double.infinity,
-                                height: 50,
-                                child: FlatButton(
-                                  disabledColor: Colors.white,
-                                  color: Colors.white,
-                                  child: Text(
-                                    '講師を止める',
-                                    style: TextStyle(
-                                      color: Colors.red,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
+                              RoundedButton(
+                                disabledColor: Colors.white,
+                                color: Colors.white,
+                                child: Text(
+                                  '講師を止める',
+                                  style: TextStyle(
+                                    color: Colors.red,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
                                   ),
-                                  onPressed: () async {
-                                    await removeTeacher(context, model);
-                                  },
                                 ),
+                                onPressed: () async {
+                                  await removeTeacher(context, model);
+                                },
                               ),
                               SizedBox(height: 10),
-                              ButtonTheme(
-                                minWidth: double.infinity,
-                                height: 50,
-                                child: FlatButton(
-                                  child: Text(
-                                    '閉じる',
-                                    style: TextStyle(
-                                      color: Colors.black87,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
+                              RoundedButton(
+                                child: Text(
+                                  '閉じる',
+                                  style: TextStyle(
+                                    color: Colors.black87,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
                                   ),
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
                                 ),
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
                               ),
                             ],
                           ),
