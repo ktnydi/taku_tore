@@ -17,71 +17,86 @@ class ChatRoom extends StatefulWidget {
 }
 
 class _ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
-  ScrollController controller = ScrollController();
-
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<ChatRoomModel>(
       create: (_) => ChatRoomModel()..fetchMessagesAsStream(room: widget.room),
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            widget.user.displayName,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
+      child: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text(
+              widget.user.displayName,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
-        ),
-        body: Column(
-          children: <Widget>[
-            Expanded(
-              child: GestureDetector(
-                onTap: () {
-                  FocusScope.of(context).unfocus();
-                },
+          body: Column(
+            children: <Widget>[
+              Expanded(
                 child: Consumer2<UserModel, ChatRoomModel>(
-                  builder: (_, userModel, chatRoomModel, __) {
-                    return StreamBuilder(
-                      stream: chatRoomModel.messagesAsStream,
-                      builder: (BuildContext context, AsyncSnapshot snapshot) {
-                        if (snapshot.data == null) {
-                          return Container();
-                        }
-
-                        final messages = snapshot.data.map(
-                          (message) {
-                            if (userModel.user.uid == message.from.uid) {
-                              return ChatRoomCellRight(
-                                message: message,
-                              );
-                            } else {
-                              return ChatRoomCellLeft(
-                                  toUser: widget.user, message: message);
+                  builder: (_, um, cm, __) {
+                    return Stack(
+                      children: <Widget>[
+                        StreamBuilder(
+                          stream: cm.messagesAsStream,
+                          builder:
+                              (BuildContext context, AsyncSnapshot snapshot) {
+                            if (snapshot.data == null) {
+                              return Container();
                             }
-                          },
-                        ).toList();
 
-                        return Align(
-                          alignment: Alignment.topCenter,
-                          child: ListView.builder(
-                            controller: controller,
-                            reverse: true,
-                            shrinkWrap: true,
-                            itemBuilder: (context, index) => messages[index],
-                            itemCount: messages.length,
-                          ),
-                        );
-                      },
+                            final List<Message> messageList = snapshot.data;
+
+                            final messages = messageList.reversed.map(
+                              (message) {
+                                if (um.user.uid == message.from.uid) {
+                                  return ChatRoomCellRight(
+                                    message: message,
+                                  );
+                                } else {
+                                  return ChatRoomCellLeft(
+                                    toUser: widget.user,
+                                    message: message,
+                                  );
+                                }
+                              },
+                            ).toList();
+
+                            return ListView.separated(
+                              controller: cm.scrollController,
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              itemBuilder: (context, index) => messages[index],
+                              itemCount: messages.length,
+                              separatorBuilder: (context, index) =>
+                                  SizedBox(height: 15),
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 15,
+                                vertical: 15,
+                              ),
+                            );
+                          },
+                        ),
+                        cm.isLoading
+                            ? Container(
+                                color:
+                                    Theme.of(context).scaffoldBackgroundColor,
+                                child: Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              )
+                            : Container(),
+                      ],
                     );
                   },
                 ),
               ),
-            ),
-            SendMessageField(
-              room: widget.room,
-              controller: controller,
-            ),
-          ],
+              SendMessageField(
+                room: widget.room,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -107,42 +122,38 @@ class ChatRoomCellRight extends StatelessWidget {
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.centerRight,
-      child: Container(
-        padding: EdgeInsets.all(15),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: <Widget>[
-            Text(
-              createdAtAsString(message.createdAt),
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.black54,
-              ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: <Widget>[
+          Text(
+            createdAtAsString(message.createdAt),
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.black54,
             ),
-            SizedBox(height: 5),
-            Flexible(
-              child: Container(
-                margin: EdgeInsets.only(left: 10),
-                padding: EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(8),
-                    bottomRight: Radius.circular(8),
-                    bottomLeft: Radius.circular(8),
-                  ),
+          ),
+          SizedBox(height: 5),
+          Flexible(
+            child: Container(
+              padding: EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.black12,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(15),
+                  bottomRight: Radius.circular(15),
+                  bottomLeft: Radius.circular(15),
                 ),
-                child: Text(
-                  message.content,
-                  style: TextStyle(
-                    color: Colors.white,
-                  ),
+              ),
+              child: Text(
+                message.content,
+                style: TextStyle(
+                  color: Colors.black87,
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -171,51 +182,48 @@ class ChatRoomCellLeft extends StatelessWidget {
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.centerLeft,
-      child: Container(
-        padding: EdgeInsets.all(15),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            CircleAvatar(
-              backgroundColor: Colors.transparent,
-              backgroundImage: NetworkImage(toUser.photoURL),
-            ),
-            SizedBox(width: 10),
-            Flexible(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    createdAtAsString(message.createdAt),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          CircleAvatar(
+            backgroundColor: Colors.transparent,
+            backgroundImage: NetworkImage(toUser.photoURL),
+          ),
+          SizedBox(width: 10),
+          Flexible(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  createdAtAsString(message.createdAt),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.black54,
+                  ),
+                ),
+                SizedBox(height: 5),
+                Container(
+                  padding: EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.black12),
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(15),
+                      bottomRight: Radius.circular(15),
+                      bottomLeft: Radius.circular(15),
+                    ),
+                  ),
+                  child: Text(
+                    message.content,
                     style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.black54,
+                      color: Colors.black87,
                     ),
                   ),
-                  SizedBox(height: 5),
-                  Container(
-                    padding: EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.black12,
-                      borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(8),
-                        bottomRight: Radius.circular(8),
-                        bottomLeft: Radius.circular(8),
-                      ),
-                    ),
-                    child: Text(
-                      message.content,
-                      style: TextStyle(
-                        color: Colors.black87,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -224,11 +232,9 @@ class ChatRoomCellLeft extends StatelessWidget {
 class SendMessageField extends StatefulWidget {
   SendMessageField({
     @required this.room,
-    @required this.controller,
   });
 
   final Room room;
-  final ScrollController controller;
   @override
   _SendMessageFieldState createState() => _SendMessageFieldState();
 }
@@ -248,68 +254,107 @@ class _SendMessageFieldState extends State<SendMessageField>
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-      color: Colors.white,
+      decoration: BoxDecoration(
+        border: Border(
+          top: BorderSide(
+            width: 1,
+            color: Colors.black12,
+          ),
+        ),
+        color: Colors.white,
+      ),
       child: SafeArea(
+        top: false,
         child: Row(
           children: <Widget>[
             Expanded(
-              child: TextField(
-                controller: _messageController,
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  hintText: 'メッセージを入力...',
-                ),
-                maxLines: null,
-                keyboardType: TextInputType.multiline,
-                onChanged: (value) {
-                  if (value.length == 0) {
-                    setState(() => isDisabled = true);
-                    return;
-                  }
+              child: Consumer<ChatRoomModel>(
+                builder: (_, model, __) {
+                  return Row(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: <Widget>[
+                      Expanded(
+                        child: Container(
+                          padding: EdgeInsets.symmetric(horizontal: 15),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: Colors.black12,
+                            ),
+                            borderRadius: BorderRadius.all(Radius.circular(25)),
+                          ),
+                          child: TextField(
+                            controller: _messageController,
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              hintText: 'メッセージを入力...',
+                            ),
+                            minLines: 1,
+                            maxLines: 10,
+                            keyboardType: TextInputType.multiline,
+                            onChanged: (value) {
+                              model.scrollToBottom();
+                              if (value.length == 0) {
+                                setState(() => isDisabled = true);
+                                return;
+                              }
 
-                  setState(() => isDisabled = false);
+                              setState(() => isDisabled = false);
+                            },
+                            onTap: () async {
+                              await model.scrollToBottom();
+                            },
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 15),
+                      ButtonTheme(
+                        minWidth: 0,
+                        height: 50,
+                        padding: EdgeInsets.symmetric(horizontal: 0),
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        child: FlatButton(
+                          disabledTextColor: Colors.black45,
+                          textColor: Colors.orange,
+                          child: Icon(Icons.send),
+                          onPressed: !isDisabled
+                              ? () async {
+                                  if (_messageController.text.trim().isEmpty) {
+                                    return;
+                                  }
+                                  model.room = widget.room;
+                                  try {
+                                    await model.addMessageWithTransition(
+                                        text: _messageController.text);
+                                    _messageController.text = '';
+                                    await model.scrollToBottom();
+                                    setState(() => isDisabled = true);
+                                  } catch (error) {
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          title: Text(error.toString()),
+                                          actions: <Widget>[
+                                            FlatButton(
+                                              child: Text('OK'),
+                                              onPressed: () =>
+                                                  Navigator.pop(context),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                  }
+                                }
+                              : null,
+                        ),
+                      ),
+                    ],
+                  );
                 },
               ),
-            ),
-            Consumer<ChatRoomModel>(
-              builder: (_, model, __) {
-                return IconButton(
-                  disabledColor: Colors.black45,
-                  color: Colors.orange,
-                  icon: Icon(Icons.send),
-                  onPressed: !isDisabled
-                      ? () async {
-                          model.room = widget.room;
-                          try {
-                            await model.addMessageWithTransition(
-                                text: _messageController.text);
-                            _messageController.text = '';
-                            setState(() => isDisabled = true);
-                            widget.controller.animateTo(
-                              0.0,
-                              duration: Duration(milliseconds: 300),
-                              curve: Curves.easeOut,
-                            );
-                          } catch (error) {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: Text(error.toString()),
-                                  actions: <Widget>[
-                                    FlatButton(
-                                      child: Text('OK'),
-                                      onPressed: () => Navigator.pop(context),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          }
-                        }
-                      : null,
-                );
-              },
             ),
           ],
         ),
