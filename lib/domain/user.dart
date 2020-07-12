@@ -12,6 +12,8 @@ class User {
     this.about,
     this.canDo,
     this.recommend,
+    this.avgRating,
+    this.numRatings,
     @required this.createdAt,
   });
 
@@ -24,5 +26,7 @@ class User {
   final String about;
   final String canDo;
   final String recommend;
+  final double avgRating;
+  final int numRatings;
   final Timestamp createdAt;
 }
