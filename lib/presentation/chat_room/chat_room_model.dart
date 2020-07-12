@@ -9,6 +9,8 @@ class ChatRoomModel extends ChangeNotifier {
   Future<List<Message>> messagesAsFuture;
   Stream<List<Message>> messagesAsStream;
   Room room;
+  ScrollController scrollController = ScrollController();
+  bool isLoading = false;
 
   Future<User> fetchUserFromFirebase({@required String userId}) async {
     final userRef = Firestore.instance.collection('users').document(userId);
@@ -26,6 +28,9 @@ class ChatRoomModel extends ChangeNotifier {
   }
 
   Future fetchMessagesAsStream({Room room}) async {
+    this.isLoading = true;
+    notifyListeners();
+
     final collection = Firestore.instance
         .collection('rooms')
         .document(room.documentId)
@@ -57,6 +62,28 @@ class ChatRoomModel extends ChangeNotifier {
 
     this.messagesAsStream = messages;
     notifyListeners();
+
+    await scrollToBottom(animation: false);
+
+    await Future.delayed(Duration(milliseconds: 300));
+    this.isLoading = false;
+    notifyListeners();
+  }
+
+  Future scrollToBottom({bool animation = true}) async {
+    await Future.delayed(Duration(milliseconds: 300));
+
+    if (animation) {
+      this.scrollController.animateTo(
+            this.scrollController.position.maxScrollExtent,
+            duration: Duration(milliseconds: 200),
+            curve: Curves.easeInOut,
+          );
+    } else {
+      this.scrollController.jumpTo(
+            this.scrollController.position.maxScrollExtent,
+          );
+    }
   }
 
   Future addMessageWithTransition({String text}) async {
