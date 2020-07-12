@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../atoms/rounded_button.dart';
 import '../common/loading.dart';
 import '../../user_model.dart';
 
@@ -148,70 +149,65 @@ class _CurrentPasswordSectionState extends State<CurrentPasswordSection> {
                   SizedBox(height: 30),
                   Center(
                     child: !isUpdating
-                        ? ButtonTheme(
-                            minWidth: double.infinity,
-                            height: 50,
-                            child: RaisedButton(
-                              disabledColor: Colors.black45,
-                              child: Text(
-                                '更新',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
+                        ? RoundedButton(
+                            color: Theme.of(context).primaryColor,
+                            child: Text(
+                              '更新',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
                               ),
-                              onPressed: !isDisabled
-                                  ? () async {
-                                      // TODO: Implement update password processing.
-                                      try {
-                                        await model.updatePassword(
-                                          currentPassword:
-                                              _currentPasswordController.text,
-                                          newPassword:
-                                              _newPasswordController.text,
-                                          newPasswordConfirm:
-                                              _newPasswordConfirmController
-                                                  .text,
-                                        );
-                                        await showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return AlertDialog(
-                                              title: Text('パスワードを更新しました。'),
-                                              actions: <Widget>[
-                                                FlatButton(
-                                                  child: Text('OK'),
-                                                  onPressed: () =>
-                                                      Navigator.pop(context),
-                                                ),
-                                              ],
-                                            );
-                                          },
-                                        );
-                                        model.checkUserSignIn();
-                                        Navigator.pop(context);
-                                      } catch (error) {
-                                        model.endLoading();
-                                        showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return AlertDialog(
-                                              title: Text(error.toString()),
-                                              actions: <Widget>[
-                                                FlatButton(
-                                                  child: Text('OK'),
-                                                  onPressed: () =>
-                                                      Navigator.pop(context),
-                                                ),
-                                              ],
-                                            );
-                                          },
-                                        );
-                                      }
-                                    }
-                                  : null,
                             ),
+                            onPressed: !isDisabled
+                                ? () async {
+                                    // TODO: Implement update password processing.
+                                    try {
+                                      await model.updatePassword(
+                                        currentPassword:
+                                            _currentPasswordController.text,
+                                        newPassword:
+                                            _newPasswordController.text,
+                                        newPasswordConfirm:
+                                            _newPasswordConfirmController.text,
+                                      );
+                                      await showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title: Text('パスワードを更新しました。'),
+                                            actions: <Widget>[
+                                              FlatButton(
+                                                child: Text('OK'),
+                                                onPressed: () =>
+                                                    Navigator.pop(context),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                      model.checkUserSignIn();
+                                      Navigator.pop(context);
+                                    } catch (error) {
+                                      model.endLoading();
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title: Text(error.toString()),
+                                            actions: <Widget>[
+                                              FlatButton(
+                                                child: Text('OK'),
+                                                onPressed: () =>
+                                                    Navigator.pop(context),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    }
+                                  }
+                                : null,
                           )
                         : CircularProgressIndicator(),
                   ),

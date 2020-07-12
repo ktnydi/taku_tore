@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:provider/provider.dart';
+import '../../atoms/rounded_button.dart';
 import 'package:timeago/timeago.dart';
 import '../../domain/user.dart';
 import '../../user_model.dart';
@@ -267,30 +268,25 @@ class ConsultButton extends StatelessWidget {
     return Consumer<TeacherDetailModel>(
       builder: (_, model, __) {
         const horizontalMargin = 30;
-        return ButtonTheme(
+        return RoundedButton(
           minWidth: MediaQuery.of(context).size.width - horizontalMargin,
-          height: 50,
-          child: FlatButton(
-            color: Theme.of(context).primaryColor,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(25.0),
-            ),
-            onPressed: () async {
-              await consult(context: context, model: model);
-            },
-            child: !model.isLoading
-                ? Text(
-                    '相談する',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 17,
-                      color: Colors.white,
-                    ),
-                  )
-                : CircularProgressIndicator(
-                    backgroundColor: Colors.white,
+          color: Theme.of(context).primaryColor,
+          disabledColor: Colors.grey,
+          onPressed: () async {
+            await consult(context: context, model: model);
+          },
+          child: !model.isLoading
+              ? Text(
+                  '相談する',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 17,
+                    color: Colors.white,
                   ),
-          ),
+                )
+              : CircularProgressIndicator(
+                  backgroundColor: Colors.white,
+                ),
         );
       },
     );
@@ -309,35 +305,29 @@ class ReviewButton extends StatelessWidget {
 
     return Consumer<TeacherDetailModel>(
       builder: (_, model, __) {
-        return ButtonTheme(
+        return RoundedButton(
           minWidth: width,
-          height: 50,
-          child: FlatButton(
-            color: Colors.amber,
-            disabledColor: Colors.grey,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(25.0),
-            ),
-            onPressed: !model.isAlreadyReviewed
-                ? () async {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        fullscreenDialog: true,
-                        builder: (BuildContext context) => Review(
-                          teacher: teacher,
-                        ),
+          color: Colors.amber,
+          disabledColor: Colors.grey,
+          onPressed: !model.isAlreadyReviewed
+              ? () async {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      fullscreenDialog: true,
+                      builder: (BuildContext context) => Review(
+                        teacher: teacher,
                       ),
-                    );
-                  }
-                : null,
-            child: Text(
-              !model.isAlreadyReviewed ? 'レビューを書く' : 'レビュー済み',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 17,
-                color: Colors.white,
-              ),
+                    ),
+                  );
+                }
+              : null,
+          child: Text(
+            !model.isAlreadyReviewed ? 'レビューを書く' : 'レビュー済み',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 17,
+              color: Colors.white,
             ),
           ),
         );

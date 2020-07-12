@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../atoms/rounded_button.dart';
 import '../common/loading.dart';
 import '../../user_model.dart';
 
@@ -142,65 +143,61 @@ class _UpdateEmailFormState extends State<UpdateEmailForm>
                   SizedBox(height: 30),
                   Center(
                     child: !isUpdating
-                        ? ButtonTheme(
-                            minWidth: double.infinity,
-                            height: 50,
-                            child: RaisedButton(
-                              disabledColor: Colors.black45,
-                              child: Text(
-                                '更新',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
+                        ? RoundedButton(
+                            color: Theme.of(context).primaryColor,
+                            child: Text(
+                              '更新',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
                               ),
-                              onPressed: isDisabled
-                                  ? null
-                                  : () async {
-                                      // TODO: Implement processing for updating email.
-                                      try {
-                                        await model.updateEmail(
-                                          email: _newEmailController.text,
-                                          password: _passwordController.text,
-                                        );
-                                        await showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return AlertDialog(
-                                              title: Text('メールアドレスを更新しました。'),
-                                              actions: <Widget>[
-                                                FlatButton(
-                                                  child: Text('OK'),
-                                                  onPressed: () =>
-                                                      Navigator.pop(context),
-                                                ),
-                                              ],
-                                            );
-                                          },
-                                        );
-                                        model.checkUserSignIn();
-                                        Navigator.pop(context);
-                                      } catch (error) {
-                                        model.endLoading();
-                                        showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return AlertDialog(
-                                              title: Text(error.toString()),
-                                              actions: <Widget>[
-                                                FlatButton(
-                                                  child: Text('OK'),
-                                                  onPressed: () =>
-                                                      Navigator.pop(context),
-                                                ),
-                                              ],
-                                            );
-                                          },
-                                        );
-                                      }
-                                    },
                             ),
+                            onPressed: isDisabled
+                                ? null
+                                : () async {
+                                    // TODO: Implement processing for updating email.
+                                    try {
+                                      await model.updateEmail(
+                                        email: _newEmailController.text,
+                                        password: _passwordController.text,
+                                      );
+                                      await showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title: Text('メールアドレスを更新しました。'),
+                                            actions: <Widget>[
+                                              FlatButton(
+                                                child: Text('OK'),
+                                                onPressed: () =>
+                                                    Navigator.pop(context),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                      model.checkUserSignIn();
+                                      Navigator.pop(context);
+                                    } catch (error) {
+                                      model.endLoading();
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title: Text(error.toString()),
+                                            actions: <Widget>[
+                                              FlatButton(
+                                                child: Text('OK'),
+                                                onPressed: () =>
+                                                    Navigator.pop(context),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    }
+                                  },
                           )
                         : CircularProgressIndicator(),
                   ),

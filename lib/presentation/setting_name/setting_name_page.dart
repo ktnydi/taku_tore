@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../atoms/rounded_button.dart';
 import '../common/loading.dart';
 import '../../user_model.dart';
 
@@ -122,25 +123,21 @@ class _SettingNameState extends State<SettingName>
                     },
                   ),
                   SizedBox(height: 30),
-                  ButtonTheme(
-                    minWidth: double.infinity,
-                    height: 50,
-                    child: RaisedButton(
-                      disabledColor: Colors.black45,
-                      child: Text(
-                        '更新',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
+                  RoundedButton(
+                    color: Theme.of(context).primaryColor,
+                    child: Text(
+                      '更新',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
-                      onPressed: isDisabled
-                          ? null
-                          : () async {
-                              await updateName(model);
-                            },
                     ),
+                    onPressed: isDisabled
+                        ? null
+                        : () async {
+                            await updateName(model);
+                          },
                   ),
                 ],
               ),
