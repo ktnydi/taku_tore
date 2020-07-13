@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:takutore/molecule/teacher_cell.dart';
 import '../teacher_detail/teacher_detail_page.dart';
 import 'bookmark_model.dart';
 
@@ -40,31 +41,7 @@ class _BookmarkListState extends State<BookmarkList> {
 
             final listTiles = model.teachers.map(
               (teacher) {
-                return ListTile(
-                  contentPadding: EdgeInsets.all(15),
-                  leading: CircleAvatar(
-                    backgroundImage: NetworkImage(teacher.photoURL),
-                    radius: 25,
-                  ),
-                  title: Text(
-                    teacher.displayName,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 17,
-                    ),
-                  ),
-                  onTap: () async {
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (BuildContext context) => TeacherDetail(
-                          teacher: teacher,
-                        ),
-                      ),
-                    );
-                    model.fetchBookmarks();
-                  },
-                );
+                return TeacherCell(teacher: teacher);
               },
             ).toList();
             return ListView.separated(
