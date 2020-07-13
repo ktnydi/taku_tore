@@ -85,6 +85,7 @@ class TeacherDetail extends StatelessWidget {
           automaticallyImplyLeading: false,
           backgroundColor: Colors.transparent,
           centerTitle: false,
+          elevation: 0.0,
           titleSpacing: 0,
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
