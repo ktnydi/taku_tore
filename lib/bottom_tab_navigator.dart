@@ -22,29 +22,37 @@ class _BottomTabNavigator extends State<BottomTabNavigator> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: _widgetOptions.elementAt(currentIndex),
-      bottomNavigationBar: BottomNavigationBar(
-        selectedFontSize: 12,
-        unselectedFontSize: 12,
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            title: Text('ホーム'),
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.message),
-            title: Text('チャット'),
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            title: Text('設定'),
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Divider(height: 0.5),
+          BottomNavigationBar(
+            backgroundColor: Colors.white,
+            elevation: 0.0,
+            selectedFontSize: 12,
+            unselectedFontSize: 12,
+            items: <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home),
+                title: Text('ホーム'),
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.message),
+                title: Text('チャット'),
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.settings),
+                title: Text('設定'),
+              ),
+            ],
+            currentIndex: currentIndex,
+            onTap: (index) {
+              setState(() {
+                currentIndex = index;
+              });
+            },
           ),
         ],
-        currentIndex: currentIndex,
-        onTap: (index) {
-          setState(() {
-            currentIndex = index;
-          });
-        },
       ),
     );
   }
