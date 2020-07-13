@@ -487,6 +487,69 @@ class Description extends StatelessWidget {
 }
 
 class ReviewList extends StatelessWidget {
+  Widget _cell(review) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(8)),
+        color: Colors.white,
+      ),
+      child: ListTile(
+        contentPadding: EdgeInsets.all(10),
+        leading: CircleAvatar(
+          backgroundColor: Colors.transparent,
+          backgroundImage: NetworkImage(
+            review.fromUser.photoURL,
+          ),
+        ),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            RatingBarIndicator(
+              rating: review.rating,
+              itemBuilder: (context, index) => Icon(
+                Icons.star,
+                color: Colors.amber,
+              ),
+              itemCount: 5,
+              itemSize: 20,
+            ),
+            SizedBox(height: 5),
+            Text(
+              review.comment,
+              style: TextStyle(
+                fontSize: 16,
+              ),
+            ),
+            SizedBox(height: 5),
+            Row(
+              children: <Widget>[
+                Flexible(
+                  child: Text(
+                    review.fromUser.displayName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: Colors.black54,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+                Text(
+                  '・${format(review.createdAt.toDate())}',
+                  style: TextStyle(
+                    color: Colors.black54,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -542,71 +605,37 @@ class ReviewList extends StatelessWidget {
                   ),
                 );
               }
-              return ListBody(
-                children: model.reviews.map(
-                  (review) {
-                    return Container(
-                      margin: EdgeInsets.only(bottom: 10),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(8)),
-                        color: Colors.white,
-                      ),
-                      child: ListTile(
-                        contentPadding: EdgeInsets.all(10),
-                        leading: CircleAvatar(
-                          backgroundColor: Colors.transparent,
-                          backgroundImage: NetworkImage(
-                            review.fromUser.photoURL,
-                          ),
-                        ),
-                        title: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            RatingBarIndicator(
-                              rating: review.rating,
-                              itemBuilder: (context, index) => Icon(
-                                Icons.star,
-                                color: Colors.amber,
-                              ),
-                              itemCount: 5,
-                              itemSize: 20,
-                            ),
-                            SizedBox(height: 5),
-                            Text(
-                              review.comment,
-                              style: TextStyle(
-                                fontSize: 16,
-                              ),
-                            ),
-                            SizedBox(height: 5),
-                            Row(
-                              children: <Widget>[
-                                Flexible(
-                                  child: Text(
-                                    review.fromUser.displayName,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      color: Colors.black54,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ),
-                                Text(
-                                  '・${format(review.createdAt.toDate())}',
-                                  style: TextStyle(
-                                    color: Colors.black54,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: <Widget>[
+                      Text(
+                        '${model.teacher.avgRating}',
+                        style: TextStyle(
+                          fontSize: 30,
                         ),
                       ),
-                    );
-                  },
-                ).toList(),
+                      SizedBox(width: 10),
+                      Text(
+                        '平均評価 (${model.teacher.numRatings}件)',
+                        style: TextStyle(
+                          color: Colors.black54,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 10),
+                  ListBody(
+                    children: model.reviews.map(
+                      (review) {
+                        return _cell(review);
+                      },
+                    ).toList(),
+                  ),
+                ],
               );
             },
           ),
