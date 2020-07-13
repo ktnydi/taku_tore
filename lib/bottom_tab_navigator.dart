@@ -21,38 +21,6 @@ class _BottomTabNavigator extends State<BottomTabNavigator> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: false,
-        title: Text(
-          'TakuTore',
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Column(
-            children: <Widget>[
-              Divider(height: 1),
-            ],
-          ),
-        ),
-        actions: <Widget>[
-          IconButton(
-            onPressed: () {
-              // TODO: Add a future for searching teacher.
-            },
-            icon: Icon(
-              Icons.search,
-            ),
-          ),
-          IconButton(
-            onPressed: () {
-              // TODO: Add a future for notification lists.
-            },
-            icon: Icon(
-              Icons.notifications_none,
-            ),
-          ),
-        ],
-      ),
       body: _widgetOptions.elementAt(currentIndex),
       bottomNavigationBar: BottomNavigationBar(
         selectedFontSize: 12,

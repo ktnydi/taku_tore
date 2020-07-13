@@ -8,6 +8,30 @@ class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        centerTitle: false,
+        title: Text(
+          'TakuTore',
+        ),
+        actions: <Widget>[
+          IconButton(
+            onPressed: () {
+              // TODO: Add a future for searching teacher.
+            },
+            icon: Icon(
+              Icons.search,
+            ),
+          ),
+          IconButton(
+            onPressed: () {
+              // TODO: Add a future for notification lists.
+            },
+            icon: Icon(
+              Icons.notifications_none,
+            ),
+          ),
+        ],
+      ),
       body: ChangeNotifierProvider<HomeModel>(
         create: (_) => HomeModel()..fetchTeachers(),
         child: TeacherList(),

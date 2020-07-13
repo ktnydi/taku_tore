@@ -7,67 +7,100 @@ import '../../domain/room.dart';
 import '../../domain/user.dart';
 import '../../user_model.dart';
 
-class Chat extends StatelessWidget {
+class Chat extends StatefulWidget {
+  @override
+  _ChatState createState() => _ChatState();
+}
+
+class _ChatState extends State<Chat> with TickerProviderStateMixin {
+  TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<ChatModel>(
       create: (_) => ChatModel()..fetchRooms(),
       child: Scaffold(
-        body: DefaultTabController(
-          length: 2,
-          child: Column(
-            children: <Widget>[
-              Container(
-                padding: EdgeInsets.only(bottom: 15),
-                height: 50,
-                child: TabBar(
-                  indicatorSize: TabBarIndicatorSize.label,
-                  indicator: BoxDecoration(
-                    borderRadius: BorderRadius.circular(50),
-                    color: Theme.of(context).primaryColor,
-                  ),
-                  labelStyle: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  labelColor: Colors.white,
-                  unselectedLabelColor: Colors.black87,
-                  tabs: [
-                    Tab(
-                      child: Align(
-                        alignment: Alignment.center,
-                        child: Text('講師'),
-                      ),
-                    ),
-                    Tab(
-                      child: Align(
-                        alignment: Alignment.center,
-                        child: Text('受講生'),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: Consumer<ChatModel>(
-                  builder: (_, model, __) {
-                    if (model.isLoading) {
-                      return Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    }
-
-                    return TabBarView(
-                      children: <Widget>[
-                        ChatList(rooms: model.teacherRooms),
-                        ChatList(rooms: model.studentRooms),
-                      ],
-                    );
-                  },
-                ),
-              ),
-            ],
+        appBar: AppBar(
+          centerTitle: false,
+          title: Text(
+            'TakuTore',
           ),
+          actions: <Widget>[
+            IconButton(
+              onPressed: () {
+                // TODO: Add a future for searching teacher.
+              },
+              icon: Icon(
+                Icons.search,
+              ),
+            ),
+            IconButton(
+              onPressed: () {
+                // TODO: Add a future for notification lists.
+              },
+              icon: Icon(
+                Icons.notifications_none,
+              ),
+            ),
+          ],
+          bottom: PreferredSize(
+            preferredSize: Size(double.infinity, 50),
+            child: Container(
+              padding: EdgeInsets.only(bottom: 15),
+              height: 50,
+              child: TabBar(
+                controller: _tabController,
+                indicatorSize: TabBarIndicatorSize.label,
+                indicator: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: Theme.of(context).primaryColor,
+                ),
+                labelStyle: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+                labelColor: Colors.white,
+                unselectedLabelColor: Colors.black87,
+                tabs: [
+                  Tab(
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: Text('講師'),
+                    ),
+                  ),
+                  Tab(
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: Text('受講生'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        body: Consumer<ChatModel>(
+          builder: (_, model, __) {
+            if (model.isLoading) {
+              return Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+
+            return TabBarView(
+              controller: _tabController,
+              children: <Widget>[
+                ChatList(rooms: model.teacherRooms),
+                ChatList(rooms: model.studentRooms),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -98,13 +131,11 @@ class ChatList extends StatelessWidget {
                 : ChatCell(user: room.teacher, room: room);
           },
         ).toList();
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15),
-          child: ListView.separated(
-            separatorBuilder: (context, index) => SizedBox(height: 10),
-            itemBuilder: (context, index) => listTiles[index],
-            itemCount: listTiles.length,
-          ),
+        return ListView.separated(
+          separatorBuilder: (context, index) => SizedBox(height: 10),
+          itemBuilder: (context, index) => listTiles[index],
+          itemCount: listTiles.length,
+          padding: EdgeInsets.all(15),
         );
       },
     );
