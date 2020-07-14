@@ -350,7 +350,7 @@ class Header extends StatelessWidget {
         image: DecorationImage(
           fit: BoxFit.cover,
           image: NetworkImage(
-            teacher.photoURL,
+            teacher.thumbnail,
           ),
         ),
       ),
