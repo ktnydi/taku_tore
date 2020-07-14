@@ -149,83 +149,90 @@ class ChatCell extends StatelessWidget {
   final Room room;
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 10),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.all(
-          Radius.circular(8),
-        ),
-        color: Colors.white,
-      ),
-      child: Row(
-        children: <Widget>[
-          Center(
-            child: Container(
-              width: 10,
-              height: 10,
-              margin: EdgeInsets.only(right: 10),
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
-                borderRadius: BorderRadius.all(
-                  Radius.circular(5),
-                ),
-              ),
+    return Consumer<ChatModel>(
+      builder: (_, model, __) {
+        return Container(
+          padding: EdgeInsets.symmetric(horizontal: 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.all(
+              Radius.circular(8),
             ),
+            color: Colors.white,
           ),
-          Expanded(
-            child: ListTile(
-              contentPadding: EdgeInsets.all(0),
-              isThreeLine: true,
-              leading: CircleAvatar(
-                backgroundImage: NetworkImage(user.photoURL),
-                backgroundColor: Colors.transparent,
-                radius: 28,
+          child: Row(
+            children: <Widget>[
+              Center(
+                child: room.hasUnreadMessage
+                    ? Container(
+                        width: 10,
+                        height: 10,
+                        margin: EdgeInsets.only(right: 10),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).primaryColor,
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(5),
+                          ),
+                        ),
+                      )
+                    : Container(),
               ),
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Flexible(
-                    child: Text(
-                      user.displayName,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
+              Expanded(
+                child: ListTile(
+                  contentPadding: EdgeInsets.all(0),
+                  isThreeLine: true,
+                  leading: CircleAvatar(
+                    backgroundImage: NetworkImage(user.photoURL),
+                    backgroundColor: Colors.transparent,
+                    radius: 28,
+                  ),
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Flexible(
+                        child: Text(
+                          user.displayName,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
+                      SizedBox(width: 10),
+                      Text(
+                        format(room.updatedAt.toDate()),
+                        style: TextStyle(
+                          color: Colors.black54,
+                          fontSize: 14,
+                        ),
+                      )
+                    ],
+                  ),
+                  subtitle: Text(
+                    room.lastMessage,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 12,
                     ),
                   ),
-                  SizedBox(width: 10),
-                  Text(
-                    format(room.updatedAt.toDate()),
-                    style: TextStyle(
-                      color: Colors.black54,
-                      fontSize: 14,
-                    ),
-                  )
-                ],
-              ),
-              subtitle: Text(
-                room.lastMessage,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 12,
+                  onTap: () async {
+                    // TODO: Add Navigation.
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (BuildContext context) =>
+                            ChatRoom(user: user, room: room),
+                      ),
+                    );
+                    model.fetchRooms();
+                  },
                 ),
               ),
-              onTap: () {
-                // TODO: Add Navigation.
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (BuildContext context) =>
-                        ChatRoom(user: user, room: room),
-                  ),
-                );
-              },
-            ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

@@ -50,6 +50,8 @@ class ChatModel extends ChangeNotifier {
 
         final teacher = await fetchUserFromFirebase(userId: teacherID);
         final student = await fetchUserFromFirebase(userId: studentID);
+        final isReceiver = currentUser.uid != doc['lastMessageFromUid'];
+        final hasAlreadyRead = doc['hasAlreadyRead'];
 
         return Room(
           documentId: doc.documentID,
@@ -58,6 +60,8 @@ class ChatModel extends ChangeNotifier {
           lastMessage: doc['lastMessage'],
           updatedAt: doc['updatedAt'],
           createdAt: doc['createdAt'],
+          lastMessageFromUid: doc['lastMessageFromUid'],
+          hasUnreadMessage: isReceiver && !hasAlreadyRead, // 受信者で読んでない
         );
       }),
     );
