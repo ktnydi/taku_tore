@@ -205,6 +205,8 @@ class TeacherDetailModel extends ChangeNotifier {
         'lastMessage': '',
         'updatedAt': FieldValue.serverTimestamp(),
         'createdAt': FieldValue.serverTimestamp(),
+        'lastMessageFromUid': '',
+        'hasAlreadyRead': true,
       },
     );
 

@@ -12,6 +12,23 @@ class ChatRoomModel extends ChangeNotifier {
   ScrollController scrollController = ScrollController();
   bool isLoading = false;
 
+  Future readMessage({Room room}) async {
+    final currentUser = await FirebaseAuth.instance.currentUser();
+
+    if (room.lastMessageFromUid == currentUser.uid) {
+      return;
+    }
+
+    final document =
+        Firestore.instance.collection('rooms').document(room.documentId);
+
+    document.updateData(
+      {
+        'hasAlreadyRead': true,
+      },
+    );
+  }
+
   Future<User> fetchUserFromFirebase({@required String userId}) async {
     final userRef = Firestore.instance.collection('users').document(userId);
     final user = await userRef.get();
@@ -42,6 +59,8 @@ class ChatRoomModel extends ChangeNotifier {
       if (isUploading) {
         return this.messagesAsFuture;
       }
+
+      readMessage(room: room);
 
       return this.messagesAsFuture = Future.wait(
         snapshot.documents.map(
