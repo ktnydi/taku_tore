@@ -209,6 +209,8 @@ class BecomeTeacher extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
+                                Thumbnail(),
+                                SizedBox(height: 20),
                                 Title(),
                                 SizedBox(height: 20),
                                 CanDo(),
@@ -230,6 +232,69 @@ class BecomeTeacher extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+}
+
+class Thumbnail extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final deviceWidth = MediaQuery.of(context).size.width;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          'サービスサムネイル',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        SizedBox(height: 10),
+        Consumer<SettingTeacherModel>(
+          builder: (_, model, __) {
+            return InkWell(
+              onTap: () async {
+                // TODO: select thumbnail image
+                await model.selectThumbnail();
+              },
+              child: Container(
+                width: deviceWidth,
+                height: deviceWidth * 0.56,
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.05),
+                ),
+                child: model.imageFile != null
+                    ? Image.file(
+                        model.imageFile,
+                        fit: BoxFit.cover,
+                      )
+                    : Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            Icon(
+                              Icons.image,
+                              size: 50,
+                              color: Colors.black38,
+                            ),
+                            SizedBox(height: 10),
+                            Text(
+                              'タップして画像を選択',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black38,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 }
