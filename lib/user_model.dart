@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'domain/user.dart';
 
 class UserModel extends ChangeNotifier {
@@ -151,40 +150,6 @@ class UserModel extends ChangeNotifier {
       await Firestore.instance.document('/users/${user.uid}').delete();
       await user.delete();
     }
-  }
-
-  Future<String> uploadImage() async {
-    final PickedFile pickedFile =
-        await ImagePicker().getImage(source: ImageSource.gallery);
-    if (pickedFile == null) {
-      return null;
-    }
-
-    beginLoading();
-
-    final imageData = await pickedFile.readAsBytes();
-
-    // Firebase Storageに画像をアップロード
-    final path = '/images/${this.user.uid}.jpg';
-    final StorageReference storageRef =
-        FirebaseStorage.instance.ref().child(path);
-    // 以下をを指定しないとiOSではcontentTypeがapplication/octet-streamになる。
-    final metaData = StorageMetadata(contentType: "image/jpg");
-    final StorageUploadTask uploadTask = storageRef.putData(
-      imageData,
-      metaData,
-    );
-
-    // 画像の保存完了時にFirebaseにURLを保存する。
-    StorageTaskSnapshot snapshot = await uploadTask.onComplete;
-    String photoURL = await snapshot.ref.getDownloadURL();
-    final doc = Firestore.instance.collection('users').document(this.user.uid);
-    await doc.updateData({
-      'photoURL': photoURL,
-    });
-
-    endLoading();
-    return photoURL;
   }
 
   Future<AuthResult> confirmPassword(password) async {
