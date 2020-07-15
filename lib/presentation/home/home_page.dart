@@ -32,7 +32,9 @@ class Home extends StatelessWidget {
         ],
       ),
       body: ChangeNotifierProvider<HomeModel>(
-        create: (_) => HomeModel()..fetchTeachers(),
+        create: (_) => HomeModel()
+          ..fetchTeachers()
+          ..scrollListener(),
         child: TeacherList(),
       ),
     );
@@ -56,6 +58,8 @@ class TeacherList extends StatelessWidget {
           },
         ).toList();
         return ListView.separated(
+          controller: model.scrollController,
+          physics: AlwaysScrollableScrollPhysics(),
           separatorBuilder: (context, index) => Divider(height: 1),
           itemBuilder: (context, index) => listTiles[index],
           itemCount: listTiles.length,
