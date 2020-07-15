@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class Loading extends StatelessWidget {
@@ -14,8 +15,8 @@ class Loading extends StatelessWidget {
       color: Colors.black12,
       child: Center(
         child: Container(
-          width: 150,
-          height: 150,
+          width: 100,
+          height: 100,
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(8),
