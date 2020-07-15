@@ -132,10 +132,11 @@ class ChatList extends StatelessWidget {
           },
         ).toList();
         return ListView.separated(
-          separatorBuilder: (context, index) => SizedBox(height: 10),
-          itemBuilder: (context, index) => listTiles[index],
+          separatorBuilder: (context, index) => Divider(height: 0.5),
+          itemBuilder: (context, index) {
+            return listTiles[index];
+          },
           itemCount: listTiles.length,
-          padding: EdgeInsets.all(15),
         );
       },
     );
@@ -152,13 +153,8 @@ class ChatCell extends StatelessWidget {
     return Consumer<ChatModel>(
       builder: (_, model, __) {
         return Container(
-          padding: EdgeInsets.symmetric(horizontal: 10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.all(
-              Radius.circular(8),
-            ),
-            color: Colors.white,
-          ),
+          padding: EdgeInsets.symmetric(horizontal: 15),
+          color: Colors.white,
           child: Row(
             children: <Widget>[
               Center(
@@ -166,7 +162,7 @@ class ChatCell extends StatelessWidget {
                     ? Container(
                         width: 10,
                         height: 10,
-                        margin: EdgeInsets.only(right: 10),
+                        margin: EdgeInsets.only(right: 15),
                         decoration: BoxDecoration(
                           color: Theme.of(context).primaryColor,
                           borderRadius: BorderRadius.all(
