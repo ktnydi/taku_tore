@@ -24,7 +24,9 @@ class _ChatState extends State<Chat> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<ChatModel>(
-      create: (_) => ChatModel()..fetchRooms(),
+      create: (_) => ChatModel()
+        ..fetchRooms()
+        ..scrollListener(),
       child: Scaffold(
         appBar: AppBar(
           centerTitle: false,
@@ -96,8 +98,14 @@ class _ChatState extends State<Chat> with TickerProviderStateMixin {
             return TabBarView(
               controller: _tabController,
               children: <Widget>[
-                ChatList(rooms: model.teacherRooms),
-                ChatList(rooms: model.studentRooms),
+                ChatList(
+                  rooms: model.teacherRooms,
+                  controller: model.teacherScroll,
+                ),
+                ChatList(
+                  rooms: model.studentRooms,
+                  controller: model.studentScroll,
+                ),
               ],
             );
           },
@@ -108,10 +116,10 @@ class _ChatState extends State<Chat> with TickerProviderStateMixin {
 }
 
 class ChatList extends StatelessWidget {
-  ChatList({@required this.rooms});
+  ChatList({@required this.rooms, @required this.controller});
 
   final List<Room> rooms;
-
+  final ScrollController controller;
   @override
   Widget build(BuildContext context) {
     return Consumer<UserModel>(
@@ -132,6 +140,8 @@ class ChatList extends StatelessWidget {
           },
         ).toList();
         return ListView.separated(
+          controller: controller,
+          physics: AlwaysScrollableScrollPhysics(),
           separatorBuilder: (context, index) => Divider(height: 0.5),
           itemBuilder: (context, index) {
             return listTiles[index];
