@@ -90,6 +90,36 @@ class _AuthState extends State<Auth> {
                             }
                           },
                         ),
+                        SizedBox(height: 15),
+                        RoundedButton(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Image.asset(
+                                'images/apple.png',
+                                width: 25,
+                                height: 25,
+                              ),
+                              Text(
+                                'Appleでログイン',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Container(width: 25),
+                            ],
+                          ),
+                          color: Colors.black,
+                          onPressed: () async {
+                            try {
+                              await model.signInWithApple();
+                            } catch (e) {
+                              print(e.toString());
+                            }
+                          },
+                        ),
                         SizedBox(height: 40),
                         ButtonTheme(
                           textTheme: ButtonTextTheme.primary,
