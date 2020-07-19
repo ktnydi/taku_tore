@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../atoms/rounded_button.dart';
 import '../common/loading.dart';
 import '../../user_model.dart';
 
@@ -15,6 +16,14 @@ class _SignUpState extends State<SignUp> {
   final TextEditingController _passwordController = TextEditingController();
   bool isObscureText = true;
   bool isLoading = false;
+  FocusNode myFocusNode;
+
+  @override
+  void initState() {
+    super.initState();
+
+    myFocusNode = FocusNode();
+  }
 
   @override
   void dispose() {
@@ -26,6 +35,7 @@ class _SignUpState extends State<SignUp> {
       _passwordController,
     ];
     _controllers.forEach((_controller) => _controller.dispose());
+    myFocusNode.dispose();
   }
 
   @override
@@ -36,53 +46,20 @@ class _SignUpState extends State<SignUp> {
           children: <Widget>[
             Scaffold(
               appBar: AppBar(
-                backgroundColor: Theme.of(context).canvasColor,
-                elevation: 0.0,
-                iconTheme: IconThemeData(
-                  color: Theme.of(context).primaryColor,
-                ),
-                automaticallyImplyLeading: false,
-                title: Row(
-                  children: <Widget>[
-                    ButtonTheme(
-                      minWidth: 0,
-                      padding: EdgeInsets.symmetric(horizontal: 0.0),
-                      child: FlatButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: Text(
-                          '閉じる',
-                          style: TextStyle(
-                            color: Theme.of(context).primaryColor,
-                            fontSize: 17,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                title: Text('メールアドレスで新規登録'),
               ),
               body: SingleChildScrollView(
                 child: Container(
-                  padding: EdgeInsets.all(16.0),
+                  padding: EdgeInsets.all(15.0),
                   child: SafeArea(
                     child: Form(
                       key: _formKey,
                       child: Column(
                         children: <Widget>[
-                          Row(
-                            children: <Widget>[
-                              Text(
-                                'アカウント作成',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 25,
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 10),
                           TextFormField(
                             controller: _nameController,
+                            autofocus: true,
+                            textInputAction: TextInputAction.next,
                             validator: (value) {
                               if (value.trim().isEmpty) {
                                 return '入力してください。';
@@ -92,10 +69,15 @@ class _SignUpState extends State<SignUp> {
                             decoration: InputDecoration(
                               hintText: 'ユーザー名',
                             ),
+                            onFieldSubmitted: (_) {
+                              myFocusNode.nextFocus();
+                            },
                           ),
                           SizedBox(height: 10),
                           TextFormField(
                             controller: _emailController,
+                            focusNode: myFocusNode,
+                            textInputAction: TextInputAction.next,
                             validator: (value) {
                               if (value.trim().isEmpty) {
                                 return '入力してください。';
@@ -105,10 +87,14 @@ class _SignUpState extends State<SignUp> {
                             decoration: InputDecoration(
                               hintText: 'メールアドレス',
                             ),
+                            onFieldSubmitted: (_) {
+                              myFocusNode.nextFocus();
+                            },
                           ),
                           SizedBox(height: 10),
                           TextFormField(
                             controller: _passwordController,
+                            textInputAction: TextInputAction.done,
                             validator: (value) {
                               if (value.trim().isEmpty) {
                                 return '入力してください。';
@@ -141,48 +127,52 @@ class _SignUpState extends State<SignUp> {
                                 ),
                               ),
                             ),
+                            onFieldSubmitted: (_) {
+                              myFocusNode.unfocus();
+                            },
                           ),
-                          SizedBox(height: 40),
-                          ButtonTheme(
-                            minWidth: double.infinity,
-                            height: 50,
-                            textTheme: ButtonTextTheme.primary,
-                            child: RaisedButton(
-                              child: Text(
-                                'アカウント作成',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 17,
-                                ),
+                          SizedBox(height: 30),
+                          RoundedButton(
+                            color: Theme.of(context).primaryColor,
+                            child: Text(
+                              'アカウント作成',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 17,
                               ),
-                              onPressed: () async {
-                                try {
-                                  await model.signUpWithEmail(
-                                    name: _nameController.text,
-                                    email: _emailController.text,
-                                    password: _passwordController.text,
-                                  );
-                                  Navigator.pop(context);
-                                } catch (error) {
-                                  model.endLoading();
-                                  showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return AlertDialog(
-                                        title: Text(error.toString()),
-                                        actions: <Widget>[
-                                          FlatButton(
-                                            child: Text('OK'),
-                                            onPressed: () =>
-                                                Navigator.pop(context),
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  );
-                                }
-                              },
                             ),
+                            onPressed: () async {
+                              if (!_formKey.currentState.validate()) {
+                                return;
+                              }
+
+                              try {
+                                await model.signUpWithEmail(
+                                  name: _nameController.text,
+                                  email: _emailController.text,
+                                  password: _passwordController.text,
+                                );
+                                Navigator.pop(context);
+                              } catch (error) {
+                                model.endLoading();
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: Text(error.toString()),
+                                      actions: <Widget>[
+                                        FlatButton(
+                                          child: Text('OK'),
+                                          onPressed: () =>
+                                              Navigator.pop(context),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              }
+                            },
                           ),
                         ],
                       ),
