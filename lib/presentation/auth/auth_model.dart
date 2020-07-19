@@ -5,6 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:apple_sign_in/apple_sign_in.dart';
+import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 
 class AuthModel extends ChangeNotifier {
   FirebaseAuth _auth = FirebaseAuth.instance;
@@ -12,6 +13,7 @@ class AuthModel extends ChangeNotifier {
   FirebaseStorage _storage = FirebaseStorage.instance;
   FirebaseMessaging _messaging = FirebaseMessaging();
   GoogleSignIn _googleSignIn = GoogleSignIn();
+  FacebookLogin _facebookLogin = FacebookLogin();
   bool isLoading = false;
 
   Future signUpWithGoogle() async {
@@ -105,6 +107,46 @@ class AuthModel extends ChangeNotifier {
       isLoading = false;
       notifyListeners();
     }
+  }
+
+  Future signInWithFacebook() async {
+    final result = await _facebookLogin.logIn(['email']);
+
+    if (result.status == FacebookLoginStatus.cancelledByUser) {
+      return print('cancel');
+    }
+
+    if (result.status == FacebookLoginStatus.error) {
+      return print('error');
+    }
+
+    isLoading = true;
+    notifyListeners();
+
+    final credential = FacebookAuthProvider.getCredential(
+      accessToken: result.accessToken.token,
+    );
+
+    FirebaseUser user = (await _auth.signInWithCredential(credential)).user;
+
+    bool registered = await hasAlreadyRegistered(userID: user.uid);
+
+    if (user != null && !registered) {
+      final deviceToken = await _messaging.getToken();
+      await user.updateEmail(user.email);
+      await _store.collection('users').document(user.uid).setData(
+        {
+          'displayName': user.displayName,
+          'photoURL': user.photoUrl,
+          'isTeacher': false,
+          'deviceToken': deviceToken,
+          'createdAt': FieldValue.serverTimestamp(),
+        },
+      );
+    }
+
+    isLoading = false;
+    notifyListeners();
   }
 
   String getFullName(AppleIdCredential credential) {

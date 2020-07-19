@@ -63,5 +63,28 @@
         </dict>
     </array>
     <!-- End of the Google Sign-in Section -->
+    <!-- Facebook Sign-in Section -->
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>fb2919634748134702</string>
+            </array>
+        </dict>
+    </array>
+    <key>FacebookAppID</key>
+    <string>2919634748134702</string>
+    <key>FacebookDisplayName</key>
+    <string>TakuTore</string>
+
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+        <string>fbapi</string>
+        <string>fb-messenger-share-api</string>
+        <string>fbauth2</string>
+        <string>fbshareextension</string>
+    </array>
+    <!-- End of the Facebook Sign-in Section -->
 </dict>
 </plist>
