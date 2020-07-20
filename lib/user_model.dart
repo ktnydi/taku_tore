@@ -138,7 +138,17 @@ class UserModel extends ChangeNotifier {
   }
 
   Future signOut() async {
+    beginLoading();
+
+    final document = Firestore.instance.collection('users').document(user.uid);
+    await document.updateData(
+      {
+        'deviceToken': '',
+      },
+    );
     await FirebaseAuth.instance.signOut();
+
+    endLoading();
   }
 
   Future<bool> hasAvatar({FirebaseUser user}) async {
