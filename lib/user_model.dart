@@ -115,10 +115,25 @@ class UserModel extends ChangeNotifier {
     @required String password,
   }) async {
     beginLoading();
-    await FirebaseAuth.instance.signInWithEmailAndPassword(
+    final user = (await FirebaseAuth.instance.signInWithEmailAndPassword(
       email: email,
       password: password,
+    ))
+        .user;
+
+    if (user == null) {
+      endLoading();
+      return;
+    }
+
+    final deviceToken = await _firebaseMessaging.getToken();
+    final document = Firestore.instance.collection('users').document(user.uid);
+    await document.updateData(
+      {
+        'deviceToken': deviceToken,
+      },
     );
+
     endLoading();
   }
 
