@@ -32,17 +32,30 @@ class AuthModel extends ChangeNotifier {
 
     FirebaseUser user = (await _auth.signInWithCredential(credential)).user;
 
+    if (user == null) {
+      isLoading = false;
+      notifyListeners();
+      return;
+    }
+
+    final deviceToken = await _messaging.getToken();
+    final document = _store.collection('users').document(user.uid);
     bool registered = await hasAlreadyRegistered(userID: user.uid);
 
-    if (user != null && !registered) {
-      final deviceToken = await _messaging.getToken();
-      await _store.collection('users').document(user.uid).setData(
+    if (!registered) {
+      await document.setData(
         {
           'displayName': user.displayName,
           'photoURL': user.photoUrl,
           'isTeacher': false,
           'deviceToken': deviceToken,
           'createdAt': FieldValue.serverTimestamp(),
+        },
+      );
+    } else {
+      await document.updateData(
+        {
+          'deviceToken': deviceToken,
         },
       );
     }
@@ -85,21 +98,34 @@ class AuthModel extends ChangeNotifier {
 
       FirebaseUser user = (await _auth.signInWithCredential(credential)).user;
 
+      if (user == null) {
+        isLoading = false;
+        notifyListeners();
+        return;
+      }
+
       if (appleIdCredential.email != null) {
         await user.updateEmail(appleIdCredential.email);
       }
 
+      final deviceToken = await _messaging.getToken();
+      final document = _store.collection('users').document(user.uid);
       bool registered = await hasAlreadyRegistered(userID: user.uid);
 
-      if (user != null && !registered) {
-        final deviceToken = await _messaging.getToken();
-        await _store.collection('users').document(user.uid).setData(
+      if (!registered) {
+        await document.setData(
           {
             'displayName': getFullName(appleIdCredential),
             'photoURL': await getDefaultPhotoURL(),
             'isTeacher': false,
             'deviceToken': deviceToken,
             'createdAt': FieldValue.serverTimestamp(),
+          },
+        );
+      } else {
+        await document.updateData(
+          {
+            'deviceToken': deviceToken,
           },
         );
       }
@@ -129,18 +155,31 @@ class AuthModel extends ChangeNotifier {
 
     FirebaseUser user = (await _auth.signInWithCredential(credential)).user;
 
+    if (user == null) {
+      isLoading = false;
+      notifyListeners();
+      return;
+    }
+
+    final deviceToken = await _messaging.getToken();
+    final document = _store.collection('users').document(user.uid);
     bool registered = await hasAlreadyRegistered(userID: user.uid);
 
-    if (user != null && !registered) {
-      final deviceToken = await _messaging.getToken();
+    if (!registered) {
       await user.updateEmail(user.email);
-      await _store.collection('users').document(user.uid).setData(
+      await document.setData(
         {
           'displayName': user.displayName,
           'photoURL': user.photoUrl,
           'isTeacher': false,
           'deviceToken': deviceToken,
           'createdAt': FieldValue.serverTimestamp(),
+        },
+      );
+    } else {
+      await document.updateData(
+        {
+          'deviceToken': deviceToken,
         },
       );
     }
