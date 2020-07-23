@@ -66,15 +66,11 @@ class ChatModel extends ChangeNotifier {
   }
 
   Future<Room> convertSnapshotToDomain({DocumentSnapshot doc}) async {
-    final currentUser = await FirebaseAuth.instance.currentUser();
-
     final teacherID = doc['member']['teacherID'];
     final studentID = doc['member']['studentID'];
 
     final teacher = await fetchUserFromFirebase(userId: teacherID);
     final student = await fetchUserFromFirebase(userId: studentID);
-    final isReceiver = currentUser.uid != doc['lastMessageFromUid'];
-    final hasAlreadyRead = doc['hasAlreadyRead'];
 
     return Room(
       documentId: doc.documentID,
@@ -84,7 +80,8 @@ class ChatModel extends ChangeNotifier {
       updatedAt: doc['updatedAt'],
       createdAt: doc['createdAt'],
       lastMessageFromUid: doc['lastMessageFromUid'],
-      hasUnreadMessage: isReceiver && !hasAlreadyRead, // 受信者で読んでない
+      hasNewMessage: doc['numNewMessage'].toDouble() > 0,
+      isAllow: doc['isAllow'],
     );
   }
 
@@ -92,6 +89,8 @@ class ChatModel extends ChangeNotifier {
     final currentUser = await FirebaseAuth.instance.currentUser();
 
     final collection = Firestore.instance
+        .collection('users')
+        .document(currentUser.uid)
         .collection('rooms')
         .where('member.studentID', isEqualTo: currentUser.uid)
         .orderBy('createdAt', descending: true)
@@ -111,6 +110,8 @@ class ChatModel extends ChangeNotifier {
     final currentUser = await FirebaseAuth.instance.currentUser();
 
     final collection = Firestore.instance
+        .collection('users')
+        .document(currentUser.uid)
         .collection('rooms')
         .where('member.studentID', isEqualTo: currentUser.uid)
         .orderBy('createdAt', descending: true)
@@ -135,6 +136,8 @@ class ChatModel extends ChangeNotifier {
     final currentUser = await FirebaseAuth.instance.currentUser();
 
     final collection = Firestore.instance
+        .collection('users')
+        .document(currentUser.uid)
         .collection('rooms')
         .where('member.teacherID', isEqualTo: currentUser.uid)
         .orderBy('createdAt', descending: true)
@@ -154,6 +157,8 @@ class ChatModel extends ChangeNotifier {
     final currentUser = await FirebaseAuth.instance.currentUser();
 
     final collection = Firestore.instance
+        .collection('users')
+        .document(currentUser.uid)
         .collection('rooms')
         .where('member.teacherID', isEqualTo: currentUser.uid)
         .orderBy('createdAt', descending: true)
