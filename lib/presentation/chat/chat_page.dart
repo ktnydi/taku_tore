@@ -168,7 +168,7 @@ class ChatCell extends StatelessWidget {
           child: Row(
             children: <Widget>[
               Center(
-                child: room.hasUnreadMessage
+                child: room.hasNewMessage
                     ? Container(
                         width: 10,
                         height: 10,

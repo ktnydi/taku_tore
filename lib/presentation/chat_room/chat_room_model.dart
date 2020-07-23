@@ -19,12 +19,15 @@ class ChatRoomModel extends ChangeNotifier {
       return;
     }
 
-    final document =
-        Firestore.instance.collection('rooms').document(room.documentId);
+    final document = Firestore.instance
+        .collection('users')
+        .document(currentUser.uid)
+        .collection('rooms')
+        .document(room.documentId);
 
     document.updateData(
       {
-        'hasAlreadyRead': true,
+        'numNewMessage': 0,
       },
     );
   }
@@ -48,7 +51,11 @@ class ChatRoomModel extends ChangeNotifier {
     this.isLoading = true;
     notifyListeners();
 
+    final currentUser = await FirebaseAuth.instance.currentUser();
+
     final collection = Firestore.instance
+        .collection('users')
+        .document(currentUser.uid)
         .collection('rooms')
         .document(room.documentId)
         .collection('messages')
@@ -107,21 +114,31 @@ class ChatRoomModel extends ChangeNotifier {
 
   Future addMessageWithTransition({String text}) async {
     final currentUser = await FirebaseAuth.instance.currentUser();
-    final collection = Firestore.instance
+    final roomRef = Firestore.instance
+        .collection('users')
+        .document(currentUser.uid)
         .collection('rooms')
-        .document(room.documentId)
-        .collection('messages');
+        .document(room.documentId);
+    final messageRef = roomRef.collection('messages');
 
     final from = currentUser.uid;
     final to = this.room.student.uid == currentUser.uid
         ? this.room.teacher.uid
         : this.room.student.uid;
 
-    await collection.add({
+    await messageRef.add({
       'fromUid': from,
       'toUid': to,
       'content': text,
       'createdAt': FieldValue.serverTimestamp(),
     });
+
+    await roomRef.updateData(
+      {
+        'updatedAt': FieldValue.serverTimestamp(),
+        'lastMessage': text,
+        'lastMessageFromUid': currentUser.uid,
+      },
+    );
   }
 }
