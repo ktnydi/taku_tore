@@ -176,6 +176,8 @@ class TeacherDetailModel extends ChangeNotifier {
     final currentUser = await FirebaseAuth.instance.currentUser();
 
     final query = Firestore.instance
+        .collection('users')
+        .document(currentUser.uid)
         .collection('rooms')
         .where('member.teacherID', isEqualTo: teacher.uid)
         .where('member.studentID', isEqualTo: currentUser.uid);
@@ -195,8 +197,13 @@ class TeacherDetailModel extends ChangeNotifier {
       throw ('自分には相談できません。');
     }
 
-    final collection = Firestore.instance.collection('rooms');
-    collection.add(
+    final document = Firestore.instance
+        .collection('users')
+        .document(currentUser.uid)
+        .collection('rooms')
+        .document('${this.teacher.uid}_${currentUser.uid}');
+
+    document.setData(
       {
         'member': {
           'teacherID': this.teacher.uid,
@@ -206,7 +213,8 @@ class TeacherDetailModel extends ChangeNotifier {
         'updatedAt': FieldValue.serverTimestamp(),
         'createdAt': FieldValue.serverTimestamp(),
         'lastMessageFromUid': '',
-        'hasAlreadyRead': true,
+        'numNewMessage': 0,
+        'isAllow': true,
       },
     );
 

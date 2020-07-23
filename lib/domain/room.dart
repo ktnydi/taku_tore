@@ -11,8 +11,9 @@ class Room {
     @required this.lastMessage,
     @required this.updatedAt,
     @required this.createdAt,
-    @required this.hasUnreadMessage,
+    @required this.hasNewMessage,
     @required this.lastMessageFromUid,
+    @required this.isAllow,
   });
 
   final String documentId;
@@ -21,6 +22,7 @@ class Room {
   final String lastMessage;
   final Timestamp updatedAt;
   final Timestamp createdAt;
-  final bool hasUnreadMessage;
+  final bool hasNewMessage;
   final String lastMessageFromUid;
+  final bool isAllow;
 }
