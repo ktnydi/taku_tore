@@ -49,7 +49,7 @@ class _ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
 
                             final List<Message> messageList = snapshot.data;
 
-                            final messages = messageList.reversed.map(
+                            final messages = messageList.map(
                               (message) {
                                 if (um.user.uid == message.from.uid) {
                                   return ChatRoomCellRight(
@@ -66,6 +66,7 @@ class _ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
 
                             return ListView.separated(
                               controller: cm.scrollController,
+                              reverse: true,
                               physics: const AlwaysScrollableScrollPhysics(),
                               itemBuilder: (context, index) => messages[index],
                               itemCount: messages.length,
@@ -294,16 +295,12 @@ class _SendMessageFieldState extends State<SendMessageField>
                             maxLines: 10,
                             keyboardType: TextInputType.multiline,
                             onChanged: (value) {
-                              model.scrollToBottom();
                               if (value.length == 0) {
                                 setState(() => isDisabled = true);
                                 return;
                               }
 
                               setState(() => isDisabled = false);
-                            },
-                            onTap: () async {
-                              await model.scrollToBottom();
                             },
                           ),
                         ),
