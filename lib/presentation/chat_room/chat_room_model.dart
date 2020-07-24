@@ -89,9 +89,6 @@ class ChatRoomModel extends ChangeNotifier {
     this.messagesAsStream = messages;
     notifyListeners();
 
-    await scrollToBottom(animation: false);
-
-    await Future.delayed(Duration(milliseconds: 300));
     this.isLoading = false;
     notifyListeners();
   }
@@ -101,14 +98,12 @@ class ChatRoomModel extends ChangeNotifier {
 
     if (animation) {
       this.scrollController.animateTo(
-            this.scrollController.position.maxScrollExtent,
+            0.0,
             duration: Duration(milliseconds: 200),
             curve: Curves.easeInOut,
           );
     } else {
-      this.scrollController.jumpTo(
-            this.scrollController.position.maxScrollExtent,
-          );
+      this.scrollController.jumpTo(0.0);
     }
   }
 
