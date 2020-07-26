@@ -1,21 +1,60 @@
+import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../../domain/message.dart';
 import '../../domain/room.dart';
 import '../../domain/user.dart';
 
 class ChatRoomModel extends ChangeNotifier {
-  Future<List<Message>> messagesAsFuture;
-  Stream<List<Message>> messagesAsStream;
+  DocumentSnapshot start;
   Room room;
+  User user;
   ScrollController scrollController = ScrollController();
-  bool isLoading = false;
+  TextEditingController messageController = TextEditingController();
+  bool isFetchingMessage = false;
+  bool showAllMessage = false;
 
-  Future readMessage({Room room}) async {
+  ChatRoomModel({this.room, this.user});
+
+  @override
+  void dispose() {
+    this.scrollController.dispose();
+    this.messageController.dispose();
+
+    super.dispose();
+  }
+
+  void scrollListener() {
+    scrollController.addListener(
+      () async {
+        final currentScrollPosition = this.scrollController.offset;
+        final maxScrollExtent = this.scrollController.position.maxScrollExtent;
+
+        if (!this.showAllMessage && currentScrollPosition == maxScrollExtent) {
+          beginFetching();
+
+          await fetchExtraMessage();
+
+          endFetching();
+        }
+      },
+    );
+  }
+
+  void beginFetching() {
+    isFetchingMessage = true;
+    notifyListeners();
+  }
+
+  void endFetching() {
+    isFetchingMessage = false;
+    notifyListeners();
+  }
+
+  Future readMessage() async {
     final currentUser = await FirebaseAuth.instance.currentUser();
 
-    if (room.lastMessageFromUid == currentUser.uid) {
+    if (this.room.lastMessageFromUid == currentUser.uid) {
       return;
     }
 
@@ -23,7 +62,7 @@ class ChatRoomModel extends ChangeNotifier {
         .collection('users')
         .document(currentUser.uid)
         .collection('rooms')
-        .document(room.documentId);
+        .document(this.room.documentId);
 
     document.updateData(
       {
@@ -32,108 +71,71 @@ class ChatRoomModel extends ChangeNotifier {
     );
   }
 
-  Future<User> fetchUserFromFirebase({@required String userId}) async {
-    final userRef = Firestore.instance.collection('users').document(userId);
-    final user = await userRef.get();
-    return User(
-      uid: user.documentID,
-      displayName: user['displayName'],
-      photoURL: user['photoURL'],
-      isTeacher: user['isTeacher'],
-      createdAt: user['createdAt'],
-      about: user['about'],
-      canDo: user['canDo'],
-      recommend: user['recommend'],
-    );
-  }
-
-  Future fetchMessagesAsStream({Room room}) async {
-    this.isLoading = true;
-    notifyListeners();
-
+  Future fetchExtraMessage() async {
     final currentUser = await FirebaseAuth.instance.currentUser();
 
     final collection = Firestore.instance
         .collection('users')
         .document(currentUser.uid)
         .collection('rooms')
-        .document(room.documentId)
-        .collection('messages')
-        .orderBy('createdAt', descending: true);
+        .document(this.room.documentId)
+        .collection('messages');
 
-    final messages = collection.snapshots().asyncMap((snapshot) {
-      final isUploading = snapshot.metadata.hasPendingWrites;
-      if (isUploading) {
-        return this.messagesAsFuture;
-      }
+    final query = collection
+        .orderBy('createdAt', descending: true)
+        .startAfterDocument(this.start)
+        .limit(30);
 
-      readMessage(room: room);
+    final docs = (await query.getDocuments()).documents;
 
-      return this.messagesAsFuture = Future.wait(
-        snapshot.documents.map(
-          (doc) async {
-            final fromUser =
-                await fetchUserFromFirebase(userId: doc['fromUid']);
-            final toUser = await fetchUserFromFirebase(userId: doc['toUid']);
-            return Message(
-              from: fromUser,
-              to: toUser,
-              content: doc['content'],
-              createdAt: doc['createdAt'],
-            );
-          },
-        ),
-      );
-    });
-
-    this.messagesAsStream = messages;
-    notifyListeners();
-
-    this.isLoading = false;
-    notifyListeners();
-  }
-
-  Future scrollToBottom({bool animation = true}) async {
-    await Future.delayed(Duration(milliseconds: 300));
-
-    if (animation) {
-      this.scrollController.animateTo(
-            0.0,
-            duration: Duration(milliseconds: 200),
-            curve: Curves.easeInOut,
-          );
-    } else {
-      this.scrollController.jumpTo(0.0);
+    if (docs.isEmpty) {
+      this.showAllMessage = true;
+      return;
     }
+
+    this.start = docs.isNotEmpty ? docs[docs.length - 1] : null;
+
+    notifyListeners();
   }
 
-  Future addMessageWithTransition({String text}) async {
+  Future addMessageWithTransition() async {
     final currentUser = await FirebaseAuth.instance.currentUser();
+
     final roomRef = Firestore.instance
         .collection('users')
         .document(currentUser.uid)
         .collection('rooms')
         .document(room.documentId);
-    final messageRef = roomRef.collection('messages');
+
+    final messageRef = roomRef.collection('messages').document();
 
     final from = currentUser.uid;
     final to = this.room.student.uid == currentUser.uid
         ? this.room.teacher.uid
         : this.room.student.uid;
 
-    await messageRef.add({
-      'fromUid': from,
-      'toUid': to,
-      'content': text,
-      'createdAt': FieldValue.serverTimestamp(),
-    });
+    final batch = Firestore.instance.batch();
 
-    await roomRef.updateData(
+    batch.setData(
+      roomRef,
       {
         'updatedAt': FieldValue.serverTimestamp(),
-        'lastMessage': text,
+        'lastMessage': this.messageController.text,
         'lastMessageFromUid': currentUser.uid,
       },
+      merge: true,
     );
+
+    batch.setData(
+      messageRef,
+      {
+        'fromUid': from,
+        'toUid': to,
+        'content': this.messageController.text,
+        'createdAt': FieldValue.serverTimestamp(),
+      },
+    );
+
+    batch.commit();
   }
 }

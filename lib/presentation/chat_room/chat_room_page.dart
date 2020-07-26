@@ -17,10 +17,47 @@ class ChatRoom extends StatefulWidget {
 }
 
 class _ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
+  List<Widget> _buildMessages({
+    Widget child,
+    List<DocumentSnapshot> documents,
+    UserModel model,
+  }) {
+    final messages = documents.map(
+      (doc) {
+        final message = Message(
+          fromUid: doc['fromUid'],
+          toUid: doc['toUid'],
+          content: doc['content'],
+          createdAt: doc['createdAt'],
+        );
+
+        if (model.user.uid == message.fromUid) {
+          return Container(
+            margin: EdgeInsets.only(top: 15, left: 15, right: 15),
+            child: ChatRoomCellRight(
+              message: message,
+            ),
+          );
+        } else {
+          return Container(
+            margin: EdgeInsets.only(top: 15, left: 15, right: 15),
+            child: ChatRoomCellLeft(
+              toUser: widget.user,
+              message: message,
+            ),
+          );
+        }
+      },
+    ).toList();
+    return <Widget>[...messages, child ?? Container()];
+  }
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<ChatRoomModel>(
-      create: (_) => ChatRoomModel()..fetchMessagesAsStream(room: widget.room),
+      create: (_) => ChatRoomModel(room: widget.room, user: widget.user)
+        ..readMessage()
+        ..scrollListener(),
       child: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: Scaffold(
@@ -37,65 +74,63 @@ class _ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
               Expanded(
                 child: Consumer2<UserModel, ChatRoomModel>(
                   builder: (_, um, cm, __) {
-                    return Stack(
-                      children: <Widget>[
-                        StreamBuilder(
-                          stream: cm.messagesAsStream,
-                          builder:
-                              (BuildContext context, AsyncSnapshot snapshot) {
-                            if (snapshot.data == null) {
-                              return Container();
-                            }
+                    Query query = Firestore.instance
+                        .collection('users')
+                        .document(um.user.uid)
+                        .collection('rooms')
+                        .document(widget.room.documentId)
+                        .collection('messages')
+                        .orderBy('createdAt', descending: true);
+                    Stream<QuerySnapshot> watch;
 
-                            final List<Message> messageList = snapshot.data;
+                    if (cm.start != null) {
+                      watch = query.endAtDocument(cm.start).snapshots();
+                    } else {
+                      watch = query.limit(30).snapshots();
+                    }
 
-                            final messages = messageList.map(
-                              (message) {
-                                if (um.user.uid == message.from.uid) {
-                                  return ChatRoomCellRight(
-                                    message: message,
-                                  );
-                                } else {
-                                  return ChatRoomCellLeft(
-                                    toUser: widget.user,
-                                    message: message,
-                                  );
-                                }
-                              },
-                            ).toList();
+                    return StreamBuilder(
+                      stream: watch,
+                      builder: (
+                        BuildContext context,
+                        AsyncSnapshot snapshot,
+                      ) {
+                        if (!snapshot.hasData) {
+                          return Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
 
-                            return ListView.separated(
-                              controller: cm.scrollController,
-                              reverse: true,
-                              physics: const AlwaysScrollableScrollPhysics(),
-                              itemBuilder: (context, index) => messages[index],
-                              itemCount: messages.length,
-                              separatorBuilder: (context, index) =>
-                                  SizedBox(height: 15),
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 15,
-                                vertical: 15,
+                        final QuerySnapshot docs = snapshot.data;
+                        final List<DocumentSnapshot> documents = docs.documents;
+
+                        if (documents.isNotEmpty) {
+                          cm.start = documents[documents.length - 1];
+                        }
+
+                        return ListView(
+                          controller: cm.scrollController,
+                          reverse: true,
+                          physics: AlwaysScrollableScrollPhysics(),
+                          children: _buildMessages(
+                            child: Container(
+                              height: !cm.showAllMessage ? 70 : 0,
+                              child: Center(
+                                child: cm.isFetchingMessage
+                                    ? CircularProgressIndicator()
+                                    : SizedBox(),
                               ),
-                            );
-                          },
-                        ),
-                        cm.isLoading
-                            ? Container(
-                                color:
-                                    Theme.of(context).scaffoldBackgroundColor,
-                                child: Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                              )
-                            : Container(),
-                      ],
+                            ),
+                            documents: documents,
+                            model: um,
+                          ),
+                        );
+                      },
                     );
                   },
                 ),
               ),
-              SendMessageField(
-                room: widget.room,
-              ),
+              SendMessageField(),
             ],
           ),
         ),
@@ -110,6 +145,9 @@ class ChatRoomCellRight extends StatelessWidget {
   final Message message;
 
   String createdAtAsString(Timestamp ts) {
+    if (ts == null) {
+      return 'loading...';
+    }
     final DateTime date = ts.toDate();
     final year = date.year;
     final month = date.month;
@@ -170,6 +208,10 @@ class ChatRoomCellLeft extends StatelessWidget {
   final User toUser;
 
   String createdAtAsString(Timestamp ts) {
+    if (ts == null) {
+      return 'Loading...';
+    }
+
     final DateTime date = ts.toDate();
     final year = date.year;
     final month = date.month;
@@ -230,25 +272,35 @@ class ChatRoomCellLeft extends StatelessWidget {
   }
 }
 
-class SendMessageField extends StatefulWidget {
-  SendMessageField({
-    @required this.room,
-  });
-
-  final Room room;
-  @override
-  _SendMessageFieldState createState() => _SendMessageFieldState();
-}
-
-class _SendMessageFieldState extends State<SendMessageField>
-    with TickerProviderStateMixin {
-  final TextEditingController _messageController = TextEditingController();
-  bool isDisabled = true;
-
-  @override
-  void dispose() {
-    _messageController.dispose();
-    super.dispose();
+class SendMessageField extends StatelessWidget {
+  Future _submit(BuildContext context, {ChatRoomModel model}) async {
+    if (model.messageController.text.trim().isEmpty) {
+      return;
+    }
+    try {
+      await model.addMessageWithTransition();
+      model.messageController.clear();
+      await model.scrollController.animateTo(
+        0.0,
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    } catch (error) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(error.toString()),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('OK'),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ],
+          );
+        },
+      );
+    }
   }
 
   @override
@@ -286,7 +338,7 @@ class _SendMessageFieldState extends State<SendMessageField>
                             borderRadius: BorderRadius.all(Radius.circular(25)),
                           ),
                           child: TextField(
-                            controller: _messageController,
+                            controller: model.messageController,
                             decoration: InputDecoration(
                               border: InputBorder.none,
                               hintText: 'メッセージを入力...',
@@ -294,14 +346,6 @@ class _SendMessageFieldState extends State<SendMessageField>
                             minLines: 1,
                             maxLines: 10,
                             keyboardType: TextInputType.multiline,
-                            onChanged: (value) {
-                              if (value.length == 0) {
-                                setState(() => isDisabled = true);
-                                return;
-                              }
-
-                              setState(() => isDisabled = false);
-                            },
                           ),
                         ),
                       ),
@@ -315,37 +359,9 @@ class _SendMessageFieldState extends State<SendMessageField>
                           disabledTextColor: Colors.black45,
                           textColor: Colors.orange,
                           child: Icon(Icons.send),
-                          onPressed: !isDisabled
-                              ? () async {
-                                  if (_messageController.text.trim().isEmpty) {
-                                    return;
-                                  }
-                                  model.room = widget.room;
-                                  try {
-                                    await model.addMessageWithTransition(
-                                        text: _messageController.text);
-                                    _messageController.text = '';
-                                    await model.scrollToBottom();
-                                    setState(() => isDisabled = true);
-                                  } catch (error) {
-                                    showDialog(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return AlertDialog(
-                                          title: Text(error.toString()),
-                                          actions: <Widget>[
-                                            FlatButton(
-                                              child: Text('OK'),
-                                              onPressed: () =>
-                                                  Navigator.pop(context),
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                    );
-                                  }
-                                }
-                              : null,
+                          onPressed: () async {
+                            await this._submit(context, model: model);
+                          },
                         ),
                       ),
                     ],
