@@ -380,9 +380,13 @@ class Content extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Title(teacher.title),
-              Divider(height: 20),
+              SizedBox(height: 10),
+              Divider(height: 0.5),
+              SizedBox(height: 10),
               Teacher(teacher),
-              Divider(height: 20),
+              SizedBox(height: 10),
+              Divider(height: 0.5),
+              SizedBox(height: 10),
               Description(
                 title: 'サービス内容',
                 content: teacher.canDo,
@@ -559,9 +563,11 @@ class ReviewList extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
+          SizedBox(height: 10),
           Divider(
-            height: 30,
+            height: 0.5,
           ),
+          SizedBox(height: 10),
           Text(
             'レビュー',
             style: TextStyle(

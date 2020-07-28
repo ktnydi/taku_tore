@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:takutore/molecule/teacher_cell.dart';
-import '../teacher_detail/teacher_detail_page.dart';
 import 'bookmark_model.dart';
 
 class BookmarkList extends StatefulWidget {
@@ -45,7 +44,7 @@ class _BookmarkListState extends State<BookmarkList> {
               },
             ).toList();
             return ListView.separated(
-              separatorBuilder: (context, index) => Divider(height: 1),
+              separatorBuilder: (context, index) => Divider(height: 0.5),
               itemBuilder: (context, index) => listTiles[index],
               itemCount: listTiles.length,
             );
