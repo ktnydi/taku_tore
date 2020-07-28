@@ -60,7 +60,7 @@ class TeacherList extends StatelessWidget {
         return ListView.separated(
           controller: model.scrollController,
           physics: AlwaysScrollableScrollPhysics(),
-          separatorBuilder: (context, index) => Divider(height: 1),
+          separatorBuilder: (context, index) => Divider(height: 0.5),
           itemBuilder: (context, index) => listTiles[index],
           itemCount: listTiles.length,
         );
