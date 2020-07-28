@@ -11,6 +11,7 @@ class ChatRoomModel extends ChangeNotifier {
   User user;
   ScrollController scrollController = ScrollController();
   TextEditingController messageController = TextEditingController();
+  String _message = '';
   bool isFetchingMessage = false;
   bool showAllMessage = false;
 
@@ -48,6 +49,13 @@ class ChatRoomModel extends ChangeNotifier {
 
   void endFetching() {
     isFetchingMessage = false;
+    notifyListeners();
+  }
+
+  String get message => this._message;
+
+  set message(String value) {
+    this._message = value;
     notifyListeners();
   }
 
