@@ -17,13 +17,49 @@ class ChatRoom extends StatefulWidget {
 }
 
 class _ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
+  String getDate(Timestamp ts) {
+    final date = ts != null ? ts.toDate() : DateTime.now();
+    return '${date.month}/${date.day} ${date.hour}:${date.minute}';
+  }
+
+  bool isLastMessageRight(
+    int index,
+    UserModel model,
+    List<DocumentSnapshot> documents,
+  ) {
+    if (index == 0) {
+      return false;
+    }
+
+    final beforeDate = getDate(documents[index - 1]['createdAt']);
+    final currentDate = getDate(documents[index]['createdAt']);
+    return documents[index - 1]['fromUid'] == model.user.uid &&
+        beforeDate == currentDate;
+  }
+
+  bool isLastMessageLeft(
+    int index,
+    UserModel model,
+    List<DocumentSnapshot> documents,
+  ) {
+    if (index == 0) {
+      return false;
+    }
+
+    final beforeDate = getDate(documents[index - 1]['createdAt']);
+    final currentDate = getDate(documents[index]['createdAt']);
+    return documents[index - 1]['fromUid'] != model.user.uid &&
+        beforeDate == currentDate;
+  }
+
   List<Widget> _buildMessages({
     Widget child,
     List<DocumentSnapshot> documents,
     UserModel model,
   }) {
-    final messages = documents.map(
-      (doc) {
+    List<Widget> messages = [];
+    documents.asMap().forEach(
+      (index, doc) {
         final message = Message(
           fromUid: doc['fromUid'],
           toUid: doc['toUid'],
@@ -31,33 +67,47 @@ class _ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
           createdAt: doc['createdAt'],
         );
 
+        final isLastMessageRight = this.isLastMessageRight(
+          index,
+          model,
+          documents,
+        );
+        final isLastMessageLeft = this.isLastMessageLeft(
+          index,
+          model,
+          documents,
+        );
+
         if (model.user.uid == message.fromUid) {
-          return Container(
-            margin: EdgeInsets.only(top: 15, left: 15, right: 15),
-            child: ChatRoomCellRight(
+          messages = [
+            ...messages,
+            ChatRoomCellRight(
               message: message,
+              isLastMessageRight: isLastMessageRight,
             ),
-          );
+          ];
         } else {
-          return Container(
-            margin: EdgeInsets.only(top: 15, left: 15, right: 15),
-            child: ChatRoomCellLeft(
+          messages = [
+            ...messages,
+            ChatRoomCellLeft(
               toUser: widget.user,
               message: message,
+              isLastMessageLeft: isLastMessageLeft,
             ),
-          );
+          ];
         }
       },
-    ).toList();
+    );
     return <Widget>[...messages, child ?? Container()];
   }
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<ChatRoomModel>(
-      create: (_) => ChatRoomModel(room: widget.room, user: widget.user)
-        ..readMessage()
-        ..scrollListener(),
+      create: (_) => ChatRoomModel(
+        room: widget.room,
+        user: widget.user,
+      )..scrollListener(),
       child: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: Scaffold(
@@ -104,12 +154,19 @@ class _ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
                         final QuerySnapshot docs = snapshot.data;
                         final List<DocumentSnapshot> documents = docs.documents;
 
-                        if (documents.isNotEmpty) {
+                        if (documents.isNotEmpty && documents.length >= 30) {
                           cm.start = documents[documents.length - 1];
+                        } else {
+                          cm.showAllMessage = true;
+                        }
+
+                        if (cm.room.hasNewMessage) {
+                          cm.readMessage();
                         }
 
                         return ListView(
                           controller: cm.scrollController,
+                          padding: EdgeInsets.only(bottom: 30, top: 15),
                           reverse: true,
                           physics: AlwaysScrollableScrollPhysics(),
                           children: _buildMessages(
@@ -140,9 +197,10 @@ class _ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
 }
 
 class ChatRoomCellRight extends StatelessWidget {
-  ChatRoomCellRight({@required this.message});
+  ChatRoomCellRight({@required this.message, this.isLastMessageRight});
 
   final Message message;
+  final bool isLastMessageRight;
 
   String createdAtAsString(Timestamp ts) {
     if (ts == null) {
@@ -159,40 +217,50 @@ class ChatRoomCellRight extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.centerRight,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: <Widget>[
-          Text(
-            createdAtAsString(message.createdAt),
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.black54,
-            ),
-          ),
-          SizedBox(height: 5),
-          Flexible(
-            child: Container(
-              padding: EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.black12,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(15),
-                  bottomRight: Radius.circular(15),
-                  bottomLeft: Radius.circular(15),
+    return Container(
+      margin: EdgeInsets.only(
+        bottom: !isLastMessageRight ? 15 : 0,
+        left: 15,
+        right: 15,
+      ),
+      child: Align(
+        alignment: Alignment.centerRight,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: <Widget>[
+            Flexible(
+              child: Container(
+                padding: EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Color(0xff203152),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(18),
+                    topRight: Radius.circular(18),
+                    bottomRight: Radius.circular(0),
+                    bottomLeft: Radius.circular(18),
+                  ),
+                ),
+                child: Text(
+                  message.content,
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
                 ),
               ),
-              child: Text(
-                message.content,
-                style: TextStyle(
-                  color: Colors.black87,
-                ),
-              ),
             ),
-          ),
-        ],
+            SizedBox(height: 5),
+            !isLastMessageRight
+                ? Text(
+                    createdAtAsString(message.createdAt),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.black54,
+                    ),
+                  )
+                : SizedBox(),
+          ],
+        ),
       ),
     );
   }
@@ -202,10 +270,12 @@ class ChatRoomCellLeft extends StatelessWidget {
   ChatRoomCellLeft({
     @required this.message,
     @required this.toUser,
+    @required this.isLastMessageLeft,
   });
 
   final Message message;
   final User toUser;
+  final bool isLastMessageLeft;
 
   String createdAtAsString(Timestamp ts) {
     if (ts == null) {
@@ -223,50 +293,74 @@ class ChatRoomCellLeft extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          CircleAvatar(
-            backgroundColor: Colors.transparent,
-            backgroundImage: NetworkImage(toUser.photoURL),
-          ),
-          SizedBox(width: 10),
-          Flexible(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  createdAtAsString(message.createdAt),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.black54,
-                  ),
-                ),
-                SizedBox(height: 5),
-                Container(
-                  padding: EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.black12),
-                    borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(15),
-                      bottomRight: Radius.circular(15),
-                      bottomLeft: Radius.circular(15),
+    return Container(
+      margin: EdgeInsets.only(
+        bottom: !isLastMessageLeft ? 15 : 0,
+        left: 15,
+        right: 15,
+      ),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: <Widget>[
+            !isLastMessageLeft
+                ? Column(
+                    children: <Widget>[
+                      CircleAvatar(
+                        backgroundColor: Colors.transparent,
+                        backgroundImage: NetworkImage(toUser.photoURL),
+                        radius: 18,
+                      ),
+                      SizedBox(height: 5),
+                      Text(
+                        '',
+                        style: TextStyle(
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  )
+                : SizedBox(width: 36),
+            SizedBox(width: 10),
+            Flexible(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Container(
+                    padding: EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Color(0xffeff0f1),
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(18),
+                        topRight: Radius.circular(18),
+                        bottomRight: Radius.circular(18),
+                        bottomLeft: Radius.circular(0),
+                      ),
+                    ),
+                    child: Text(
+                      message.content,
+                      style: TextStyle(
+                        color: Colors.black87,
+                      ),
                     ),
                   ),
-                  child: Text(
-                    message.content,
-                    style: TextStyle(
-                      color: Colors.black87,
-                    ),
-                  ),
-                ),
-              ],
+                  SizedBox(height: 5),
+                  !isLastMessageLeft
+                      ? Text(
+                          createdAtAsString(message.createdAt),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.black54,
+                          ),
+                        )
+                      : SizedBox(),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -306,11 +400,11 @@ class SendMessageField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+      padding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
       decoration: BoxDecoration(
         border: Border(
           top: BorderSide(
-            width: 1,
+            width: 0.5,
             color: Colors.black12,
           ),
         ),
@@ -318,58 +412,65 @@ class SendMessageField extends StatelessWidget {
       ),
       child: SafeArea(
         top: false,
-        child: Row(
-          children: <Widget>[
-            Expanded(
-              child: Consumer<ChatRoomModel>(
-                builder: (_, model, __) {
-                  return Row(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: <Widget>[
-                      Expanded(
-                        child: Container(
-                          padding: EdgeInsets.symmetric(horizontal: 15),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: Colors.black12,
-                            ),
-                            borderRadius: BorderRadius.all(Radius.circular(25)),
-                          ),
-                          child: TextField(
-                            controller: model.messageController,
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              hintText: 'メッセージを入力...',
-                            ),
-                            minLines: 1,
-                            maxLines: 10,
-                            keyboardType: TextInputType.multiline,
-                          ),
-                        ),
+        child: Consumer<ChatRoomModel>(
+          builder: (_, model, __) {
+            return Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: <Widget>[
+                Expanded(
+                  child: Container(
+                    constraints: BoxConstraints(
+                      minHeight: 40,
+                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 15),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        width: 0.5,
+                        color: Colors.black12,
                       ),
-                      SizedBox(width: 15),
-                      ButtonTheme(
-                        minWidth: 0,
-                        height: 50,
-                        padding: EdgeInsets.symmetric(horizontal: 0),
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        child: FlatButton(
-                          disabledTextColor: Colors.black45,
-                          textColor: Colors.orange,
-                          child: Icon(Icons.send),
-                          onPressed: () async {
+                      borderRadius: BorderRadius.all(Radius.circular(20)),
+                    ),
+                    child: TextField(
+                      controller: model.messageController,
+                      decoration: InputDecoration(
+                        contentPadding: EdgeInsets.symmetric(vertical: 10),
+                        border: InputBorder.none,
+                        hintText: 'メッセージを入力...',
+                        isDense: true,
+                      ),
+                      minLines: 1,
+                      maxLines: 10,
+                      keyboardType: TextInputType.multiline,
+                      onChanged: (value) => model.message = value,
+                    ),
+                  ),
+                ),
+                SizedBox(width: 15),
+                ButtonTheme(
+                  minWidth: 0,
+                  height: 40,
+                  padding: EdgeInsets.symmetric(horizontal: 0),
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  child: FlatButton(
+                    disabledTextColor:
+                        Theme.of(context).primaryColor.withOpacity(0.6),
+                    textColor: Theme.of(context).primaryColor,
+                    child: Icon(
+                      Icons.send,
+                      size: 30,
+                    ),
+                    onPressed: model.message.isNotEmpty
+                        ? () async {
                             await this._submit(context, model: model);
-                          },
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ),
-          ],
+                          }
+                        : null,
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
