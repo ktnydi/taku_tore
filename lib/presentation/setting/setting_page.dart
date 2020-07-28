@@ -438,10 +438,10 @@ class Section extends StatelessWidget {
                 return Column(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    index == 0 ? Divider(height: 1) : Container(),
+                    index == 0 ? Divider(height: 0.5) : Container(),
                     children[index],
                     index == children.length - 1
-                        ? Divider(height: 1)
+                        ? Divider(height: 0.5)
                         : Container(),
                   ],
                 );
@@ -450,7 +450,7 @@ class Section extends StatelessWidget {
               separatorBuilder: (context, index) {
                 return Padding(
                   padding: const EdgeInsets.only(left: 15),
-                  child: Divider(height: 1),
+                  child: Divider(height: 0.5),
                 );
               },
             ),
