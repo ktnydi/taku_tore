@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'presentation/chat/chat_page.dart';
 import 'presentation/home/home_page.dart';
+import 'presentation/notice_list/notice_list_page.dart';
 import 'presentation/setting/setting_page.dart';
 
 class BottomTabNavigator extends StatefulWidget {
@@ -15,6 +16,7 @@ class _BottomTabNavigator extends State<BottomTabNavigator> {
   final List<Widget> _widgetOptions = [
     Home(),
     Chat(),
+    NoticeList(),
     Setting(),
   ];
 
@@ -27,6 +29,7 @@ class _BottomTabNavigator extends State<BottomTabNavigator> {
         children: <Widget>[
           Divider(height: 0.5),
           BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
             backgroundColor: Colors.white,
             elevation: 0.0,
             selectedFontSize: 12,
@@ -39,6 +42,10 @@ class _BottomTabNavigator extends State<BottomTabNavigator> {
               BottomNavigationBarItem(
                 icon: Icon(Icons.message),
                 title: Text('チャット'),
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.notifications),
+                title: Text('通知'),
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.settings),
