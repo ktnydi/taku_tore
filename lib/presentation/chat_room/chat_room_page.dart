@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../chat_info/chat_info_page.dart';
 import '../../domain/message.dart';
 import '../../domain/room.dart';
 import '../../domain/user.dart';
@@ -118,6 +119,24 @@ class _ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
                 fontWeight: FontWeight.bold,
               ),
             ),
+            actions: <Widget>[
+              IconButton(
+                icon: Icon(Icons.info_outline),
+                onPressed: () {
+                  // TODO: Navigation to ChatInfo
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      fullscreenDialog: true,
+                      builder: (BuildContext context) => ChatInfo(
+                        user: widget.user,
+                        room: widget.room,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
           body: Column(
             children: <Widget>[
