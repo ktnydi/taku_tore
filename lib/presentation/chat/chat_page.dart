@@ -29,10 +29,7 @@ class _ChatState extends State<Chat> with TickerProviderStateMixin {
         ..scrollListener(),
       child: Scaffold(
         appBar: AppBar(
-          centerTitle: false,
-          title: Text(
-            'TakuTore',
-          ),
+          title: Text('チャット'),
           actions: <Widget>[
             IconButton(
               onPressed: () {
@@ -40,14 +37,6 @@ class _ChatState extends State<Chat> with TickerProviderStateMixin {
               },
               icon: Icon(
                 Icons.search,
-              ),
-            ),
-            IconButton(
-              onPressed: () {
-                // TODO: Add a future for notification lists.
-              },
-              icon: Icon(
-                Icons.notifications_none,
               ),
             ),
           ],

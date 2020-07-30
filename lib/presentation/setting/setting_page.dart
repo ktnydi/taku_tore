@@ -16,28 +16,9 @@ class Setting extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        centerTitle: false,
         title: Text(
-          'TakuTore',
+          '設定',
         ),
-        actions: <Widget>[
-          IconButton(
-            onPressed: () {
-              // TODO: Add a future for searching teacher.
-            },
-            icon: Icon(
-              Icons.search,
-            ),
-          ),
-          IconButton(
-            onPressed: () {
-              // TODO: Add a future for notification lists.
-            },
-            icon: Icon(
-              Icons.notifications_none,
-            ),
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         child: Padding(
