@@ -8,9 +8,8 @@ class Home extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        centerTitle: false,
         title: Text(
-          'TakuTore',
+          '講師を探す',
         ),
         actions: <Widget>[
           IconButton(
@@ -19,14 +18,6 @@ class Home extends StatelessWidget {
             },
             icon: Icon(
               Icons.search,
-            ),
-          ),
-          IconButton(
-            onPressed: () {
-              // TODO: Add a future for notification lists.
-            },
-            icon: Icon(
-              Icons.notifications_none,
             ),
           ),
         ],
