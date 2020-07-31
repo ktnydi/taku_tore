@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:timeago/timeago.dart';
 import 'presentation/auth/auth_page.dart';
 import 'bottom_tab_navigator.dart';
 import 'presentation/common/loading.dart';
@@ -7,6 +8,8 @@ import 'user_model.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  setLocaleMessages('ja', JaMessages());
+
   runApp(MyApp());
 }
 

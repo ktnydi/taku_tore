@@ -557,7 +557,7 @@ class ReviewList extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '・${format(review.createdAt.toDate())}',
+                  '・${format(review.createdAt.toDate(), locale: 'ja')}',
                   style: TextStyle(
                     color: Colors.black54,
                     fontSize: 12,
