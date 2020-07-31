@@ -195,7 +195,7 @@ class ChatCell extends StatelessWidget {
                       ),
                       SizedBox(width: 10),
                       Text(
-                        format(room.updatedAt.toDate()),
+                        format(room.updatedAt.toDate(), locale: 'ja'),
                         style: TextStyle(
                           color: Colors.black54,
                           fontSize: 14,

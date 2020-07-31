@@ -15,7 +15,7 @@ class Notice {
   Notice(DocumentSnapshot doc) {
     this.type = doc['type'];
     this.data = doc['data'];
-    this.createdAt = format(doc['createdAt'].toDate());
+    this.createdAt = format(doc['createdAt'].toDate(), locale: 'ja');
     this.message = _typeParser(doc['type']);
   }
 
