@@ -36,6 +36,7 @@ class BookmarkModel extends ChangeNotifier {
           photoURL: document['photoURL'],
           isTeacher: document['isTeacher'],
           createdAt: document['createdAt'],
+          thumbnail: document['thumbnail'],
           title: document['title'],
           about: document['about'],
           canDo: document['canDo'],
