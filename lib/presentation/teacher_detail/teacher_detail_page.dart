@@ -69,6 +69,18 @@ class TeacherDetail extends StatelessWidget {
     }
   }
 
+  Widget _buildFloatingButton(TeacherDetailModel model) {
+    if (model.isLoading || model.isAuthor) {
+      return Container();
+    }
+
+    if (model.isAlreadyExist) {
+      return ReviewButton(teacher);
+    }
+
+    return ConsultButton(teacher);
+  }
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<TeacherDetailModel>(
@@ -81,6 +93,7 @@ class TeacherDetail extends StatelessWidget {
         ..scrollListener(),
       child: Scaffold(
         extendBodyBehindAppBar: true,
+        backgroundColor: Colors.white,
         appBar: AppBar(
           automaticallyImplyLeading: false,
           backgroundColor: Colors.transparent,
@@ -142,33 +155,30 @@ class TeacherDetail extends StatelessWidget {
         ),
         body: Consumer<TeacherDetailModel>(
           builder: (_, model, __) {
-            return SingleChildScrollView(
-              controller: model.scrollController,
-              child: Padding(
-                padding: EdgeInsets.only(bottom: 100),
-                child: Column(
-                  children: <Widget>[
-                    Header(teacher: teacher),
-                    Content(teacher: teacher),
-                    ReviewList(),
-                  ],
+            return Stack(
+              alignment: Alignment.bottomCenter,
+              children: <Widget>[
+                SingleChildScrollView(
+                  controller: model.scrollController,
+                  child: Padding(
+                    padding: EdgeInsets.only(bottom: !model.isAuthor ? 75 : 15),
+                    child: Column(
+                      children: <Widget>[
+                        Header(teacher: teacher),
+                        Content(teacher: teacher),
+                        ReviewList(),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+                AnimatedPositioned(
+                  duration: Duration(milliseconds: 250),
+                  curve: Curves.easeInOut,
+                  bottom: model.isLoading ? -100 : 15,
+                  child: _buildFloatingButton(model),
+                ),
+              ],
             );
-          },
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-        floatingActionButton: Consumer<TeacherDetailModel>(
-          builder: (_, model, __) {
-            if (model.isLoading || model.isAuthor) {
-              return Container();
-            }
-
-            if (model.isAlreadyExist) {
-              return ReviewButton(teacher);
-            }
-
-            return ConsultButton(teacher);
           },
         ),
       ),
@@ -380,24 +390,27 @@ class Content extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Title(teacher.title),
-              SizedBox(height: 10),
+              SizedBox(height: 15),
               Divider(height: 0.5),
               SizedBox(height: 10),
               Teacher(teacher),
               SizedBox(height: 10),
               Divider(height: 0.5),
-              SizedBox(height: 10),
+              SizedBox(height: 15),
               Description(
+                context,
                 title: 'サービス内容',
                 content: teacher.canDo,
               ),
-              SizedBox(height: 15),
+              SizedBox(height: 30),
               Description(
+                context,
                 title: 'こんな方におすすめ',
                 content: teacher.recommend,
               ),
-              SizedBox(height: 15),
+              SizedBox(height: 30),
               Description(
+                context,
                 title: '自己紹介',
                 content: teacher.about,
               ),
@@ -454,21 +467,24 @@ class Teacher extends StatelessWidget {
 }
 
 class Description extends StatelessWidget {
-  Description({@required this.title, @required this.content});
+  Description(this.context, {@required this.title, @required this.content});
 
+  final BuildContext context;
   final String title;
   final String content;
 
   TextStyle _label() {
     return TextStyle(
+      fontSize: 20,
       fontWeight: FontWeight.bold,
+      color: Color(0xff203152),
     );
   }
 
   TextStyle _description() {
     return TextStyle(
-      fontSize: 16,
-      color: Colors.black54,
+      fontSize: 17,
+      height: 1.5,
     );
   }
 
@@ -492,12 +508,12 @@ class Description extends StatelessWidget {
 }
 
 class ReviewList extends StatelessWidget {
-  Widget _cell(review) {
+  Widget _cell(BuildContext context, review) {
     return Container(
       margin: EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.all(Radius.circular(8)),
-        color: Colors.white,
+        color: Theme.of(context).scaffoldBackgroundColor,
       ),
       child: ListTile(
         contentPadding: EdgeInsets.all(10),
@@ -563,15 +579,17 @@ class ReviewList extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          SizedBox(height: 10),
+          SizedBox(height: 30),
           Divider(
             height: 0.5,
           ),
-          SizedBox(height: 10),
+          SizedBox(height: 15),
           Text(
             'レビュー',
             style: TextStyle(
+              fontSize: 20,
               fontWeight: FontWeight.bold,
+              color: Color(0xff203152),
             ),
           ),
           SizedBox(
@@ -585,18 +603,10 @@ class ReviewList extends StatelessWidget {
                   padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.all(Radius.circular(8)),
-                    color: Colors.white,
+                    color: Colors.black.withOpacity(0.05),
                   ),
                   child: Row(
                     children: <Widget>[
-                      CircleAvatar(
-                        child: Icon(
-                          Icons.person_outline,
-                          color: Colors.white,
-                        ),
-                        backgroundColor: Colors.black12,
-                      ),
-                      SizedBox(width: 15),
                       Expanded(
                         child: Center(
                           child: Text(
@@ -638,7 +648,7 @@ class ReviewList extends StatelessWidget {
                   ListBody(
                     children: model.reviews.map(
                       (review) {
-                        return _cell(review);
+                        return _cell(context, review);
                       },
                     ).toList(),
                   ),
