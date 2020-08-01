@@ -81,32 +81,30 @@ class SettingImage extends StatelessWidget {
                             },
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(60),
-                              child: !model.isLoading
-                                  ? Container(
-                                      width: 120,
-                                      height: 120,
-                                      decoration: BoxDecoration(
-                                        image: DecorationImage(
-                                          fit: BoxFit.cover,
-                                          image: userIcon(model),
-                                        ),
+                              child: Container(
+                                width: 120,
+                                height: 120,
+                                decoration: BoxDecoration(
+                                  image: DecorationImage(
+                                    fit: BoxFit.cover,
+                                    image: userIcon(model),
+                                  ),
+                                ),
+                                child: Align(
+                                  alignment: Alignment.bottomCenter,
+                                  child: Container(
+                                    height: 40,
+                                    color: Colors.black54,
+                                    child: Center(
+                                      child: Icon(
+                                        Icons.photo_camera,
+                                        size: 24,
+                                        color: Colors.grey,
                                       ),
-                                      child: Align(
-                                        alignment: Alignment.bottomCenter,
-                                        child: Container(
-                                          height: 40,
-                                          color: Colors.black54,
-                                          child: Center(
-                                            child: Icon(
-                                              Icons.photo_camera,
-                                              size: 24,
-                                              color: Colors.grey,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    )
-                                  : Container(),
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                           SizedBox(height: 15),
