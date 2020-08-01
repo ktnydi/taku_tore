@@ -63,5 +63,11 @@
             </intent-filter>
         </activity>
         <!-- End Sign in with Facebook -->
+        <!-- Image cropper -->
+        <activity
+            android:name="com.yalantis.ucrop.UCropActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+        <!-- End Image cropper -->
     </application>
 </manifest>

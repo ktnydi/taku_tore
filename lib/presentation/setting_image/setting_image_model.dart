@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:image_cropper/image_cropper.dart';
 import '../../domain/user.dart';
 
 class SettingImageModel extends ChangeNotifier {
@@ -46,8 +47,30 @@ class SettingImageModel extends ChangeNotifier {
       return null;
     }
 
-    this.imageFile = File(pickedFile.path);
-    this.imageData = await pickedFile.readAsBytes();
+    final File croppedFile = await ImageCropper.cropImage(
+      sourcePath: pickedFile.path,
+      aspectRatio: CropAspectRatio(ratioX: 1, ratioY: 1),
+      cropStyle: CropStyle.circle,
+      androidUiSettings: AndroidUiSettings(
+        toolbarTitle: 'Cropper',
+        toolbarColor: Colors.deepOrange,
+        toolbarWidgetColor: Colors.white,
+        initAspectRatio: CropAspectRatioPreset.original,
+        lockAspectRatio: true,
+      ),
+      iosUiSettings: IOSUiSettings(
+        minimumAspectRatio: 1.0,
+        cancelButtonTitle: 'キャンセル',
+        doneButtonTitle: '完了',
+      ),
+    );
+
+    if (croppedFile == null) {
+      return;
+    }
+
+    this.imageFile = croppedFile;
+    this.imageData = await croppedFile.readAsBytes();
     notifyListeners();
   }
 
