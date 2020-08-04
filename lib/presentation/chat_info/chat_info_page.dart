@@ -10,13 +10,18 @@ class ChatInfo extends StatelessWidget {
   final User user;
   final Room room;
 
-  Future<bool> _confirm(BuildContext context) async {
+  Future<bool> _confirm(
+    BuildContext context, {
+    Widget title,
+    Widget content,
+    Widget done,
+  }) async {
     return await showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('トークを削除しますか？'),
-          content: Text('トークを全て削除します。相手側のトークは削除されません。'),
+          title: title,
+          content: content,
           actions: <Widget>[
             FlatButton(
               child: Text(
@@ -28,16 +33,68 @@ class ChatInfo extends StatelessWidget {
               onPressed: () => Navigator.pop(context, false),
             ),
             FlatButton(
-              child: Text(
-                '削除',
-                style: TextStyle(color: Colors.redAccent),
-              ),
+              child: done,
               onPressed: () => Navigator.pop(context, true),
             )
           ],
         );
       },
     );
+  }
+
+  Future _errorDialog(BuildContext context, {String errorText}) async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('エラー'),
+          content: Text(errorText),
+          actions: <Widget>[
+            FlatButton(
+              child: Text(
+                'OK',
+                style: TextStyle(color: Colors.blueAccent),
+              ),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future _addBlock(BuildContext context, ChatInfoModel model) async {
+    try {
+      final isConfirm = await this._confirm(
+        context,
+        title: Text('ユーザーをブロックする'),
+        content: Text(
+          '今後、${model.user.displayName}さんに関する情報は表示されなくなります。${model.user.displayName}さんをブロックしますか？',
+        ),
+        done: Text(
+          'ブロック',
+          style: TextStyle(color: Colors.redAccent),
+        ),
+      );
+
+      if (!isConfirm) return;
+
+      await model.addBlock();
+
+      Navigator.pop(context);
+    } catch (e) {
+      this._errorDialog(context, errorText: e.toString());
+    }
+  }
+
+  Future _removeBlock(BuildContext context, ChatInfoModel model) async {
+    try {
+      await model.removeBlock();
+
+      Navigator.pop(context);
+    } catch (e) {
+      this._errorDialog(context, errorText: e.toString());
+    }
   }
 
   Future _removeTalk(ChatInfoModel model) async {
@@ -91,16 +148,8 @@ class ChatInfo extends StatelessWidget {
     return ListTile(
       contentPadding: EdgeInsets.all(0),
       onTap: !model.isBlocked
-          ? () async {
-              await model.addBlock();
-
-              Navigator.pop(context);
-            }
-          : () async {
-              await model.removeBlock();
-
-              Navigator.pop(context);
-            },
+          ? () async => this._addBlock(context, model)
+          : () async => this._removeBlock(context, model),
       dense: true,
       title: Center(
         child: Text(
@@ -121,7 +170,15 @@ class ChatInfo extends StatelessWidget {
     return ListTile(
       contentPadding: EdgeInsets.all(0),
       onTap: () async {
-        final isConfirm = await _confirm(context);
+        final isConfirm = await _confirm(
+          context,
+          title: Text('トークを削除しますか？'),
+          content: Text('トークを全て削除します。相手側のトークは削除されません。'),
+          done: Text(
+            '削除',
+            style: TextStyle(color: Colors.redAccent),
+          ),
+        );
 
         if (!isConfirm) return;
 
