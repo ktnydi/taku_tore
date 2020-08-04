@@ -108,7 +108,9 @@ class _ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
       create: (_) => ChatRoomModel(
         room: widget.room,
         user: widget.user,
-      )..scrollListener(),
+      )
+        ..checkBlocked()
+        ..scrollListener(),
       child: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: Scaffold(
@@ -120,19 +122,24 @@ class _ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
               ),
             ),
             actions: <Widget>[
-              IconButton(
-                icon: Icon(Icons.info_outline),
-                onPressed: () {
-                  // TODO: Navigation to ChatInfo
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      fullscreenDialog: true,
-                      builder: (BuildContext context) => ChatInfo(
-                        user: widget.user,
-                        room: widget.room,
-                      ),
-                    ),
+              Consumer<ChatRoomModel>(
+                builder: (_, model, __) {
+                  return IconButton(
+                    icon: Icon(Icons.info_outline),
+                    onPressed: () async {
+                      // TODO: Navigation to ChatInfo
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          fullscreenDialog: true,
+                          builder: (BuildContext context) => ChatInfo(
+                            user: widget.user,
+                            room: widget.room,
+                          ),
+                        ),
+                      );
+                      model.checkBlocked();
+                    },
                   );
                 },
               ),
@@ -418,22 +425,45 @@ class SendMessageField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-      decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(
-            width: 0.5,
-            color: Colors.black12,
+    return Consumer<ChatRoomModel>(
+      builder: (_, model, __) {
+        if (model.isBlocked) {
+          return Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(15),
+            decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(
+                  width: 0.5,
+                  color: Colors.black12,
+                ),
+              ),
+              color: Colors.white,
+            ),
+            child: SafeArea(
+              child: Align(
+                alignment: Alignment.center,
+                child: Text(
+                  '現在、メッセージを送信できません',
+                ),
+              ),
+            ),
+          );
+        }
+
+        return Container(
+          padding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+          decoration: BoxDecoration(
+            border: Border(
+              top: BorderSide(
+                width: 0.5,
+                color: Colors.black12,
+              ),
+            ),
+            color: Colors.white,
           ),
-        ),
-        color: Colors.white,
-      ),
-      child: SafeArea(
-        top: false,
-        child: Consumer<ChatRoomModel>(
-          builder: (_, model, __) {
-            return Row(
+          child: SafeArea(
+            child: Row(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -488,10 +518,10 @@ class SendMessageField extends StatelessWidget {
                   ),
                 ),
               ],
-            );
-          },
-        ),
-      ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

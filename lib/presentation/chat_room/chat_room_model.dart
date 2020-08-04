@@ -14,6 +14,8 @@ class ChatRoomModel extends ChangeNotifier {
   String _message = '';
   bool isFetchingMessage = false;
   bool showAllMessage = false;
+  bool isBlocked = false;
+  bool isLoading = false;
 
   ChatRoomModel({this.room, this.user});
 
@@ -23,6 +25,32 @@ class ChatRoomModel extends ChangeNotifier {
     this.messageController.dispose();
 
     super.dispose();
+  }
+
+  void beginLoading() {
+    isLoading = true;
+    notifyListeners();
+  }
+
+  void endLoading() {
+    isLoading = false;
+    notifyListeners();
+  }
+
+  Future checkBlocked() async {
+    beginLoading();
+
+    final currentUser = await FirebaseAuth.instance.currentUser();
+    final document =
+        Firestore.instance.collection('users').document(currentUser.uid);
+    final doc = await document.get();
+
+    final isBlocking = doc['blockedUserID'].contains(this.user.uid);
+    final isBlocked = this.user.blockedUserID.contains(currentUser.uid);
+
+    this.isBlocked = isBlocking || isBlocked;
+
+    endLoading();
   }
 
   void scrollListener() {
