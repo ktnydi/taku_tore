@@ -10,6 +10,7 @@ class ChatInfoModel extends ChangeNotifier {
   final Room room;
   final User user;
   bool isLoading = false;
+  bool isBlocked = false;
 
   ChatInfoModel({@required this.room, @required this.user});
 
@@ -21,6 +22,35 @@ class ChatInfoModel extends ChangeNotifier {
   void endLoading() {
     isLoading = false;
     notifyListeners();
+  }
+
+  Future checkBlockedUser() async {
+    final currentUser = await _auth.currentUser();
+    final document = _store.collection('users').document(currentUser.uid);
+    final doc = await document.get();
+
+    this.isBlocked = doc['blockedUserID'].contains(this.user.uid);
+    notifyListeners();
+  }
+
+  Future addBlock() async {
+    final currentUser = await _auth.currentUser();
+    final document = _store.collection('users').document(currentUser.uid);
+    await document.updateData(
+      {
+        'blockedUserID': FieldValue.arrayUnion([this.user.uid]),
+      },
+    );
+  }
+
+  Future removeBlock() async {
+    final currentUser = await _auth.currentUser();
+    final document = _store.collection('users').document(currentUser.uid);
+    await document.updateData(
+      {
+        'blockedUserID': FieldValue.arrayRemove([this.user.uid]),
+      },
+    );
   }
 
   Future removeTalk() async {

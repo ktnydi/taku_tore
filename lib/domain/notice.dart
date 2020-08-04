@@ -37,6 +37,7 @@ class Notice {
       photoURL: doc['photoURL'],
       isTeacher: doc['isTeacher'],
       createdAt: doc['createdAt'],
+      blockedUserID: doc['blockedUserID'],
     );
     return user;
   }

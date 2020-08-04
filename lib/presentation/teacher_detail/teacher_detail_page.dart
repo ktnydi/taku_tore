@@ -74,6 +74,10 @@ class TeacherDetail extends StatelessWidget {
       return Container();
     }
 
+    if (model.isBlocked) {
+      return BlockedButton();
+    }
+
     if (model.isAlreadyExist) {
       return ReviewButton(teacher);
     }
@@ -85,6 +89,7 @@ class TeacherDetail extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<TeacherDetailModel>(
       create: (_) => TeacherDetailModel()
+        ..checkBlocked(teacher: teacher)
         ..checkAuthor(teacher: teacher)
         ..checkBookmark(teacher: teacher)
         ..checkRoom(teacher: teacher)
@@ -182,6 +187,34 @@ class TeacherDetail extends StatelessWidget {
           },
         ),
       ),
+    );
+  }
+}
+
+class BlockedButton extends StatelessWidget {
+  final horizontalMargin = 30;
+
+  @override
+  Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width - horizontalMargin;
+
+    return Consumer<TeacherDetailModel>(
+      builder: (_, model, __) {
+        return RoundedButton(
+          minWidth: width,
+          color: Colors.amber,
+          disabledColor: Colors.grey,
+          onPressed: null,
+          child: Text(
+            'この講師には相談できません',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 17,
+              color: Colors.white,
+            ),
+          ),
+        );
+      },
     );
   }
 }

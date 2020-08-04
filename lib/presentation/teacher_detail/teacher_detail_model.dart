@@ -9,6 +9,7 @@ class TeacherDetailModel extends ChangeNotifier {
   ScrollController scrollController = ScrollController();
   List<Review> reviews = [];
   List<DocumentSnapshot> reviewDocList = [];
+  bool isBlocked = false;
   bool isAuthor = false;
   bool isBookmarked = false;
   bool isAlreadyExist = false;
@@ -54,6 +55,14 @@ class TeacherDetailModel extends ChangeNotifier {
         );
     final docs = await query.getDocuments();
     this.isBookmarked = docs.documents.isNotEmpty;
+    notifyListeners();
+  }
+
+  Future checkBlocked({User teacher}) async {
+    final currentUser = await FirebaseAuth.instance.currentUser();
+
+    this.isBlocked = teacher.blockedUserID.contains(currentUser.uid);
+
     notifyListeners();
   }
 

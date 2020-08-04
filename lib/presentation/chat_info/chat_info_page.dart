@@ -87,6 +87,36 @@ class ChatInfo extends StatelessWidget {
     );
   }
 
+  Widget _buildBlockedUser(BuildContext context, ChatInfoModel model) {
+    return ListTile(
+      contentPadding: EdgeInsets.all(0),
+      onTap: !model.isBlocked
+          ? () async {
+              await model.addBlock();
+
+              Navigator.pop(context);
+            }
+          : () async {
+              await model.removeBlock();
+
+              Navigator.pop(context);
+            },
+      dense: true,
+      title: Center(
+        child: Text(
+          !model.isBlocked
+              ? '${model.user.displayName}さんをブロックする'
+              : '${model.user.displayName}さんのブロックを解除する',
+          style: TextStyle(
+            color: Colors.red,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildClearTalk(BuildContext context, ChatInfoModel model) {
     return ListTile(
       contentPadding: EdgeInsets.all(0),
@@ -116,10 +146,12 @@ class ChatInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<ChatInfoModel>(
-      create: (_) => ChatInfoModel(user: this.user, room: this.room),
+      create: (_) =>
+          ChatInfoModel(user: this.user, room: this.room)..checkBlockedUser(),
       child: Consumer<ChatInfoModel>(
         builder: (_, model, __) {
           final List<Widget> _listTiles = [
+            _buildBlockedUser(context, model),
             _buildClearTalk(context, model),
           ];
 
@@ -150,6 +182,7 @@ class ChatInfo extends StatelessWidget {
                           ),
                         ),
                         child: ListView.separated(
+                          padding: EdgeInsets.all(0),
                           physics: NeverScrollableScrollPhysics(),
                           shrinkWrap: true,
                           itemBuilder: (context, index) => _listTiles[index],
