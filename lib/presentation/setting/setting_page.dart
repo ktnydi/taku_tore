@@ -10,6 +10,7 @@ import '../setting_email/setting_email_page.dart';
 import '../setting_password/setting_password_page.dart';
 import '../bookmark/bookmark_page.dart';
 import '../remove_user/remove_user_page.dart';
+import '../blocked_user_list/blocked_user_list_page.dart';
 
 class Setting extends StatelessWidget {
   @override
@@ -28,6 +29,8 @@ class Setting extends StatelessWidget {
               CurrentAccount(),
               SizedBox(height: 15),
               AccountSetting(),
+              SizedBox(height: 15),
+              BlockedUser(),
               SizedBox(height: 15),
               Bookmark(),
               SizedBox(height: 15),
@@ -212,6 +215,34 @@ class AccountSetting extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+}
+
+class BlockedUser extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Section(
+      title: SectionTitle(title: 'ブロック'),
+      children: <Widget>[
+        SectionCell(
+          title: Text(
+            'ブロックしたユーザー',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (BuildContext context) => BlockedUserList(),
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 }
