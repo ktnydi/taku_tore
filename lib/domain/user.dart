@@ -15,6 +15,7 @@ class User {
     this.recommend,
     this.avgRating,
     this.numRatings,
+    this.blockedUserID,
     @required this.createdAt,
   });
 
@@ -30,5 +31,6 @@ class User {
   final String recommend;
   final double avgRating;
   final int numRatings;
+  final List<dynamic> blockedUserID;
   final Timestamp createdAt;
 }

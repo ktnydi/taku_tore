@@ -62,6 +62,7 @@ class ChatModel extends ChangeNotifier {
       about: user['about'],
       canDo: user['canDo'],
       recommend: user['recommend'],
+      blockedUserID: user['blockedUserID'],
     );
   }
 

@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../domain/user.dart';
@@ -5,6 +6,7 @@ import '../../domain/user.dart';
 class HomeModel extends ChangeNotifier {
   ScrollController scrollController = ScrollController();
   List<User> teachers = [];
+  List<dynamic> blockedUserID = [];
   List<DocumentSnapshot> docSnapshot = [];
   bool isLoading = false;
   bool isFetchingTeachers = false;
@@ -30,8 +32,16 @@ class HomeModel extends ChangeNotifier {
     });
   }
 
-  Future fetchTeachers() async {
+  Future loading() async {
     beginLoading();
+
+    await checkBlockedUser();
+    await fetchTeachers();
+
+    endLoading();
+  }
+
+  Future fetchTeachers() async {
     final query = Firestore.instance
         .collection('users')
         .where('isTeacher', isEqualTo: true)
@@ -54,11 +64,12 @@ class HomeModel extends ChangeNotifier {
         recommend: doc['recommend'],
         avgRating: doc['avgRating'].toDouble(),
         numRatings: doc['numRatings'].toInt(),
+        blockedUserID: doc['blockedUserID'],
       );
     }).toList();
+
     this.teachers = teachers;
     notifyListeners();
-    endLoading();
   }
 
   Future addExtraTeachers() async {
@@ -96,5 +107,28 @@ class HomeModel extends ChangeNotifier {
 
     this.isFetchingTeachers = false;
     notifyListeners();
+  }
+
+  Future checkBlockedUser() async {
+    final currentUser = await FirebaseAuth.instance.currentUser();
+    final document =
+        Firestore.instance.collection('users').document(currentUser.uid);
+    final doc = await document.get();
+    final blockedUserID = doc['blockedUserID'];
+    this.blockedUserID = blockedUserID;
+  }
+
+  Future blockedUser({User user}) async {
+    final currentUser = await FirebaseAuth.instance.currentUser();
+    final document =
+        Firestore.instance.collection('users').document(currentUser.uid);
+
+    await document.updateData(
+      {
+        'blockedUserID': FieldValue.arrayUnion(
+          [user.uid],
+        ),
+      },
+    );
   }
 }

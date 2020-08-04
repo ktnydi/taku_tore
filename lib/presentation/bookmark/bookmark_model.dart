@@ -43,6 +43,7 @@ class BookmarkModel extends ChangeNotifier {
           recommend: document['recommend'],
           avgRating: document['avgRating'].toDouble(),
           numRatings: document['numRatings'],
+          blockedUserID: document['blockedUserID'],
         );
       }),
     );

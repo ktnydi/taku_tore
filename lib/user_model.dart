@@ -104,6 +104,7 @@ class UserModel extends ChangeNotifier {
         'photoURL': photoURL,
         'isTeacher': false,
         'deviceToken': deviceToken,
+        'blockedUserID': [],
         'createdAt': FieldValue.serverTimestamp(),
       });
     }
