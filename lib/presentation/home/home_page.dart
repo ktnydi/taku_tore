@@ -46,6 +46,40 @@ class Home extends StatelessWidget {
     );
   }
 
+  Future _addBlocked(BuildContext context,
+      {HomeModel model, User teacher}) async {
+    try {
+      Navigator.pop(context);
+
+      final isConfirm = await this._confirmDialog(
+        context,
+        teacher,
+      );
+
+      if (!isConfirm) return;
+
+      await model.blockedUser(user: teacher);
+
+      final snackBar = SnackBar(
+        content: Text(
+          '${teacher.displayName}さんをブロックしました',
+        ),
+      );
+
+      _scaffoldKey.currentState.showSnackBar(snackBar);
+
+      await model.loading();
+    } catch (e) {
+      final snackBar = SnackBar(
+        content: Text(
+          e.toString(),
+        ),
+      );
+
+      _scaffoldKey.currentState.showSnackBar(snackBar);
+    }
+  }
+
   Future _showModalBottomSheet(
     BuildContext context,
     User teacher,
@@ -99,30 +133,11 @@ class Home extends StatelessWidget {
                         ],
                       ),
                       onPressed: () async {
-                        try {
-                          Navigator.pop(context);
-
-                          final isConfirm = await this._confirmDialog(
-                            context,
-                            teacher,
-                          );
-
-                          if (!isConfirm) return;
-
-                          await model.blockedUser(user: teacher);
-
-                          final snackBar = SnackBar(
-                            content: Text(
-                              '${teacher.displayName}さんをブロックしました',
-                            ),
-                          );
-
-                          _scaffoldKey.currentState.showSnackBar(snackBar);
-
-                          await model.loading();
-                        } catch (e) {
-                          print(e.toString());
-                        }
+                        await _addBlocked(
+                          context,
+                          model: model,
+                          teacher: teacher,
+                        );
                       },
                     ),
                   ),
