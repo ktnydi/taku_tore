@@ -112,7 +112,101 @@ class Home extends StatelessWidget {
                           ),
                         ],
                       ),
-                      onPressed: () {},
+                      onPressed: () async {
+                        Navigator.pop(context);
+
+                        await showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return SimpleDialog(
+                              titlePadding: EdgeInsets.all(15),
+                              contentPadding: EdgeInsets.all(0),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              title: Center(
+                                child: Column(
+                                  children: <Widget>[
+                                    Text(
+                                      'ユーザーを報告する',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    SizedBox(height: 5),
+                                    Text(
+                                      '報告したい内容を選択してください',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              children: <Widget>[
+                                Divider(height: 0.5),
+                                SimpleDialogOption(
+                                  padding: EdgeInsets.all(15),
+                                  child: Center(
+                                    child: Text(
+                                      '不適切な内容である',
+                                    ),
+                                  ),
+                                  onPressed: () async {
+                                    await model.report(
+                                      user: teacher,
+                                      contentType: 'inappropriate',
+                                    );
+
+                                    Navigator.pop(context);
+
+                                    _scaffoldKey.currentState.showSnackBar(
+                                      SnackBar(
+                                        content: Text('ご報告ありがとうございます'),
+                                      ),
+                                    );
+                                  },
+                                ),
+                                Divider(height: 0.5),
+                                SimpleDialogOption(
+                                  padding: EdgeInsets.all(15),
+                                  child: Center(
+                                    child: Text(
+                                      'スパムである',
+                                    ),
+                                  ),
+                                  onPressed: () async {
+                                    await model.report(
+                                      user: teacher,
+                                      contentType: 'spam',
+                                    );
+
+                                    Navigator.pop(context);
+
+                                    _scaffoldKey.currentState.showSnackBar(
+                                      SnackBar(
+                                        content: Text('ご報告ありがとうございます'),
+                                      ),
+                                    );
+                                  },
+                                ),
+                                Divider(height: 0.5),
+                                SimpleDialogOption(
+                                  padding: EdgeInsets.all(15),
+                                  child: Center(
+                                    child: Text('キャンセル'),
+                                  ),
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                ),
+                                Divider(height: 0.5),
+                              ],
+                            );
+                          },
+                        );
+                      },
                     ),
                   ),
                   ButtonTheme(

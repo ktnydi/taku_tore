@@ -131,4 +131,24 @@ class HomeModel extends ChangeNotifier {
       },
     );
   }
+
+  Future report({User user, String contentType}) async {
+    final contentTypes = ['inappropriate', 'spam'];
+
+    if (!contentTypes.contains(contentType)) return;
+
+    final currentUser = await FirebaseAuth.instance.currentUser();
+
+    if (user.uid == currentUser.uid) return;
+
+    final collection = Firestore.instance.collection('reports');
+    await collection.add(
+      {
+        'userID': user.uid,
+        'senderID': currentUser.uid,
+        'contentType': contentType,
+        'createdAt': FieldValue.serverTimestamp(),
+      },
+    );
+  }
 }
