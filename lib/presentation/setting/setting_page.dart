@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:takutore/atoms/rounded_button.dart';
+import 'package:takutore/presentation/feedback_form/feedback_form_page.dart';
 import '../setting_image/setting_image_page.dart';
 import '../../user_model.dart';
 import '../setting_teacher/setting_teacher_page.dart';
@@ -33,6 +34,8 @@ class Setting extends StatelessWidget {
               BlockedUser(),
               SizedBox(height: 15),
               Bookmark(),
+              SizedBox(height: 15),
+              About(),
               SizedBox(height: 15),
               Danger(),
             ],
@@ -266,6 +269,34 @@ class Bookmark extends StatelessWidget {
               context,
               MaterialPageRoute(
                 builder: (BuildContext context) => BookmarkList(),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class About extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Section(
+      title: SectionTitle(title: 'アプリについて'),
+      children: <Widget>[
+        SectionCell(
+          title: Text(
+            'アプリのフィードバックを送る',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (BuildContext context) => FeedbackForm(),
               ),
             );
           },
