@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../../domain/user.dart';
 
 class HomeModel extends ChangeNotifier {
@@ -142,12 +144,28 @@ class HomeModel extends ChangeNotifier {
     if (user.uid == currentUser.uid) return;
 
     final collection = Firestore.instance.collection('reports');
-    await collection.add(
+
+    final result = await collection.add(
       {
         'userID': user.uid,
         'senderID': currentUser.uid,
         'contentType': contentType,
         'createdAt': FieldValue.serverTimestamp(),
+      },
+    );
+
+    final doc = await result.get();
+
+    // gasで作成したgssに報告データを追加するweb apiを呼ぶ
+    final webAppURL = DotEnv().env['GOOGLE_WEB_APP_URL'];
+    http.post(
+      webAppURL,
+      body: {
+        'documentID': doc.documentID,
+        'userID': doc['userID'],
+        'senderID': doc['senderID'],
+        'contentType': doc['contentType'],
+        'createdAt': doc['createdAt'].toDate().toString(),
       },
     );
   }
