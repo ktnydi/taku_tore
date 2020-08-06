@@ -8,6 +8,31 @@ import 'home_model.dart';
 class Home extends StatelessWidget {
   final _scaffoldKey = new GlobalKey<ScaffoldState>();
 
+  Future _alertDialog(BuildContext context, {String errorText}) async {
+    return await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('エラー'),
+          content: Text(errorText),
+          actions: <Widget>[
+            FlatButton(
+              child: Text(
+                'OK',
+                style: TextStyle(
+                  color: Colors.blueAccent,
+                ),
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<bool> _confirmDialog(BuildContext context, User teacher) async {
     return await showDialog(
       context: context,
@@ -44,6 +69,35 @@ class Home extends StatelessWidget {
         );
       },
     );
+  }
+
+  Future _report(BuildContext context,
+      {HomeModel model, User teacher, String contentType}) async {
+    final types = ['inappropriate', 'spam'];
+    try {
+      if (!types.contains(contentType)) {
+        throw ('適切な報告内容を選択してください。');
+      }
+
+      await model.report(
+        user: teacher,
+        contentType: 'inappropriate',
+      );
+
+      Navigator.pop(context);
+
+      _scaffoldKey.currentState.showSnackBar(
+        SnackBar(
+          content: Text('ご報告ありがとうございます'),
+        ),
+      );
+    } catch (e) {
+      Navigator.pop(context);
+      this._alertDialog(
+        context,
+        errorText: e.toString(),
+      );
+    }
   }
 
   Future _addBlocked(BuildContext context,
@@ -154,17 +208,11 @@ class Home extends StatelessWidget {
                                     ),
                                   ),
                                   onPressed: () async {
-                                    await model.report(
-                                      user: teacher,
+                                    await this._report(
+                                      context,
+                                      model: model,
+                                      teacher: teacher,
                                       contentType: 'inappropriate',
-                                    );
-
-                                    Navigator.pop(context);
-
-                                    _scaffoldKey.currentState.showSnackBar(
-                                      SnackBar(
-                                        content: Text('ご報告ありがとうございます'),
-                                      ),
                                     );
                                   },
                                 ),
@@ -177,17 +225,11 @@ class Home extends StatelessWidget {
                                     ),
                                   ),
                                   onPressed: () async {
-                                    await model.report(
-                                      user: teacher,
+                                    await this._report(
+                                      context,
+                                      model: model,
+                                      teacher: teacher,
                                       contentType: 'spam',
-                                    );
-
-                                    Navigator.pop(context);
-
-                                    _scaffoldKey.currentState.showSnackBar(
-                                      SnackBar(
-                                        content: Text('ご報告ありがとうございます'),
-                                      ),
                                     );
                                   },
                                 ),
