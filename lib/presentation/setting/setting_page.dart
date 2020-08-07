@@ -346,6 +346,27 @@ class About extends StatelessWidget {
             }
           },
         ),
+        SectionCell(
+          title: Text(
+            'プライバシーポリシー',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          onTap: () async {
+            try {
+              const url = 'https://takutore-e2ffa.firebaseapp.com/privacy.html';
+              if (await launcher.canLaunch(url)) {
+                await launcher.launch(url);
+              } else {
+                throw 'プライバシーポリシーの読み込みに失敗しました。';
+              }
+            } catch (e) {
+              this._alertDialog(context, errorText: e.toString());
+            }
+          },
+        ),
       ],
     );
   }
