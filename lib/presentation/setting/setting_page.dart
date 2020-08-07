@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:takutore/atoms/rounded_button.dart';
 import 'package:takutore/presentation/feedback_form/feedback_form_page.dart';
+import 'package:url_launcher/url_launcher.dart' as launcher;
 import '../setting_image/setting_image_page.dart';
 import '../../user_model.dart';
 import '../setting_teacher/setting_teacher_page.dart';
@@ -279,6 +280,29 @@ class Bookmark extends StatelessWidget {
 }
 
 class About extends StatelessWidget {
+  Future _alertDialog(BuildContext context, {String errorText}) async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('エラー'),
+          content: Text(errorText),
+          actions: <Widget>[
+            FlatButton(
+              child: Text(
+                'OK',
+                style: TextStyle(
+                  color: Colors.blueAccent,
+                ),
+              ),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Section(
@@ -299,6 +323,27 @@ class About extends StatelessWidget {
                 builder: (BuildContext context) => FeedbackForm(),
               ),
             );
+          },
+        ),
+        SectionCell(
+          title: Text(
+            '利用規約',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          onTap: () async {
+            try {
+              const url = 'https://takutore-e2ffa.firebaseapp.com/terms.html';
+              if (await launcher.canLaunch(url)) {
+                await launcher.launch(url);
+              } else {
+                throw '利用規約の読み込みに失敗しました。';
+              }
+            } catch (e) {
+              this._alertDialog(context, errorText: e.toString());
+            }
           },
         ),
       ],
