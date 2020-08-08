@@ -7,6 +7,7 @@ import 'domain/user.dart';
 
 class UserModel extends ChangeNotifier {
   User user;
+  final Firestore _store = Firestore.instance;
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   bool isLoading = false;
 
@@ -63,6 +64,7 @@ class UserModel extends ChangeNotifier {
               displayName: userData['displayName'],
               photoURL: userData['photoURL'],
               isTeacher: userData['isTeacher'],
+              blockedUserID: userData['blockedUserID'],
               createdAt: userData['createdAt'],
             );
           } else {
@@ -164,18 +166,89 @@ class UserModel extends ChangeNotifier {
     }
   }
 
-  Future removeUser() async {
+  Future removeUser({String password}) async {
     FirebaseUser user = await FirebaseAuth.instance.currentUser();
-    if (user != null) {
-      if (await hasAvatar(user: user)) {
-        await FirebaseStorage.instance
-            .ref()
-            .child('/images/${user.uid}.jpg')
-            .delete();
-      }
-      await Firestore.instance.document('/users/${user.uid}').delete();
-      await user.delete();
+
+    final result = await user.reauthenticateWithCredential(
+      EmailAuthProvider.getCredential(
+        email: user.email,
+        password: password,
+      ),
+    );
+
+    if (result.user == null) return;
+
+    if (await hasAvatar(user: user)) {
+      await FirebaseStorage.instance
+          .ref()
+          .child('/images/${user.uid}.jpg')
+          .delete();
     }
+    final userRef = _store.collection('users').document(user.uid);
+    final roomRef = userRef.collection('rooms');
+    final bookmarkRef = userRef.collection('bookmarks');
+    final reviewRef = userRef.collection('reviews');
+    final noticeRef = userRef.collection('notices');
+
+    // rooms, messagesのデータ削除
+    final roomDocs = await roomRef.getDocuments();
+    await Future.forEach(
+      roomDocs.documents,
+      (DocumentSnapshot doc) async {
+        final msgRef = roomRef.document(doc.documentID).collection('messages');
+        final msgDocs = await msgRef.getDocuments();
+
+        await Future.forEach(
+          msgDocs.documents,
+          (DocumentSnapshot doc) async {
+            await msgRef.document(doc.documentID).delete();
+          },
+        );
+
+        await roomRef.document(doc.documentID).delete();
+      },
+    );
+
+    // bookmarksのデータ削除
+    final bookmarkDocs = await bookmarkRef.getDocuments();
+    Future.forEach(
+      bookmarkDocs.documents,
+      (DocumentSnapshot doc) async {
+        await bookmarkRef.document(doc.documentID).delete();
+      },
+    );
+
+    // reviewsのデータ削除
+    final reviewDocs = await reviewRef.getDocuments();
+    Future.forEach(
+      reviewDocs.documents,
+      (DocumentSnapshot doc) async {
+        await reviewRef.document(doc.documentID).delete();
+      },
+    );
+
+    // noticesのデータ削除
+    final noticeDocs = await noticeRef.getDocuments();
+    Future.forEach(
+      noticeDocs.documents,
+      (DocumentSnapshot doc) async {
+        await noticeRef.document(doc.documentID).delete();
+      },
+    );
+
+    final userDoc = await userRef.get();
+
+    if (userDoc['isTeacher']) {
+      await FirebaseStorage.instance
+          .ref()
+          .child('/images/${user.uid}_thumbnail.jpg')
+          .delete();
+    }
+
+    // userのデータ削除
+    await userRef.delete();
+
+    await user.delete();
   }
 
   Future<AuthResult> confirmPassword(password) async {
