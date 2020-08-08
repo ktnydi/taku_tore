@@ -65,11 +65,13 @@ class NoticeListModel extends ChangeNotifier {
   }
 
   Future fetchRoom({Notice notice}) async {
+    final user = await _auth.currentUser();
+
     final document = _store
         .collection('users')
-        .document(notice.data['senderID'])
+        .document(user.uid)
         .collection('rooms')
-        .document(notice.data['roomID']);
+        .document(notice.data['documentID']);
     final doc = await document.get();
     final teacher =
         await _fetchUserFromFirebase(uid: doc['member']['teacherID']);

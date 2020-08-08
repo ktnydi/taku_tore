@@ -4,6 +4,7 @@ import 'user.dart';
 import 'room.dart';
 
 class Notice {
+  String _senderID;
   String type;
   Map<String, dynamic> data;
   String createdAt;
@@ -17,6 +18,7 @@ class Notice {
     this.data = doc['data'];
     this.createdAt = format(doc['createdAt'].toDate(), locale: 'ja');
     this.message = _typeParser(doc['type']);
+    this._senderID = doc['senderID'];
   }
 
   String _typeParser(String type) {
@@ -43,7 +45,7 @@ class Notice {
   }
 
   Future<void> fetchSender() async {
-    final sender = await _fetchUserFromFirebase(uid: this.data['senderID']);
+    final sender = await _fetchUserFromFirebase(uid: this._senderID);
     this.sender = sender;
   }
 }
