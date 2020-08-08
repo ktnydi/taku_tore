@@ -89,6 +89,7 @@ class TeacherDetailModel extends ChangeNotifier {
         .collection('bookmarks');
     await collection.add({
       'teacherId': teacher.uid,
+      'userId': user.uid,
       'createdAt': FieldValue.serverTimestamp(),
     });
   }

@@ -59,10 +59,10 @@ class ReviewModel extends ChangeNotifier {
           return;
         }
 
-        final int oldNumRatings = doc.data['numRatings'];
+        final double oldNumRatings = doc.data['numRatings'];
         final double oldAvgRating = doc.data['avgRating'].toDouble();
 
-        final int newNumRatings = oldNumRatings + 1;
+        final double newNumRatings = oldNumRatings + 1;
         final double oldRatingTotal = oldAvgRating * oldNumRatings;
         final double newRatingTotal = oldRatingTotal + this._rating;
         final double newAvgRating = newRatingTotal / newNumRatings;
@@ -78,6 +78,7 @@ class ReviewModel extends ChangeNotifier {
         await transaction.set(
           reviewRef,
           {
+            'teacherID': this._teacher.uid,
             'rating': this._rating,
             'comment': this._comment,
             'fromUid': currentUser.uid,
