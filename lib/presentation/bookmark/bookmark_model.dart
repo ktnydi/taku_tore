@@ -51,4 +51,29 @@ class BookmarkModel extends ChangeNotifier {
     notifyListeners();
     await endLoading();
   }
+
+  Future deleteBookmark(User teacher) async {
+    final currentUser = await FirebaseAuth.instance.currentUser();
+    final query = Firestore.instance
+        .collection('users')
+        .document(currentUser.uid)
+        .collection('bookmarks')
+        .where(
+          'teacherId',
+          isEqualTo: teacher.uid,
+        );
+    final docs = await query.getDocuments();
+    final docId = docs.documents.first.documentID;
+    await Firestore.instance
+        .collection('users')
+        .document(currentUser.uid)
+        .collection('bookmarks')
+        .document(docId)
+        .delete();
+
+    List<User> newTeachers = List<User>.from(this.teachers);
+    newTeachers.removeWhere((tc) => tc.uid == teacher.uid);
+    this.teachers = newTeachers;
+    notifyListeners();
+  }
 }
