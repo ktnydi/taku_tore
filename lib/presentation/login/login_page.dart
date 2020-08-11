@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart' as launcher;
+import '../forgot_password/forgot_password_page.dart';
 import '../../atoms/rounded_button.dart';
 import '../common/loading.dart';
 import '../../user_model.dart';
@@ -95,24 +96,46 @@ class _LoginState extends State<Login> {
                             },
                           ),
                           SizedBox(height: 10),
-                          TextFormField(
-                            controller: _passwordController,
-                            focusNode: myFocusNode,
-                            validator: (value) {
-                              if (value.trim().isEmpty) {
-                                return '入力してください。';
-                              }
-                              return null;
-                            },
-                            obscureText: true,
-                            decoration: InputDecoration(
-                              hintText: 'パスワード',
-                            ),
-                            onFieldSubmitted: (_) {
-                              myFocusNode.unfocus();
-                            },
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: <Widget>[
+                              TextFormField(
+                                controller: _passwordController,
+                                focusNode: myFocusNode,
+                                validator: (value) {
+                                  if (value.trim().isEmpty) {
+                                    return '入力してください。';
+                                  }
+                                  return null;
+                                },
+                                obscureText: true,
+                                decoration: InputDecoration(
+                                  hintText: 'パスワード',
+                                ),
+                                onFieldSubmitted: (_) {
+                                  myFocusNode.unfocus();
+                                },
+                              ),
+                              FlatButton(
+                                child: Text(
+                                  'パスワードを忘れた場合',
+                                  style: TextStyle(
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                                ),
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (BuildContext context) =>
+                                          ForgotPassword(),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
                           ),
-                          SizedBox(height: 30),
+                          SizedBox(height: 10),
                           RoundedButton(
                             color: Theme.of(context).primaryColor,
                             child: Text(
