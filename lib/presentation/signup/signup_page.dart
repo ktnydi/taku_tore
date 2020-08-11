@@ -1,5 +1,7 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart' as launcher;
 import '../../atoms/rounded_button.dart';
 import '../common/loading.dart';
 import '../../user_model.dart';
@@ -36,6 +38,29 @@ class _SignUpState extends State<SignUp> {
     ];
     _controllers.forEach((_controller) => _controller.dispose());
     myFocusNode.dispose();
+  }
+
+  Future _alertDialog(BuildContext context, {String errorText}) async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('エラー'),
+          content: Text(errorText),
+          actions: <Widget>[
+            FlatButton(
+              child: Text(
+                'OK',
+                style: TextStyle(
+                  color: Colors.blueAccent,
+                ),
+              ),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -173,6 +198,65 @@ class _SignUpState extends State<SignUp> {
                                 );
                               }
                             },
+                          ),
+                          SizedBox(height: 30),
+                          Container(
+                            child: RichText(
+                              text: TextSpan(
+                                text: 'アカウント登録すると',
+                                style: TextStyle(color: Colors.black54),
+                                children: <TextSpan>[
+                                  TextSpan(
+                                    text: '利用規約',
+                                    style: TextStyle(
+                                      color: Theme.of(context).primaryColor,
+                                    ),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () async {
+                                        try {
+                                          const url =
+                                              'https://takutore-e2ffa.firebaseapp.com/terms.html';
+                                          if (await launcher.canLaunch(url)) {
+                                            await launcher.launch(url);
+                                          } else {
+                                            throw '利用規約の読み込みに失敗しました。';
+                                          }
+                                        } catch (e) {
+                                          this._alertDialog(context,
+                                              errorText: e.toString());
+                                        }
+                                      },
+                                  ),
+                                  TextSpan(
+                                    text: 'または',
+                                  ),
+                                  TextSpan(
+                                    text: 'プライバシーポリシー',
+                                    style: TextStyle(
+                                      color: Theme.of(context).primaryColor,
+                                    ),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () async {
+                                        try {
+                                          const url =
+                                              'https://takutore-e2ffa.firebaseapp.com/privacy.html';
+                                          if (await launcher.canLaunch(url)) {
+                                            await launcher.launch(url);
+                                          } else {
+                                            throw 'プライバシーポリシーの読み込みに失敗しました。';
+                                          }
+                                        } catch (e) {
+                                          this._alertDialog(context,
+                                              errorText: e.toString());
+                                        }
+                                      },
+                                  ),
+                                  TextSpan(
+                                    text: 'に同意したものとみなされます。',
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         ],
                       ),
