@@ -43,21 +43,17 @@ class _ChatState extends State<Chat> with TickerProviderStateMixin {
           bottom: PreferredSize(
             preferredSize: Size(double.infinity, 50),
             child: Container(
-              padding: EdgeInsets.only(bottom: 15),
               height: 50,
               child: TabBar(
+                labelPadding: EdgeInsets.symmetric(horizontal: 0),
                 controller: _tabController,
                 indicatorSize: TabBarIndicatorSize.label,
-                indicator: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  color: Theme.of(context).primaryColor,
-                ),
                 labelStyle: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
-                labelColor: Colors.white,
-                unselectedLabelColor: Colors.black87,
+                labelColor: Theme.of(context).primaryColor,
+                unselectedLabelColor: Colors.black45,
                 tabs: [
                   Tab(
                     child: Align(
