@@ -43,22 +43,39 @@ class AuthModel extends ChangeNotifier {
     bool registered = await hasAlreadyRegistered(userID: user.uid);
 
     if (!registered) {
-      await document.setData(
-        {
-          'displayName': user.displayName,
-          'photoURL': user.photoUrl,
-          'isTeacher': false,
-          'blockedUserID': [],
-          'deviceToken': deviceToken,
-          'createdAt': FieldValue.serverTimestamp(),
+      await _store.runTransaction(
+        (transaction) async {
+          await transaction.set(
+            document,
+            {
+              'displayName': user.displayName,
+              'photoURL': user.photoUrl,
+              'isTeacher': false,
+              'blockedUserID': [],
+              'createdAt': FieldValue.serverTimestamp(),
+            },
+          );
+
+          if (deviceToken != null && deviceToken.isNotEmpty) {
+            await transaction.set(
+              document.collection('tokens').document(deviceToken),
+              {
+                'deviceToken': deviceToken,
+                'createdAt': FieldValue.serverTimestamp(),
+              },
+            );
+          }
         },
       );
     } else {
-      await document.updateData(
-        {
-          'deviceToken': deviceToken,
-        },
-      );
+      if (deviceToken != null && deviceToken.isNotEmpty) {
+        await document.collection('tokens').document(deviceToken).setData(
+          {
+            'deviceToken': deviceToken,
+            'createdAt': FieldValue.serverTimestamp(),
+          },
+        );
+      }
     }
 
     isLoading = false;
@@ -114,22 +131,39 @@ class AuthModel extends ChangeNotifier {
       bool registered = await hasAlreadyRegistered(userID: user.uid);
 
       if (!registered) {
-        await document.setData(
-          {
-            'displayName': getFullName(appleIdCredential),
-            'photoURL': await getDefaultPhotoURL(),
-            'isTeacher': false,
-            'blockedUserID': [],
-            'deviceToken': deviceToken,
-            'createdAt': FieldValue.serverTimestamp(),
+        await _store.runTransaction(
+          (transaction) async {
+            await transaction.set(
+              document,
+              {
+                'displayName': getFullName(appleIdCredential),
+                'photoURL': await getDefaultPhotoURL(),
+                'isTeacher': false,
+                'blockedUserID': [],
+                'createdAt': FieldValue.serverTimestamp(),
+              },
+            );
+
+            if (deviceToken != null && deviceToken.isNotEmpty) {
+              await transaction.set(
+                document.collection('tokens').document(deviceToken),
+                {
+                  'deviceToken': deviceToken,
+                  'createdAt': FieldValue.serverTimestamp(),
+                },
+              );
+            }
           },
         );
       } else {
-        await document.updateData(
-          {
-            'deviceToken': deviceToken,
-          },
-        );
+        if (deviceToken != null && deviceToken.isNotEmpty) {
+          await document.collection('tokens').document(deviceToken).setData(
+            {
+              'deviceToken': deviceToken,
+              'createdAt': FieldValue.serverTimestamp(),
+            },
+          );
+        }
       }
 
       isLoading = false;
@@ -169,22 +203,39 @@ class AuthModel extends ChangeNotifier {
 
     if (!registered) {
       await user.updateEmail(user.email);
-      await document.setData(
-        {
-          'displayName': user.displayName,
-          'photoURL': user.photoUrl,
-          'isTeacher': false,
-          'blockedUserID': [],
-          'deviceToken': deviceToken,
-          'createdAt': FieldValue.serverTimestamp(),
+      await _store.runTransaction(
+        (transaction) async {
+          await transaction.set(
+            document,
+            {
+              'displayName': user.displayName,
+              'photoURL': user.photoUrl,
+              'isTeacher': false,
+              'blockedUserID': [],
+              'createdAt': FieldValue.serverTimestamp(),
+            },
+          );
+
+          if (deviceToken != null && deviceToken.isNotEmpty) {
+            await transaction.set(
+              document.collection('tokens').document(deviceToken),
+              {
+                'deviceToken': deviceToken,
+                'createdAt': FieldValue.serverTimestamp(),
+              },
+            );
+          }
         },
       );
     } else {
-      await document.updateData(
-        {
-          'deviceToken': deviceToken,
-        },
-      );
+      if (deviceToken != null && deviceToken.isNotEmpty) {
+        await document.collection('tokens').document(deviceToken).setData(
+          {
+            'deviceToken': deviceToken,
+            'createdAt': FieldValue.serverTimestamp(),
+          },
+        );
+      }
     }
 
     isLoading = false;
