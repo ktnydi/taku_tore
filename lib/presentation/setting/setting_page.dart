@@ -373,36 +373,51 @@ class About extends StatelessWidget {
 }
 
 class Danger extends StatelessWidget {
-  void _logoutDialog(BuildContext context, UserModel model) {
-    showDialog(
+  Future<bool> _confirmDialog(context) async {
+    final isConfirm = await showDialog(
       context: context,
-      child: AlertDialog(
-        title: Text('ログアウトしますか?'),
-        actions: <Widget>[
-          FlatButton(
-            child: Text(
-              'キャンセル',
-              style: TextStyle(
-                color: Colors.blueAccent,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('ロウアウトしますか？'),
+          actions: <Widget>[
+            FlatButton(
+              child: Text(
+                'キャンセル',
+                style: TextStyle(color: Colors.blueAccent),
               ),
+              onPressed: () => Navigator.pop(context, false),
             ),
-            onPressed: () => Navigator.pop(context),
-          ),
-          FlatButton(
-            child: Text(
-              'ログアウト',
-              style: TextStyle(
-                color: Colors.redAccent,
+            FlatButton(
+              child: Text(
+                'ログアウト',
+                style: TextStyle(color: Colors.redAccent),
               ),
+              onPressed: () => Navigator.pop(context, true),
             ),
-            onPressed: () {
-              Navigator.pop(context);
-              model.signOut();
-            },
-          ),
-        ],
-      ),
+          ],
+        );
+      },
     );
+    return isConfirm;
+  }
+
+  Future _logoutDialog(BuildContext context, UserModel model) async {
+    try {
+      final isConfirm = await this._confirmDialog(context);
+
+      if (!isConfirm) return;
+
+      model.beginLoading();
+
+      await model.signOut();
+
+      model.endLoading();
+    } catch (e, s) {
+      model.endLoading();
+      print(s);
+      print(e);
+    }
   }
 
   @override
