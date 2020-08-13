@@ -101,14 +101,35 @@ class UserModel extends ChangeNotifier {
       final photoRef = FirebaseStorage.instance.ref().child(path);
       String photoURL = await photoRef.getDownloadURL();
       final deviceToken = await _firebaseMessaging.getToken();
-      await Firestore.instance.document('users/${result.user.uid}').setData({
-        'displayName': name,
-        'photoURL': photoURL,
-        'isTeacher': false,
-        'deviceToken': deviceToken,
-        'blockedUserID': [],
-        'createdAt': FieldValue.serverTimestamp(),
-      });
+
+      await Firestore.instance.runTransaction(
+        (transaction) async {
+          await transaction.set(
+            Firestore.instance.collection('users').document(result.user.uid),
+            {
+              'displayName': name,
+              'photoURL': photoURL,
+              'isTeacher': false,
+              'blockedUserID': [],
+              'createdAt': FieldValue.serverTimestamp(),
+            },
+          );
+
+          if (deviceToken != null || deviceToken.isNotEmpty) {
+            await transaction.set(
+              Firestore.instance
+                  .collection('users')
+                  .document(result.user.uid)
+                  .collection('tokens')
+                  .document(deviceToken),
+              {
+                'deviceToken': deviceToken,
+                'createdAt': FieldValue.serverTimestamp(),
+              },
+            );
+          }
+        },
+      );
     }
     endLoading();
   }
@@ -130,28 +151,35 @@ class UserModel extends ChangeNotifier {
     }
 
     final deviceToken = await _firebaseMessaging.getToken();
-    final document = Firestore.instance.collection('users').document(user.uid);
-    await document.updateData(
-      {
-        'deviceToken': deviceToken,
-      },
-    );
+
+    if (deviceToken != null && deviceToken.isNotEmpty) {
+      final document = Firestore.instance
+          .collection('users')
+          .document(user.uid)
+          .collection('tokens')
+          .document(deviceToken);
+      await document.setData(
+        {
+          'deviceToken': deviceToken,
+          'createdAt': FieldValue.serverTimestamp(),
+        },
+      );
+    }
 
     endLoading();
   }
 
   Future signOut() async {
-    beginLoading();
+    final deviceToken = await _firebaseMessaging.getToken();
 
-    final document = Firestore.instance.collection('users').document(user.uid);
-    await document.updateData(
-      {
-        'deviceToken': '',
-      },
-    );
+    await Firestore.instance
+        .collection('users')
+        .document(user.uid)
+        .collection('tokens')
+        .document(deviceToken)
+        .delete();
+
     await FirebaseAuth.instance.signOut();
-
-    endLoading();
   }
 
   Future<bool> hasAvatar({FirebaseUser user}) async {
@@ -244,6 +272,15 @@ class UserModel extends ChangeNotifier {
           .child('/images/${user.uid}_thumbnail.jpg')
           .delete();
     }
+
+    // tokenの削除
+    final docs = await userRef.collection('tokens').getDocuments();
+    await Future.forEach(
+      docs.documents,
+      (DocumentSnapshot doc) async {
+        await doc.reference.delete();
+      },
+    );
 
     // userのデータ削除
     await userRef.delete();
