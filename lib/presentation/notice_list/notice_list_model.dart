@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app_badger/flutter_app_badger.dart';
 import '../../domain/notice.dart';
 import '../../domain/room.dart';
 import '../../domain/user.dart';
@@ -22,18 +23,56 @@ class NoticeListModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future readNotice() async {
+    final user = await _auth.currentUser();
+
+    final newNoticeDocs = await _store
+        .collection('users')
+        .document(user.uid)
+        .collection('notices')
+        .where('isRead', isEqualTo: false)
+        .getDocuments();
+
+    await Future.forEach(
+      newNoticeDocs.documents,
+      (DocumentSnapshot doc) async {
+        if (doc['isRead']) return;
+
+        await doc.reference.updateData(
+          {
+            'isRead': true,
+          },
+        );
+
+        await _store.collection('users').document(user.uid).updateData(
+          {
+            'numNotices': FieldValue.increment(-1),
+          },
+        );
+
+        final userDoc =
+            await _store.collection('users').document(user.uid).get();
+
+        final badgeCounter = userDoc['numNotices'];
+
+        FlutterAppBadger.updateBadgeCount(badgeCounter);
+      },
+    );
+  }
+
   Future fetchNotices() async {
     this.beginLoading();
 
     final user = await _auth.currentUser();
 
-    final collection =
-        _store.collection('users').document(user.uid).collection('notices');
-
-    final docs = await collection.getDocuments();
+    final noticeDocs = await _store
+        .collection('users')
+        .document(user.uid)
+        .collection('notices')
+        .getDocuments();
 
     final notices = await Future.wait(
-      docs.documents.map(
+      noticeDocs.documents.map(
         (doc) async {
           final notice = Notice(doc);
           await notice.fetchSender();
