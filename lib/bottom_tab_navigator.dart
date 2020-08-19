@@ -1,9 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:takutore/atoms/badge.dart';
 import 'presentation/chat/chat_page.dart';
 import 'presentation/home/home_page.dart';
 import 'presentation/notice_list/notice_list_page.dart';
 import 'presentation/setting/setting_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class BottomTabNavigator extends StatefulWidget {
   @override
@@ -12,6 +15,9 @@ class BottomTabNavigator extends StatefulWidget {
 
 class _BottomTabNavigator extends State<BottomTabNavigator> {
   int currentIndex = 0;
+  int noticeBadger = 0;
+  final _auth = FirebaseAuth.instance;
+  final _store = Firestore.instance;
 
   final List<Widget> _widgetOptions = [
     Home(),
@@ -19,6 +25,33 @@ class _BottomTabNavigator extends State<BottomTabNavigator> {
     NoticeList(),
     Setting(),
   ];
+
+  Future<void> _newNoticeSnapshot() async {
+    final currentUser = await _auth.currentUser();
+
+    final notices = _store
+        .collection('users')
+        .document(currentUser.uid)
+        .collection('notices')
+        .where('isRead', isEqualTo: false);
+
+    notices.snapshots().listen(
+      (snapshot) {
+        setState(
+          () {
+            noticeBadger = snapshot.documents.length;
+          },
+        );
+      },
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    this._newNoticeSnapshot();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +77,10 @@ class _BottomTabNavigator extends State<BottomTabNavigator> {
                 title: Text('チャット'),
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.notifications),
+                icon: Badge(
+                  counter: this.noticeBadger,
+                  child: Icon(Icons.notifications),
+                ),
                 title: Text('通知'),
               ),
               BottomNavigationBarItem(
