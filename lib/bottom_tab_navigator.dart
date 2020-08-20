@@ -16,6 +16,7 @@ class BottomTabNavigator extends StatefulWidget {
 class _BottomTabNavigator extends State<BottomTabNavigator> {
   int currentIndex = 0;
   int noticeBadger = 0;
+  int messageBadger = 0;
   final _auth = FirebaseAuth.instance;
   final _store = Firestore.instance;
 
@@ -25,6 +26,33 @@ class _BottomTabNavigator extends State<BottomTabNavigator> {
     NoticeList(),
     Setting(),
   ];
+
+  Future<void> _newMessageSnapshot() async {
+    final currentUser = await _auth.currentUser();
+
+    final rooms = _store
+        .collection('users')
+        .document(currentUser.uid)
+        .collection('rooms')
+        .where('numNewMessage', isGreaterThan: 0);
+
+    rooms.snapshots().listen(
+      (snapshot) async {
+        int messageBadger = 0;
+        await Future.forEach(
+          snapshot.documents,
+          (DocumentSnapshot doc) async {
+            messageBadger += doc['numNewMessage'];
+          },
+        );
+        setState(
+          () {
+            this.messageBadger = messageBadger;
+          },
+        );
+      },
+    );
+  }
 
   Future<void> _newNoticeSnapshot() async {
     final currentUser = await _auth.currentUser();
@@ -50,6 +78,7 @@ class _BottomTabNavigator extends State<BottomTabNavigator> {
   void initState() {
     super.initState();
 
+    this._newMessageSnapshot();
     this._newNoticeSnapshot();
   }
 
@@ -73,7 +102,10 @@ class _BottomTabNavigator extends State<BottomTabNavigator> {
                 title: Text('ホーム'),
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.message),
+                icon: Badge(
+                  counter: this.messageBadger,
+                  child: Icon(Icons.message),
+                ),
                 title: Text('チャット'),
               ),
               BottomNavigationBarItem(
