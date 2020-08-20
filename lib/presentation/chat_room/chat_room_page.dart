@@ -110,6 +110,7 @@ class _ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
         user: widget.user,
       )
         ..checkBlocked()
+        ..readMessage()
         ..scrollListener(),
       child: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
@@ -184,10 +185,6 @@ class _ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
                           cm.start = documents[documents.length - 1];
                         } else {
                           cm.showAllMessage = true;
-                        }
-
-                        if (cm.room.hasNewMessage) {
-                          cm.readMessage();
                         }
 
                         return ListView(

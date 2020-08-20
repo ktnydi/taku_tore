@@ -152,21 +152,6 @@ class ChatCell extends StatelessWidget {
           color: Colors.white,
           child: Row(
             children: <Widget>[
-              Center(
-                child: room.hasNewMessage
-                    ? Container(
-                        width: 10,
-                        height: 10,
-                        margin: EdgeInsets.only(right: 15),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor,
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(5),
-                          ),
-                        ),
-                      )
-                    : Container(),
-              ),
               Expanded(
                 child: ListTile(
                   contentPadding: EdgeInsets.all(0),
@@ -199,13 +184,47 @@ class ChatCell extends StatelessWidget {
                       )
                     ],
                   ),
-                  subtitle: Text(
-                    room.lastMessage,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 12,
-                    ),
+                  subtitle: Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: Text(
+                          '${room.lastMessage}',
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                      Center(
+                        child: room.numNewMessage > 0
+                            ? ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  minWidth: 24,
+                                ),
+                                child: Container(
+                                  height: 24,
+                                  padding: EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).primaryColor,
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(14),
+                                    ),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      '${room.numNewMessage}',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              )
+                            : Container(),
+                      ),
+                    ],
                   ),
                   onTap: () async {
                     // TODO: Add Navigation.
