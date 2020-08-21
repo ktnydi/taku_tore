@@ -156,63 +156,6 @@ class EmailLoginButton extends StatelessWidget {
 }
 
 class EmailRegisterButton extends StatelessWidget {
-  Future _alertDialog(BuildContext context, {String errorText}) async {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('エラー'),
-          content: Text(errorText),
-          actions: <Widget>[
-            FlatButton(
-              child: Text(
-                'OK',
-                style: TextStyle(
-                  color: Colors.blueAccent,
-                ),
-              ),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<bool> _confirmDialog(BuildContext context) async {
-    return showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('確認'),
-          content: Text(
-            '続けるには利用規約またはプライバシーポリシーに同意する必要があります。',
-          ),
-          actions: <Widget>[
-            FlatButton(
-              child: Text(
-                'キャンセル',
-                style: TextStyle(
-                  color: Colors.blueAccent,
-                ),
-              ),
-              onPressed: () => Navigator.pop(context, false),
-            ),
-            FlatButton(
-              child: Text(
-                '送信',
-                style: TextStyle(
-                  color: Colors.blueAccent,
-                ),
-              ),
-              onPressed: () => Navigator.pop(context, true),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return RoundedButton(
