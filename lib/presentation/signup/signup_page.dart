@@ -1,45 +1,13 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:takutore/presentation/auth/auth_model.dart';
+import 'package:takutore/presentation/signup_email/signup_email_page.dart';
 import 'package:url_launcher/url_launcher.dart' as launcher;
 import '../../atoms/rounded_button.dart';
-import '../common/loading.dart';
 import '../../user_model.dart';
 
-class SignUp extends StatefulWidget {
-  @override
-  _SignUpState createState() => _SignUpState();
-}
-
-class _SignUpState extends State<SignUp> {
-  final _formKey = GlobalKey<FormState>();
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  bool isObscureText = true;
-  bool isLoading = false;
-  FocusNode myFocusNode;
-
-  @override
-  void initState() {
-    super.initState();
-
-    myFocusNode = FocusNode();
-  }
-
-  @override
-  void dispose() {
-    // TODO: implement dispose
-    super.dispose();
-    final List<TextEditingController> _controllers = [
-      _nameController,
-      _emailController,
-      _passwordController,
-    ];
-    _controllers.forEach((_controller) => _controller.dispose());
-    myFocusNode.dispose();
-  }
-
+class SignUp extends StatelessWidget {
   Future _alertDialog(BuildContext context, {String errorText}) async {
     showDialog(
       context: context,
@@ -65,146 +33,53 @@ class _SignUpState extends State<SignUp> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<UserModel>(
-      builder: (_, model, __) {
-        return Stack(
-          children: <Widget>[
-            Scaffold(
-              appBar: AppBar(
-                title: Text('メールアドレスで新規登録'),
-              ),
-              body: SingleChildScrollView(
-                child: Container(
-                  padding: EdgeInsets.all(15.0),
-                  child: SafeArea(
-                    child: Form(
-                      key: _formKey,
+    return ChangeNotifierProvider<AuthModel>(
+      create: (_) => AuthModel(),
+      child: Consumer<UserModel>(
+        builder: (_, model, __) {
+          return Stack(
+            children: <Widget>[
+              Scaffold(
+                appBar: AppBar(
+                  title: Text('新規登録'),
+                ),
+                body: SingleChildScrollView(
+                  child: Container(
+                    padding: EdgeInsets.all(15.0),
+                    child: SafeArea(
                       child: Column(
                         children: <Widget>[
-                          TextFormField(
-                            controller: _nameController,
-                            autofocus: true,
-                            textInputAction: TextInputAction.next,
-                            validator: (value) {
-                              if (value.trim().isEmpty) {
-                                return '入力してください。';
-                              }
-                              return null;
-                            },
-                            decoration: InputDecoration(
-                              hintText: 'ユーザー名',
-                            ),
-                            onFieldSubmitted: (_) {
-                              myFocusNode.nextFocus();
-                            },
-                          ),
+                          EmailButton(),
                           SizedBox(height: 10),
-                          TextFormField(
-                            controller: _emailController,
-                            focusNode: myFocusNode,
-                            textInputAction: TextInputAction.next,
-                            validator: (value) {
-                              if (value.trim().isEmpty) {
-                                return '入力してください。';
-                              }
-                              return null;
-                            },
-                            decoration: InputDecoration(
-                              hintText: 'メールアドレス',
-                            ),
-                            onFieldSubmitted: (_) {
-                              myFocusNode.nextFocus();
-                            },
-                          ),
-                          SizedBox(height: 10),
-                          TextFormField(
-                            controller: _passwordController,
-                            textInputAction: TextInputAction.done,
-                            validator: (value) {
-                              if (value.trim().isEmpty) {
-                                return '入力してください。';
-                              }
-                              return null;
-                            },
-                            obscureText: isObscureText,
-                            decoration: InputDecoration(
-                              hintText: 'パスワード',
-                              suffixIcon: ButtonTheme(
-                                minWidth: 0.0,
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 0.0,
-                                ),
-                                child: FlatButton(
-                                  child: Text(
-                                    isObscureText ? '表示' : '隠す',
-                                    style: TextStyle(
-                                      color: Theme.of(context).hintColor,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  splashColor: Colors.transparent,
-                                  highlightColor: Colors.transparent,
-                                  onPressed: () {
-                                    setState(() {
-                                      isObscureText = !isObscureText;
-                                    });
-                                  },
+                          Row(
+                            children: <Widget>[
+                              Flexible(
+                                child: Divider(height: 0.5),
+                              ),
+                              SizedBox(width: 5),
+                              Text(
+                                'SNSアカウントで登録',
+                                style: TextStyle(
+                                  color: Colors.black54,
                                 ),
                               ),
-                            ),
-                            onFieldSubmitted: (_) {
-                              myFocusNode.unfocus();
-                            },
-                          ),
-                          SizedBox(height: 30),
-                          RoundedButton(
-                            color: Theme.of(context).primaryColor,
-                            child: Text(
-                              'アカウント作成',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 17,
+                              SizedBox(width: 5),
+                              Flexible(
+                                child: Divider(height: 0.5),
                               ),
-                            ),
-                            onPressed: () async {
-                              if (!_formKey.currentState.validate()) {
-                                return;
-                              }
-
-                              try {
-                                await model.signUpWithEmail(
-                                  name: _nameController.text,
-                                  email: _emailController.text,
-                                  password: _passwordController.text,
-                                );
-                                Navigator.pop(context);
-                              } catch (error) {
-                                model.endLoading();
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      title: Text(error.toString()),
-                                      actions: <Widget>[
-                                        FlatButton(
-                                          child: Text('OK'),
-                                          onPressed: () =>
-                                              Navigator.pop(context),
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                );
-                              }
-                            },
+                            ],
                           ),
-                          SizedBox(height: 30),
+                          SizedBox(height: 10),
+                          AuthButtonList(),
+                          SizedBox(height: 15),
                           Container(
                             child: RichText(
                               text: TextSpan(
                                 text: 'アカウント登録すると',
-                                style: TextStyle(color: Colors.black54),
+                                style: TextStyle(
+                                  color: Colors.black54,
+                                  fontSize: 12,
+                                ),
                                 children: <TextSpan>[
                                   TextSpan(
                                     text: '利用規約',
@@ -264,10 +139,177 @@ class _SignUpState extends State<SignUp> {
                   ),
                 ),
               ),
+              model.isLoading
+                  ? Container(
+                      color: Colors.white.withOpacity(0.7),
+                      child: Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    )
+                  : SizedBox(),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class AuthButtonList extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<AuthModel>(
+      builder: (_, model, __) {
+        return Column(
+          children: <Widget>[
+            Column(
+              children: <Widget>[
+                GoogleButton(model),
+                SizedBox(height: 10),
+                AppleButton(model),
+                SizedBox(height: 10),
+                FacebookButton(model),
+              ],
             ),
-            Loading(model.isLoading),
           ],
         );
+      },
+    );
+  }
+}
+
+class EmailButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return RoundedButton(
+      child: Text(
+        'メールアドレスでサインアップ',
+        style: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      color: Colors.red,
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (BuildContext context) => SignUpEmail(),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class GoogleButton extends StatelessWidget {
+  GoogleButton(this.model);
+
+  final AuthModel model;
+  @override
+  Widget build(BuildContext context) {
+    return RoundedButton(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Image.asset(
+            'images/google.png',
+            width: 25,
+            height: 25,
+          ),
+          Text(
+            'Googleでサインアップ',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(width: 25),
+        ],
+      ),
+      color: Colors.white,
+      onPressed: () async {
+        try {
+          await model.signUpWithGoogle();
+          Navigator.pop(context);
+        } catch (e) {
+          print(e.toString());
+        }
+      },
+    );
+  }
+}
+
+class AppleButton extends StatelessWidget {
+  AppleButton(this.model);
+
+  final AuthModel model;
+  @override
+  Widget build(BuildContext context) {
+    return RoundedButton(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Image.asset(
+            'images/apple.png',
+            width: 25,
+            height: 25,
+          ),
+          Text(
+            'Appleでサインアップ',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(width: 25),
+        ],
+      ),
+      color: Colors.black,
+      onPressed: () async {
+        try {
+          await model.signInWithApple();
+          Navigator.pop(context);
+        } catch (e) {
+          print(e.toString());
+        }
+      },
+    );
+  }
+}
+
+class FacebookButton extends StatelessWidget {
+  FacebookButton(this.model);
+
+  final AuthModel model;
+  @override
+  Widget build(BuildContext context) {
+    return RoundedButton(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Image.asset(
+            'images/facebook.png',
+            width: 25,
+            height: 25,
+          ),
+          Text(
+            'Facebookでサインアップ',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(width: 25),
+        ],
+      ),
+      color: Color(0xFF1778f2),
+      onPressed: () async {
+        try {
+          await model.signInWithFacebook();
+          Navigator.pop(context);
+        } catch (e) {
+          print(e.toString());
+        }
       },
     );
   }

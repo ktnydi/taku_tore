@@ -1,42 +1,12 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:takutore/presentation/auth/auth_model.dart';
+import 'package:takutore/presentation/login_email/login_email_page.dart';
 import 'package:url_launcher/url_launcher.dart' as launcher;
-import '../forgot_password/forgot_password_page.dart';
 import '../../atoms/rounded_button.dart';
-import '../common/loading.dart';
-import '../../user_model.dart';
 
-class Login extends StatefulWidget {
-  @override
-  _LoginState createState() => _LoginState();
-}
-
-class _LoginState extends State<Login> {
-  final _formKey = GlobalKey<FormState>();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  FocusNode myFocusNode;
-
-  @override
-  void initState() {
-    super.initState();
-
-    myFocusNode = FocusNode();
-  }
-
-  @override
-  void dispose() {
-    // TODO: implement dispose
-    super.dispose();
-    final List<TextEditingController> _controllers = [
-      _emailController,
-      _passwordController,
-    ];
-    _controllers.forEach((_controller) => _controller.dispose());
-    myFocusNode.dispose();
-  }
-
+class Login extends StatelessWidget {
   Future _alertDialog(BuildContext context, {String errorText}) async {
     showDialog(
       context: context,
@@ -62,127 +32,53 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<UserModel>(
-      builder: (_, model, __) {
-        return Stack(
-          children: <Widget>[
-            Scaffold(
-              appBar: AppBar(
-                title: Text('メールアドレスでログイン'),
-              ),
-              body: SingleChildScrollView(
-                child: Container(
-                  padding: EdgeInsets.all(15.0),
-                  child: SafeArea(
-                    child: Form(
-                      key: _formKey,
+    return ChangeNotifierProvider<AuthModel>(
+      create: (_) => AuthModel(),
+      child: Consumer<AuthModel>(
+        builder: (_, model, __) {
+          return Stack(
+            children: <Widget>[
+              Scaffold(
+                appBar: AppBar(
+                  title: Text('ログイン'),
+                ),
+                body: SingleChildScrollView(
+                  child: Container(
+                    padding: EdgeInsets.all(15.0),
+                    child: SafeArea(
                       child: Column(
                         children: <Widget>[
-                          TextFormField(
-                            controller: _emailController,
-                            autofocus: true,
-                            textInputAction: TextInputAction.next,
-                            validator: (value) {
-                              if (value.trim().isEmpty) {
-                                return '入力してください。';
-                              }
-                              return null;
-                            },
-                            decoration: InputDecoration(
-                              hintText: 'メールアドレス',
-                            ),
-                            onFieldSubmitted: (_) {
-                              myFocusNode.nextFocus();
-                            },
-                          ),
+                          EmailButton(),
                           SizedBox(height: 10),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
+                          Row(
                             children: <Widget>[
-                              TextFormField(
-                                controller: _passwordController,
-                                focusNode: myFocusNode,
-                                validator: (value) {
-                                  if (value.trim().isEmpty) {
-                                    return '入力してください。';
-                                  }
-                                  return null;
-                                },
-                                obscureText: true,
-                                decoration: InputDecoration(
-                                  hintText: 'パスワード',
-                                ),
-                                onFieldSubmitted: (_) {
-                                  myFocusNode.unfocus();
-                                },
+                              Flexible(
+                                child: Divider(height: 0.5),
                               ),
-                              FlatButton(
-                                child: Text(
-                                  'パスワードを忘れた場合',
-                                  style: TextStyle(
-                                    color: Theme.of(context).primaryColor,
-                                  ),
+                              SizedBox(width: 5),
+                              Text(
+                                'SNSアカウントでログイン',
+                                style: TextStyle(
+                                  color: Colors.black54,
                                 ),
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (BuildContext context) =>
-                                          ForgotPassword(),
-                                    ),
-                                  );
-                                },
+                              ),
+                              SizedBox(width: 5),
+                              Flexible(
+                                child: Divider(height: 0.5),
                               ),
                             ],
                           ),
                           SizedBox(height: 10),
-                          RoundedButton(
-                            color: Theme.of(context).primaryColor,
-                            child: Text(
-                              'ログイン',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 17,
-                              ),
-                            ),
-                            onPressed: () async {
-                              if (!_formKey.currentState.validate()) {
-                                return;
-                              }
-
-                              try {
-                                await model.loginWithEmail(
-                                  email: _emailController.text,
-                                  password: _passwordController.text,
-                                );
-                                Navigator.pop(context);
-                              } catch (error) {
-                                model.endLoading();
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      title: Text(error.toString()),
-                                      actions: <Widget>[
-                                        FlatButton(
-                                          child: Text('OK'),
-                                          onPressed: () =>
-                                              Navigator.pop(context),
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                );
-                              }
-                            },
-                          ),
-                          SizedBox(height: 30),
+                          AuthButtonList(),
+                          SizedBox(height: 10),
                           Container(
                             child: RichText(
                               text: TextSpan(
                                 text: 'ログインすると',
-                                style: TextStyle(color: Colors.black54),
+                                style: TextStyle(
+                                  color: Colors.black54,
+                                  fontSize: 12,
+                                ),
                                 children: <TextSpan>[
                                   TextSpan(
                                     text: '利用規約',
@@ -242,10 +138,177 @@ class _LoginState extends State<Login> {
                   ),
                 ),
               ),
+              model.isLoading
+                  ? Container(
+                      color: Colors.white.withOpacity(0.7),
+                      child: Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    )
+                  : SizedBox(),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class AuthButtonList extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<AuthModel>(
+      builder: (_, model, __) {
+        return Column(
+          children: <Widget>[
+            Column(
+              children: <Widget>[
+                GoogleButton(model),
+                SizedBox(height: 10),
+                AppleButton(model),
+                SizedBox(height: 10),
+                FacebookButton(model),
+              ],
             ),
-            Loading(model.isLoading),
           ],
         );
+      },
+    );
+  }
+}
+
+class EmailButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return RoundedButton(
+      child: Text(
+        'メールアドレスでログイン',
+        style: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      color: Colors.red,
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (BuildContext context) => LoginEmail(),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class GoogleButton extends StatelessWidget {
+  GoogleButton(this.model);
+
+  final AuthModel model;
+  @override
+  Widget build(BuildContext context) {
+    return RoundedButton(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Image.asset(
+            'images/google.png',
+            width: 25,
+            height: 25,
+          ),
+          Text(
+            'Googleでログイン',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(width: 25),
+        ],
+      ),
+      color: Colors.white,
+      onPressed: () async {
+        try {
+          await model.signUpWithGoogle();
+          Navigator.pop(context);
+        } catch (e) {
+          print(e.toString());
+        }
+      },
+    );
+  }
+}
+
+class AppleButton extends StatelessWidget {
+  AppleButton(this.model);
+
+  final AuthModel model;
+  @override
+  Widget build(BuildContext context) {
+    return RoundedButton(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Image.asset(
+            'images/apple.png',
+            width: 25,
+            height: 25,
+          ),
+          Text(
+            'Appleでログイン',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(width: 25),
+        ],
+      ),
+      color: Colors.black,
+      onPressed: () async {
+        try {
+          await model.signInWithApple();
+          Navigator.pop(context);
+        } catch (e) {
+          print(e.toString());
+        }
+      },
+    );
+  }
+}
+
+class FacebookButton extends StatelessWidget {
+  FacebookButton(this.model);
+
+  final AuthModel model;
+  @override
+  Widget build(BuildContext context) {
+    return RoundedButton(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Image.asset(
+            'images/facebook.png',
+            width: 25,
+            height: 25,
+          ),
+          Text(
+            'Facebookでログイン',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(width: 25),
+        ],
+      ),
+      color: Color(0xFF1778f2),
+      onPressed: () async {
+        try {
+          await model.signInWithFacebook();
+          Navigator.pop(context);
+        } catch (e) {
+          print(e.toString());
+        }
       },
     );
   }
