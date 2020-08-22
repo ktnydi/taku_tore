@@ -42,7 +42,7 @@ class BookmarkModel extends ChangeNotifier {
           canDo: document['canDo'],
           recommend: document['recommend'],
           avgRating: document['avgRating'].toDouble(),
-          numRatings: document['numRatings'],
+          numRatings: document['numRatings'].toInt(),
           blockedUserID: document['blockedUserID'],
         );
       }),

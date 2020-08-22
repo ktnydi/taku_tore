@@ -65,7 +65,7 @@ class HomeModel extends ChangeNotifier {
         canDo: doc['canDo'],
         recommend: doc['recommend'],
         avgRating: doc['avgRating'].toDouble(),
-        numRatings: doc['numRatings'].toDouble(),
+        numRatings: doc['numRatings'].toInt(),
         blockedUserID: doc['blockedUserID'],
       );
     }).toList();
@@ -102,7 +102,7 @@ class HomeModel extends ChangeNotifier {
         canDo: doc['canDo'],
         recommend: doc['recommend'],
         avgRating: doc['avgRating'].toDouble(),
-        numRatings: doc['numRatings'].toDouble(),
+        numRatings: doc['numRatings'].toInt(),
       );
     }).toList();
     this.teachers = [...this.teachers, ...teachers];
