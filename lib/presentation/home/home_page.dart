@@ -324,58 +324,81 @@ class Home extends StatelessWidget {
         onLongPress: () async {
           await _showModalBottomSheet(context, teacher, model);
         },
-        child: ListTile(
-          leading: CircleAvatar(
-            backgroundColor: Colors.transparent,
-            backgroundImage: NetworkImage(teacher.photoURL),
-            radius: 25,
-          ),
-          title: Text(
-            teacher.title,
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          subtitle: Column(
+        child: Container(
+          padding: EdgeInsets.fromLTRB(15, 10, 0, 10),
+          child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text(
-                teacher.displayName,
-                style: TextStyle(
-                  color: Colors.black54,
-                  fontSize: 13,
+              CircleAvatar(
+                backgroundColor: Colors.transparent,
+                backgroundImage: NetworkImage(teacher.photoURL),
+                radius: 25,
+              ),
+              SizedBox(width: 15),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      teacher.title,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.black87,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 5),
+                    Text(
+                      teacher.displayName,
+                      style: TextStyle(
+                        color: Colors.black54,
+                        fontSize: 13,
+                      ),
+                    ),
+                    SizedBox(height: 5),
+                    Row(
+                      children: <Widget>[
+                        RatingBarIndicator(
+                          rating: teacher.avgRating.toDouble(),
+                          itemBuilder: (context, index) => Icon(
+                            Icons.star,
+                            color: Colors.amber,
+                          ),
+                          itemCount: 5,
+                          itemSize: 20,
+                        ),
+                        SizedBox(width: 3),
+                        Text(
+                          '${teacher.avgRating}',
+                          style: TextStyle(
+                            color: Colors.black54,
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(width: 3),
+                        Text(
+                          '(${teacher.numRatings})',
+                          style: TextStyle(
+                            color: Colors.black54,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-              Row(
-                children: <Widget>[
-                  RatingBarIndicator(
-                    rating: teacher.avgRating.toDouble(),
-                    itemBuilder: (context, index) => Icon(
-                      Icons.star,
-                      color: Colors.amber,
-                    ),
-                    itemCount: 5,
-                    itemSize: 20,
+              Transform.translate(
+                offset: Offset(0, -10),
+                child: IconButton(
+                  icon: Icon(
+                    Icons.more_vert,
                   ),
-                  SizedBox(width: 3),
-                  Text(
-                    '${teacher.avgRating}',
-                    style: TextStyle(
-                      color: Colors.black54,
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(width: 3),
-                  Text(
-                    '(${teacher.numRatings})',
-                    style: TextStyle(
-                      color: Colors.black54,
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
+                  onPressed: () async {
+                    await _showModalBottomSheet(context, teacher, model);
+                  },
+                ),
               ),
             ],
           ),
