@@ -61,6 +61,8 @@ class SettingImage extends StatelessWidget {
       create: (_) => SettingImageModel()..fetchCurrentUser(),
       child: Consumer<SettingImageModel>(
         builder: (_, model, __) {
+          if (model.currentUser == null) return SizedBox();
+
           return Stack(
             alignment: Alignment.center,
             children: <Widget>[
