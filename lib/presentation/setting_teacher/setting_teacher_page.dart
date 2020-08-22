@@ -180,30 +180,6 @@ class BecomeTeacher extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  actions: <Widget>[
-                    FlatButton(
-                      child: Text(
-                        '次へ',
-                        style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      textColor: Theme.of(context).primaryColor,
-                      disabledTextColor: Colors.black38,
-                      onPressed: !model.disabled()
-                          ? () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (BuildContext context) =>
-                                      TeacherFormConfirm(model: model),
-                                ),
-                              );
-                            }
-                          : null,
-                    ),
-                  ],
                 ),
                 body: SingleChildScrollView(
                   child: SafeArea(
@@ -225,6 +201,38 @@ class BecomeTeacher extends StatelessWidget {
                                 Recommend(),
                                 SizedBox(height: 20),
                                 About(),
+                                SizedBox(height: 20),
+                                ButtonTheme(
+                                  minWidth: double.infinity,
+                                  height: 50,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(25),
+                                  ),
+                                  child: FlatButton(
+                                    color: Theme.of(context).primaryColor,
+                                    child: Text(
+                                      '入力した内容を確認する',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    disabledColor: Colors.black38,
+                                    onPressed: !model.disabled()
+                                        ? () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder:
+                                                    (BuildContext context) =>
+                                                        TeacherFormConfirm(
+                                                            model: model),
+                                              ),
+                                            );
+                                          }
+                                        : null,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
