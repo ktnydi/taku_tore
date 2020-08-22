@@ -81,6 +81,7 @@ class ChatModel extends ChangeNotifier {
       updatedAt: doc['updatedAt'],
       createdAt: doc['createdAt'],
       lastMessageFromUid: doc['lastMessageFromUid'],
+      numNewMessage: doc['numNewMessage'],
       hasNewMessage: doc['numNewMessage'].toDouble() > 0,
       isAllow: doc['isAllow'],
     );

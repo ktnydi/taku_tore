@@ -11,6 +11,7 @@ class Notice {
   User sender;
   Room room;
   String message;
+  bool isRead;
   Firestore _store = Firestore.instance;
 
   Notice(DocumentSnapshot doc) {
@@ -19,6 +20,7 @@ class Notice {
     this.createdAt = format(doc['createdAt'].toDate(), locale: 'ja');
     this.message = _typeParser(doc['type']);
     this._senderID = doc['senderID'];
+    this.isRead = doc['isRead'];
   }
 
   String _typeParser(String type) {
