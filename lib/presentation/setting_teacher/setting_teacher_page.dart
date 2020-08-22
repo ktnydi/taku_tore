@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:takutore/presentation/teacher_form_confirm/teacher_form_confirm_page.dart';
 import 'setting_teacher_model.dart';
 import '../common/loading.dart';
 import '../../user_model.dart';
@@ -182,7 +183,7 @@ class BecomeTeacher extends StatelessWidget {
                   actions: <Widget>[
                     FlatButton(
                       child: Text(
-                        '登録',
+                        '次へ',
                         style: TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.bold,
@@ -191,8 +192,14 @@ class BecomeTeacher extends StatelessWidget {
                       textColor: Theme.of(context).primaryColor,
                       disabledTextColor: Colors.black38,
                       onPressed: !model.disabled()
-                          ? () async {
-                              await registerAsTeacher(context, model);
+                          ? () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (BuildContext context) =>
+                                      TeacherFormConfirm(model: model),
+                                ),
+                              );
                             }
                           : null,
                     ),
@@ -239,8 +246,6 @@ class BecomeTeacher extends StatelessWidget {
 class Thumbnail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final deviceWidth = MediaQuery.of(context).size.width;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -480,55 +485,57 @@ class CanDo extends StatelessWidget {
 class Recommend extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Consumer<SettingTeacherModel>(builder: (_, model, __) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(
-            'こんな方におすすめ',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox(height: 10),
-          TextFormField(
-            validator: (value) {
-              if (value.trim().isEmpty) {
-                return '入力してください。';
-              }
-              if (value.length > 500) {
-                return '500文字以内にしてください。';
-              }
-              return null;
-            },
-            minLines: 5,
-            maxLines: 10,
-            decoration: InputDecoration(
-              contentPadding: EdgeInsets.all(8),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.all(
-                  Radius.circular(8),
-                ),
-                borderSide: BorderSide.none,
-              ),
-              hintText: 'おすすめのユーザー',
-              filled: true,
-              fillColor: Colors.black.withOpacity(0.05),
-            ),
-            onChanged: (value) => model.recommend = value,
-          ),
-          SizedBox(height: 10),
-          Align(
-            alignment: Alignment.centerRight,
-            child: Text(
-              '${model.recommend.length}/500',
+    return Consumer<SettingTeacherModel>(
+      builder: (_, model, __) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              'こんな方におすすめ',
               style: TextStyle(
-                color: Colors.black54,
+                fontWeight: FontWeight.bold,
               ),
             ),
-          ),
-        ],
-      );
-    });
+            SizedBox(height: 10),
+            TextFormField(
+              validator: (value) {
+                if (value.trim().isEmpty) {
+                  return '入力してください。';
+                }
+                if (value.length > 500) {
+                  return '500文字以内にしてください。';
+                }
+                return null;
+              },
+              minLines: 5,
+              maxLines: 10,
+              decoration: InputDecoration(
+                contentPadding: EdgeInsets.all(8),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(8),
+                  ),
+                  borderSide: BorderSide.none,
+                ),
+                hintText: 'おすすめのユーザー',
+                filled: true,
+                fillColor: Colors.black.withOpacity(0.05),
+              ),
+              onChanged: (value) => model.recommend = value,
+            ),
+            SizedBox(height: 10),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                '${model.recommend.length}/500',
+                style: TextStyle(
+                  color: Colors.black54,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
