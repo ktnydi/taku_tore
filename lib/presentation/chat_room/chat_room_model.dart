@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app_badger/flutter_app_badger.dart';
 import '../../domain/room.dart';
 import '../../domain/user.dart';
 
@@ -88,17 +89,40 @@ class ChatRoomModel extends ChangeNotifier {
   }
 
   Future readMessage() async {
+    if (!this.room.hasNewMessage) return;
+
     final currentUser = await FirebaseAuth.instance.currentUser();
 
     if (this.room.lastMessageFromUid == currentUser.uid) {
       return;
     }
 
+    final userDoc = await Firestore.instance
+        .collection('users')
+        .document(currentUser.uid)
+        .get();
+    final numNotices = userDoc['numNotices'];
+
     final document = Firestore.instance
         .collection('users')
         .document(currentUser.uid)
         .collection('rooms')
         .document(this.room.documentId);
+
+    final numNewMessage = (await document.get()).data['numNewMessage'];
+
+    final latestNumNotices = numNotices - numNewMessage;
+
+    await Firestore.instance
+        .collection('users')
+        .document(currentUser.uid)
+        .updateData(
+      {
+        'numNotices': latestNumNotices,
+      },
+    );
+
+    FlutterAppBadger.updateBadgeCount(latestNumNotices);
 
     document.updateData(
       {

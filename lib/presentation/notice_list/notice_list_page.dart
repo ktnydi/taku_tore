@@ -102,7 +102,9 @@ class NoticeList extends StatelessWidget {
         title: Text('通知'),
       ),
       body: ChangeNotifierProvider<NoticeListModel>(
-        create: (_) => NoticeListModel()..fetchNotices(),
+        create: (_) => NoticeListModel()
+          ..fetchNotices()
+          ..readNotice(),
         child: Consumer<NoticeListModel>(
           builder: (_, model, __) {
             if (model.isLoading) {
