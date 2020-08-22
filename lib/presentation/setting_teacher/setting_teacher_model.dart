@@ -94,7 +94,6 @@ class SettingTeacherModel extends ChangeNotifier {
   }
 
   Future registerAsTeacher() async {
-    beginLoading();
     if (this.imageData == null) {
       throw ('サムネイルを選択してください');
     }
@@ -128,6 +127,5 @@ class SettingTeacherModel extends ChangeNotifier {
       'avgRating': 0.0,
       'numRatings': 0.0,
     });
-    endLoading();
   }
 }
