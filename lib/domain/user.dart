@@ -30,7 +30,7 @@ class User {
   final String canDo;
   final String recommend;
   final double avgRating;
-  final double numRatings;
+  final int numRatings;
   final List<dynamic> blockedUserID;
   final Timestamp createdAt;
 }
