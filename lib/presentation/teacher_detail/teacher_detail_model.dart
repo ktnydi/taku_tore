@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:takutore/domain/review.dart';
+import 'package:takutore/domain/room.dart';
 import '../../domain/user.dart';
 
 class TeacherDetailModel extends ChangeNotifier {
@@ -15,6 +16,7 @@ class TeacherDetailModel extends ChangeNotifier {
   bool isAlreadyExist = false;
   bool isAlreadyReviewed = false;
   bool isLoading = false;
+  bool isCreatingRoom = false;
 
   void beginLoading() {
     this.isLoading = true;
@@ -23,6 +25,16 @@ class TeacherDetailModel extends ChangeNotifier {
 
   void endLoading() {
     this.isLoading = false;
+    notifyListeners();
+  }
+
+  void beginCreatingRoom() {
+    this.isCreatingRoom = true;
+    notifyListeners();
+  }
+
+  void endCreatingRoom() {
+    this.isCreatingRoom = false;
     notifyListeners();
   }
 
@@ -198,12 +210,10 @@ class TeacherDetailModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future addRoom() async {
-    beginLoading();
-
+  Future<Room> addRoom() async {
     final currentUser = await FirebaseAuth.instance.currentUser();
 
-    if (teacher.uid == currentUser.uid) {
+    if (this.teacher.uid == currentUser.uid) {
       throw ('自分には相談できません。');
     }
 
@@ -213,7 +223,7 @@ class TeacherDetailModel extends ChangeNotifier {
         .collection('rooms')
         .document('${this.teacher.uid}_${currentUser.uid}');
 
-    document.setData(
+    await document.setData(
       {
         'member': {
           'teacherID': this.teacher.uid,
@@ -228,6 +238,36 @@ class TeacherDetailModel extends ChangeNotifier {
       },
     );
 
-    endLoading();
+    final doc = await document.get();
+    final teacher = await fetchUser(id: doc['member']['teacherID']);
+    final student = await fetchUser(id: doc['member']['studentID']);
+
+    final room = Room(
+      documentId: doc.documentID,
+      teacher: teacher,
+      student: student,
+      lastMessage: doc['lastMessage'],
+      updatedAt: doc['updatedAt'],
+      createdAt: doc['createdAt'],
+      numNewMessage: doc['numNewMessage'],
+      hasNewMessage: doc['numNewMessage'] > 0,
+      lastMessageFromUid: doc['lastMessageFromUid'],
+      isAllow: doc['isAllow'],
+    );
+
+    return room;
+  }
+
+  Future<User> fetchUser({String id}) async {
+    final userSnapshot =
+        await Firestore.instance.collection('users').document(id).get();
+    final user = User(
+      uid: userSnapshot.documentID,
+      displayName: userSnapshot['displayName'],
+      photoURL: userSnapshot['photoURL'],
+      isTeacher: userSnapshot['isTeacher'],
+      createdAt: userSnapshot['createdAt'],
+    );
+    return user;
   }
 }
