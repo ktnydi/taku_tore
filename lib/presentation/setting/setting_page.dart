@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:takutore/atoms/rounded_button.dart';
 import 'package:takutore/presentation/feedback_form/feedback_form_page.dart';
+import 'package:takutore/presentation/teacher_edit/teacher_edit_page.dart';
 import 'package:url_launcher/url_launcher.dart' as launcher;
 import '../setting_image/setting_image_page.dart';
 import '../../user_model.dart';
@@ -102,7 +103,7 @@ class _CurrentAccountState extends State<CurrentAccount> {
                   SizedBox(height: 5),
                   RoundedButton(
                     child: Text(
-                      model.user.isTeacher ? '講師を止める' : '講師になる',
+                      model.user.isTeacher ? '講師設定' : '講師になる',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -122,7 +123,7 @@ class _CurrentAccountState extends State<CurrentAccount> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (BuildContext context) => RemoveTeacher(),
+                            builder: (BuildContext context) => TeacherEdit(),
                           ),
                         );
                       }
