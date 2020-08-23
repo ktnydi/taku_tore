@@ -5,6 +5,7 @@ import '../../domain/room.dart';
 import '../../domain/user.dart';
 
 class ChatModel extends ChangeNotifier {
+  final String tabName;
   ScrollController teacherScroll = ScrollController();
   ScrollController studentScroll = ScrollController();
   List<DocumentSnapshot> teacherSnapshot = [];
@@ -12,6 +13,8 @@ class ChatModel extends ChangeNotifier {
   List<Room> teacherRooms = [];
   List<Room> studentRooms = [];
   bool isLoading = false;
+
+  ChatModel({this.tabName});
 
   void beginLoading() {
     isLoading = true;
@@ -46,8 +49,14 @@ class ChatModel extends ChangeNotifier {
   }
 
   void scrollListener() {
-    teacherScrollListener();
-    studentScrollListener();
+    switch (tabName) {
+      case 'teacher':
+        teacherScrollListener();
+        break;
+      case 'student':
+        studentScrollListener();
+        break;
+    }
   }
 
   Future<User> fetchUserFromFirebase({@required String userId}) async {
@@ -184,8 +193,14 @@ class ChatModel extends ChangeNotifier {
   Future fetchRooms() async {
     beginLoading();
 
-    await this.fetchTeacherRooms();
-    await this.fetchStudentRooms();
+    switch (tabName) {
+      case 'teacher':
+        await this.fetchTeacherRooms();
+        break;
+      case 'student':
+        await this.fetchStudentRooms();
+        break;
+    }
 
     endLoading();
     notifyListeners();

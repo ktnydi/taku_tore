@@ -23,117 +23,111 @@ class _ChatState extends State<Chat> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<ChatModel>(
-      create: (_) => ChatModel()
-        ..fetchRooms()
-        ..scrollListener(),
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text('チャット'),
-          actions: <Widget>[
-            IconButton(
-              onPressed: () {
-                // TODO: Add a future for searching teacher.
-              },
-              icon: Icon(
-                Icons.search,
-              ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('チャット'),
+        actions: <Widget>[
+          IconButton(
+            onPressed: () {
+              // TODO: Add a future for searching teacher.
+            },
+            icon: Icon(
+              Icons.search,
             ),
-          ],
-          bottom: PreferredSize(
-            preferredSize: Size(double.infinity, 50),
-            child: Container(
-              height: 50,
-              child: TabBar(
-                labelPadding: EdgeInsets.symmetric(horizontal: 0),
-                controller: _tabController,
-                indicatorSize: TabBarIndicatorSize.label,
-                labelStyle: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-                labelColor: Theme.of(context).primaryColor,
-                unselectedLabelColor: Colors.black45,
-                tabs: [
-                  Tab(
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: Text('講師'),
-                    ),
-                  ),
-                  Tab(
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: Text('受講生'),
-                    ),
-                  ),
-                ],
+          ),
+        ],
+        bottom: PreferredSize(
+          preferredSize: Size(double.infinity, 50),
+          child: Container(
+            height: 50,
+            child: TabBar(
+              labelPadding: EdgeInsets.symmetric(horizontal: 0),
+              controller: _tabController,
+              indicatorSize: TabBarIndicatorSize.label,
+              labelStyle: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
               ),
+              labelColor: Theme.of(context).primaryColor,
+              unselectedLabelColor: Colors.black45,
+              tabs: [
+                Tab(
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: Text('講師'),
+                  ),
+                ),
+                Tab(
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: Text('受講生'),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
-        body: Consumer<ChatModel>(
-          builder: (_, model, __) {
-            if (model.isLoading) {
-              return Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-
-            return TabBarView(
-              controller: _tabController,
-              children: <Widget>[
-                ChatList(
-                  rooms: model.teacherRooms,
-                  controller: model.teacherScroll,
-                ),
-                ChatList(
-                  rooms: model.studentRooms,
-                  controller: model.studentScroll,
-                ),
-              ],
-            );
-          },
-        ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: <Widget>[
+          ChatList(tabName: 'teacher'),
+          ChatList(tabName: 'student'),
+        ],
       ),
     );
   }
 }
 
 class ChatList extends StatelessWidget {
-  ChatList({@required this.rooms, @required this.controller});
+  ChatList({this.tabName});
 
-  final List<Room> rooms;
-  final ScrollController controller;
+  final String tabName;
+
   @override
   Widget build(BuildContext context) {
-    return Consumer<UserModel>(
-      builder: (_, model, __) {
-        if (this.rooms.isEmpty) {
-          return Center(
-            child: Text(
-              'チャットルームはありません。',
-            ),
-          );
-        }
+    return ChangeNotifierProvider<ChatModel>(
+      create: (_) => ChatModel(tabName: this.tabName)
+        ..fetchRooms()
+        ..scrollListener(),
+      child: Consumer2<UserModel, ChatModel>(
+        builder: (_, um, cm, __) {
+          if (cm.isLoading) {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          }
 
-        final listTiles = this.rooms.map(
-          (room) {
-            return model.user.uid == room.teacher.uid
-                ? ChatCell(user: room.student, room: room)
-                : ChatCell(user: room.teacher, room: room);
-          },
-        ).toList();
-        return ListView.separated(
-          controller: controller,
-          physics: AlwaysScrollableScrollPhysics(),
-          separatorBuilder: (context, index) => Divider(height: 0.5),
-          itemBuilder: (context, index) {
-            return listTiles[index];
-          },
-          itemCount: listTiles.length,
-        );
-      },
+          final rooms =
+              this.tabName == 'teacher' ? cm.teacherRooms : cm.studentRooms;
+
+          if (rooms.isEmpty) {
+            return Center(
+              child: Text(
+                'チャットルームはありません。',
+              ),
+            );
+          }
+
+          final listTiles = rooms.map(
+            (room) {
+              return um.user.uid == room.teacher.uid
+                  ? ChatCell(user: room.student, room: room)
+                  : ChatCell(user: room.teacher, room: room);
+            },
+          ).toList();
+          return ListView.separated(
+            controller:
+                this.tabName == 'teacher' ? cm.teacherScroll : cm.studentScroll,
+            physics: AlwaysScrollableScrollPhysics(),
+            separatorBuilder: (context, index) => Divider(height: 0.5),
+            itemBuilder: (context, index) {
+              return listTiles[index];
+            },
+            itemCount: listTiles.length,
+          );
+        },
+      ),
     );
   }
 }
