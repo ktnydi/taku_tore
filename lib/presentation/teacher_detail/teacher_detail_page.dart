@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:provider/provider.dart';
+import 'package:takutore/presentation/chat_room/chat_room_page.dart';
 import '../../atoms/rounded_button.dart';
 import 'package:timeago/timeago.dart';
 import '../../domain/user.dart';
@@ -70,7 +71,7 @@ class TeacherDetail extends StatelessWidget {
   }
 
   Widget _buildFloatingButton(TeacherDetailModel model) {
-    if (model.isLoading || model.isAuthor) {
+    if (model.isAuthor) {
       return Container();
     }
 
@@ -96,96 +97,113 @@ class TeacherDetail extends StatelessWidget {
         ..checkReview(teacher: teacher)
         ..fetchReviews(teacher: teacher)
         ..scrollListener(),
-      child: Scaffold(
-        extendBodyBehindAppBar: true,
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          backgroundColor: Colors.transparent,
-          centerTitle: false,
-          elevation: 0.0,
-          titleSpacing: 0,
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              FlatButton(
-                padding: EdgeInsets.all(16),
-                child: Transform.translate(
-                  offset: Offset(-1, 0),
-                  child: Icon(
-                    Icons.arrow_back_ios,
-                    color: Colors.white,
-                    size: 18,
-                  ),
-                ),
-                color: Colors.black45,
-                shape: CircleBorder(),
-                onPressed: () => Navigator.pop(context),
-              ),
-              Consumer2<UserModel, TeacherDetailModel>(
-                builder: (_, userModel, teacherDetailModel, __) {
-                  if (teacher.uid == userModel.user.uid) {
-                    return Container();
-                  }
-
-                  return FlatButton(
-                    child: Icon(
-                      teacherDetailModel.isBookmarked
-                          ? Icons.bookmark
-                          : Icons.bookmark_border,
-                      color: Colors.white,
-                      size: 18,
+      child: Stack(
+        children: <Widget>[
+          Scaffold(
+            extendBodyBehindAppBar: true,
+            backgroundColor: Colors.white,
+            appBar: AppBar(
+              automaticallyImplyLeading: false,
+              backgroundColor: Colors.transparent,
+              centerTitle: false,
+              elevation: 0.0,
+              titleSpacing: 0,
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  FlatButton(
+                    padding: EdgeInsets.all(16),
+                    child: Transform.translate(
+                      offset: Offset(-1, 0),
+                      child: Icon(
+                        Icons.arrow_back_ios,
+                        color: Colors.white,
+                        size: 18,
+                      ),
                     ),
                     color: Colors.black45,
-                    padding: EdgeInsets.all(16),
                     shape: CircleBorder(),
-                    onPressed: () async {
-                      if (teacherDetailModel.isBookmarked) {
-                        await deleteBookmark(
-                          model: teacherDetailModel,
-                          context: context,
-                        );
-                      } else {
-                        await addBookmark(
-                          model: teacherDetailModel,
-                          context: context,
-                        );
-                      }
-                    },
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
-        body: Consumer<TeacherDetailModel>(
-          builder: (_, model, __) {
-            return Stack(
-              alignment: Alignment.bottomCenter,
-              children: <Widget>[
-                SingleChildScrollView(
-                  controller: model.scrollController,
-                  child: Padding(
-                    padding: EdgeInsets.only(bottom: !model.isAuthor ? 75 : 15),
-                    child: Column(
-                      children: <Widget>[
-                        Header(teacher: teacher),
-                        Content(teacher: teacher),
-                        ReviewList(),
-                      ],
-                    ),
+                    onPressed: () => Navigator.pop(context),
                   ),
-                ),
-                AnimatedPositioned(
-                  duration: Duration(milliseconds: 250),
-                  curve: Curves.easeInOut,
-                  bottom: model.isLoading ? -100 : 15,
-                  child: _buildFloatingButton(model),
-                ),
-              ],
-            );
-          },
-        ),
+                  Consumer2<UserModel, TeacherDetailModel>(
+                    builder: (_, userModel, teacherDetailModel, __) {
+                      if (teacher.uid == userModel.user.uid) {
+                        return Container();
+                      }
+
+                      return FlatButton(
+                        child: Icon(
+                          teacherDetailModel.isBookmarked
+                              ? Icons.bookmark
+                              : Icons.bookmark_border,
+                          color: Colors.white,
+                          size: 18,
+                        ),
+                        color: Colors.black45,
+                        padding: EdgeInsets.all(16),
+                        shape: CircleBorder(),
+                        onPressed: () async {
+                          if (teacherDetailModel.isBookmarked) {
+                            await deleteBookmark(
+                              model: teacherDetailModel,
+                              context: context,
+                            );
+                          } else {
+                            await addBookmark(
+                              model: teacherDetailModel,
+                              context: context,
+                            );
+                          }
+                        },
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+            body: Consumer<TeacherDetailModel>(
+              builder: (_, model, __) {
+                return Stack(
+                  alignment: Alignment.bottomCenter,
+                  children: <Widget>[
+                    SingleChildScrollView(
+                      controller: model.scrollController,
+                      child: Padding(
+                        padding:
+                            EdgeInsets.only(bottom: !model.isAuthor ? 75 : 15),
+                        child: Column(
+                          children: <Widget>[
+                            Header(teacher: teacher),
+                            Content(teacher: teacher),
+                            ReviewList(),
+                          ],
+                        ),
+                      ),
+                    ),
+                    AnimatedPositioned(
+                      duration: Duration(milliseconds: 250),
+                      curve: Curves.easeInOut,
+                      bottom: model.isLoading ? -100 : 15,
+                      child: _buildFloatingButton(model),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+          Consumer<TeacherDetailModel>(
+            builder: (_, model, __) {
+              return model.isCreatingRoom
+                  ? Container(
+                      color: Colors.white.withOpacity(0.7),
+                      child: Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    )
+                  : SizedBox();
+            },
+          ),
+        ],
       ),
     );
   }
@@ -231,9 +249,13 @@ class ConsultButton extends StatelessWidget {
   }) async {
     return await showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(title),
+          title: Text(
+            title,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
           content: Text(content),
           actions: <Widget>[
             FlatButton(
@@ -247,14 +269,13 @@ class ConsultButton extends StatelessWidget {
             ),
             FlatButton(
               child: Text(
-                'OK',
+                '相談する',
                 style: TextStyle(
                   color: Colors.blueAccent,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              onPressed: () async {
-                Navigator.pop(context, true);
-              },
+              onPressed: () => Navigator.pop(context, true),
             ),
           ],
         );
@@ -269,21 +290,34 @@ class ConsultButton extends StatelessWidget {
     try {
       final isConfirm = await _showDialog(
         context: context,
-        title: '確認',
-        content: '${teacher.displayName}さんに相談しますか？',
+        title: '${model.teacher.displayName}さんとメッセージで相談しますか？',
+        content: 'トークルームを作成します。',
       );
 
       if (!isConfirm) return;
 
-      await model.addRoom();
+      model.beginCreatingRoom();
 
-      _showDialog(
-        context: context,
-        title: '確認',
-        content: 'チャットルームを作成しました。',
+      final newRoom = await model.addRoom();
+
+      model.endCreatingRoom();
+
+      if (newRoom == null) return;
+
+      await model.checkRoom(teacher: teacher);
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (BuildContext context) => ChatRoom(
+            room: newRoom,
+            user: model.teacher,
+          ),
+        ),
       );
 
-      model.checkRoom(teacher: teacher);
+      // TODO: トークルームを作成
+      // TODO: トークルームに遷移
     } catch (e) {
       model.endLoading();
       showDialog(
@@ -315,22 +349,20 @@ class ConsultButton extends StatelessWidget {
         return RoundedButton(
           minWidth: MediaQuery.of(context).size.width - horizontalMargin,
           color: Theme.of(context).primaryColor,
-          disabledColor: Colors.grey,
-          onPressed: () async {
-            await consult(context: context, model: model);
-          },
-          child: !model.isLoading
-              ? Text(
-                  '相談する',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 17,
-                    color: Colors.white,
-                  ),
-                )
-              : CircularProgressIndicator(
-                  backgroundColor: Colors.white,
-                ),
+          disabledColor: Theme.of(context).primaryColor,
+          onPressed: !model.isLoading
+              ? () async {
+                  await consult(context: context, model: model);
+                }
+              : null,
+          child: Text(
+            'メッセージで相談',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 17,
+              color: Colors.white,
+            ),
+          ),
         );
       },
     );
