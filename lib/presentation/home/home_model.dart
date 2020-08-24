@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:takutore/domain/teacher.dart';
 import '../../domain/user.dart';
 
 class HomeModel extends ChangeNotifier {
   ScrollController scrollController = ScrollController();
-  List<User> teachers = [];
+  List<Teacher> teachers = [];
   List<dynamic> blockedUserID = [];
   List<DocumentSnapshot> docSnapshot = [];
   bool isLoading = false;
@@ -53,7 +54,7 @@ class HomeModel extends ChangeNotifier {
     this.docSnapshot = docs.documents;
 
     final teachers = docs.documents.map((doc) {
-      return User(
+      return Teacher(
         uid: doc.documentID,
         displayName: doc['displayName'],
         photoURL: doc['photoURL'],
@@ -90,7 +91,7 @@ class HomeModel extends ChangeNotifier {
     this.docSnapshot = [...this.docSnapshot, ...docs.documents];
 
     final teachers = docs.documents.map((doc) {
-      return User(
+      return Teacher(
         uid: doc.documentID,
         displayName: doc['displayName'],
         photoURL: doc['photoURL'],
@@ -103,6 +104,7 @@ class HomeModel extends ChangeNotifier {
         recommend: doc['recommend'],
         avgRating: doc['avgRating'].toDouble(),
         numRatings: doc['numRatings'].toInt(),
+        blockedUserID: doc['blockedUserID'],
       );
     }).toList();
     this.teachers = [...this.teachers, ...teachers];

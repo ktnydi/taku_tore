@@ -68,9 +68,6 @@ class ChatModel extends ChangeNotifier {
       photoURL: user['photoURL'],
       isTeacher: user['isTeacher'],
       createdAt: user['createdAt'],
-      about: user['about'],
-      canDo: user['canDo'],
-      recommend: user['recommend'],
       blockedUserID: user['blockedUserID'],
     );
   }

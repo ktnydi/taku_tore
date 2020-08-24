@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:provider/provider.dart';
+import 'package:takutore/domain/teacher.dart';
 import 'package:takutore/domain/user.dart';
 import 'package:takutore/presentation/teacher_detail/teacher_detail_page.dart';
 import 'home_model.dart';
@@ -33,7 +34,7 @@ class Home extends StatelessWidget {
     );
   }
 
-  Future<bool> _confirmDialog(BuildContext context, User teacher) async {
+  Future<bool> _confirmDialog(BuildContext context, Teacher teacher) async {
     return await showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -72,7 +73,7 @@ class Home extends StatelessWidget {
   }
 
   Future _report(BuildContext context,
-      {HomeModel model, User teacher, String contentType}) async {
+      {HomeModel model, Teacher teacher, String contentType}) async {
     final types = ['inappropriate', 'spam'];
     try {
       if (!types.contains(contentType)) {
@@ -308,7 +309,7 @@ class Home extends StatelessWidget {
     );
   }
 
-  Widget _cell(BuildContext context, HomeModel model, User teacher) {
+  Widget _cell(BuildContext context, HomeModel model, Teacher teacher) {
     return Material(
       color: Colors.white,
       child: InkWell(

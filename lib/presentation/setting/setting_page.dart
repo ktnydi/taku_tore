@@ -7,7 +7,6 @@ import 'package:url_launcher/url_launcher.dart' as launcher;
 import '../setting_image/setting_image_page.dart';
 import '../../user_model.dart';
 import '../setting_teacher/setting_teacher_page.dart';
-import '../remove_teacher/remove_teacher_page.dart';
 import '../setting_name/setting_name_page.dart';
 import '../setting_email/setting_email_page.dart';
 import '../setting_password/setting_password_page.dart';

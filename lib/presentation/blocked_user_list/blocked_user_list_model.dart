@@ -47,6 +47,7 @@ class BlockedUserListModel extends ChangeNotifier {
           photoURL: data['photoURL'],
           isTeacher: data['isTeacher'],
           createdAt: data['createdAt'],
+          blockedUserID: data['blockedUserID'],
         );
       },
     ));

@@ -34,6 +34,7 @@ class SettingImageModel extends ChangeNotifier {
       photoURL: doc['photoURL'],
       isTeacher: doc['isTeacher'],
       createdAt: doc['createdAt'],
+      blockedUserID: doc['blockedUserID'],
     );
 
     _isLoading = false;
