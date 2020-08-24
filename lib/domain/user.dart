@@ -7,16 +7,9 @@ class User {
     @required this.displayName,
     @required this.photoURL,
     @required this.isTeacher,
-    this.email,
-    this.thumbnail,
-    this.title,
-    this.about,
-    this.canDo,
-    this.recommend,
-    this.avgRating,
-    this.numRatings,
-    this.blockedUserID,
     @required this.createdAt,
+    @required this.blockedUserID,
+    this.email,
   });
 
   final String uid;
@@ -24,13 +17,6 @@ class User {
   final String photoURL;
   final bool isTeacher;
   final String email;
-  final String thumbnail;
-  final String title;
-  final String about;
-  final String canDo;
-  final String recommend;
-  final double avgRating;
-  final int numRatings;
   final List<dynamic> blockedUserID;
   final Timestamp createdAt;
 }

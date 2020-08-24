@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:takutore/domain/teacher.dart';
 import '../../domain/user.dart';
 
 class BookmarkModel extends ChangeNotifier {
@@ -30,7 +31,7 @@ class BookmarkModel extends ChangeNotifier {
         final teacherRef =
             Firestore.instance.collection('users').document(doc['teacherId']);
         final document = await teacherRef.get();
-        return User(
+        return Teacher(
           uid: document.documentID,
           displayName: document['displayName'],
           photoURL: document['photoURL'],
