@@ -31,6 +31,19 @@ class TeacherEditModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<bool> hasStudents() async {
+    final currentUser = await _auth.currentUser();
+
+    final roomSnapshot = await _store
+        .collection('users')
+        .document(currentUser.uid)
+        .collection('rooms')
+        .where('member.teacherID', isEqualTo: currentUser.uid)
+        .getDocuments();
+
+    return roomSnapshot.documents.length > 0;
+  }
+
   Future fetchTeacher() async {
     beginLoading();
 
