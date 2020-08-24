@@ -343,6 +343,23 @@ class ConsultButton extends StatelessWidget {
     return Consumer<TeacherDetailModel>(
       builder: (_, model, __) {
         const horizontalMargin = 30;
+        if (!model.teacher.isRecruiting) {
+          return RoundedButton(
+            minWidth: MediaQuery.of(context).size.width - horizontalMargin,
+            color: Theme.of(context).primaryColor,
+            disabledColor: Colors.grey,
+            onPressed: null,
+            child: Text(
+              'この募集は締め切りました',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 17,
+                color: Colors.white,
+              ),
+            ),
+          );
+        }
+
         return RoundedButton(
           minWidth: MediaQuery.of(context).size.width - horizontalMargin,
           color: Theme.of(context).primaryColor,
