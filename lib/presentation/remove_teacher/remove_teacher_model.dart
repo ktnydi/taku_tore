@@ -47,6 +47,14 @@ class RemoveTeacherModel extends ChangeNotifier {
 
     await doc.updateData({
       'isTeacher': false,
+      'thumbnail': FieldValue.delete(),
+      'title': FieldValue.delete(),
+      'canDo': FieldValue.delete(),
+      'recommend': FieldValue.delete(),
+      'about': FieldValue.delete(),
+      'avgRating': FieldValue.delete(),
+      'numRatings': FieldValue.delete(),
+      'isRecruiting': FieldValue.delete(),
     });
     endLoading();
   }
