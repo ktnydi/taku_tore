@@ -68,6 +68,7 @@ class HomeModel extends ChangeNotifier {
         avgRating: doc['avgRating'].toDouble(),
         numRatings: doc['numRatings'].toInt(),
         blockedUserID: doc['blockedUserID'],
+        isRecruiting: doc['isRecruiting'],
       );
     }).toList();
 
@@ -105,6 +106,7 @@ class HomeModel extends ChangeNotifier {
         avgRating: doc['avgRating'].toDouble(),
         numRatings: doc['numRatings'].toInt(),
         blockedUserID: doc['blockedUserID'],
+        isRecruiting: doc['isRecruiting'],
       );
     }).toList();
     this.teachers = [...this.teachers, ...teachers];

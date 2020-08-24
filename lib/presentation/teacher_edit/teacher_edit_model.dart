@@ -40,6 +40,7 @@ class TeacherEditModel extends ChangeNotifier {
       numRatings: userSnapshot['numRatings'],
       avgRating: userSnapshot['avgRating'],
       thumbnail: userSnapshot['thumbnail'],
+      isRecruiting: userSnapshot['isRecruiting'],
     );
 
     this.teacher = teacher;
