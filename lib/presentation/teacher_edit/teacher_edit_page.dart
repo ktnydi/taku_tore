@@ -57,14 +57,16 @@ class TeacherEdit extends StatelessWidget {
                         Icons.arrow_forward_ios,
                         size: 15,
                       ),
-                      onTap: () {
-                        Navigator.push(
+                      onTap: () async {
+                        await Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (BuildContext context) =>
                                 TeacherEditForm(model.teacher),
                           ),
                         );
+
+                        model.fetchTeacher();
                       },
                     ),
                   );
