@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:takutore/presentation/teacher_edit_form/teacher_edit_form_page.dart';
 import 'teacher_edit_model.dart';
 
 class TeacherEdit extends StatelessWidget {
@@ -29,33 +30,45 @@ class TeacherEdit extends StatelessWidget {
                 ),
               ),
               Divider(height: 0.5),
-              Ink(
-                color: Colors.white,
-                child: ListTile(
-                  dense: true,
-                  contentPadding: EdgeInsets.symmetric(
-                    vertical: 0,
-                    horizontal: 15,
-                  ),
-                  title: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Text(
-                        '内容を編集する',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                        ),
+              Consumer<TeacherEditModel>(
+                builder: (_, model, __) {
+                  return Ink(
+                    color: Colors.white,
+                    child: ListTile(
+                      dense: true,
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: 0,
+                        horizontal: 15,
                       ),
-                      SizedBox(width: 10),
-                    ],
-                  ),
-                  trailing: Icon(
-                    Icons.arrow_forward_ios,
-                    size: 15,
-                  ),
-                  onTap: () {},
-                ),
+                      title: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Text(
+                            '内容を編集する',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(width: 10),
+                        ],
+                      ),
+                      trailing: Icon(
+                        Icons.arrow_forward_ios,
+                        size: 15,
+                      ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (BuildContext context) =>
+                                TeacherEditForm(model.teacher),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
               ),
               Divider(height: 0.5),
               Consumer<TeacherEditModel>(
