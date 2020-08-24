@@ -1,119 +1,132 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'teacher_edit_model.dart';
 
 class TeacherEdit extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('講師設定'),
-      ),
-      body: Container(
-        child: ListView(
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 15,
-                vertical: 10,
-              ),
-              child: Text(
-                '基本設定',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black54,
-                ),
-              ),
-            ),
-            Divider(height: 0.5),
-            Ink(
-              color: Colors.white,
-              child: ListTile(
-                dense: true,
-                contentPadding: EdgeInsets.symmetric(
-                  vertical: 0,
+    return ChangeNotifierProvider<TeacherEditModel>(
+      create: (_) => TeacherEditModel()..fetchTeacher(),
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('講師設定'),
+        ),
+        body: Container(
+          child: ListView(
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.symmetric(
                   horizontal: 15,
+                  vertical: 10,
                 ),
-                title: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Text(
-                      '内容を編集する',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
+                child: Text(
+                  '基本設定',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black54,
+                  ),
+                ),
+              ),
+              Divider(height: 0.5),
+              Ink(
+                color: Colors.white,
+                child: ListTile(
+                  dense: true,
+                  contentPadding: EdgeInsets.symmetric(
+                    vertical: 0,
+                    horizontal: 15,
+                  ),
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Text(
+                        '内容を編集する',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                    ],
+                  ),
+                  trailing: Icon(
+                    Icons.arrow_forward_ios,
+                    size: 15,
+                  ),
+                  onTap: () {},
+                ),
+              ),
+              Divider(height: 0.5),
+              Consumer<TeacherEditModel>(
+                builder: (_, model, __) {
+                  return Ink(
+                    color: Colors.white,
+                    child: ListTile(
+                      dense: true,
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: 0,
+                        horizontal: 15,
+                      ),
+                      title: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Text(
+                            '募集を停止する',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          !model.isLoading
+                              ? Switch(
+                                  value: !model.isRecruiting,
+                                  onChanged: (isRecruiting) {
+                                    model.switchRecruiting(!isRecruiting);
+                                  },
+                                )
+                              : SizedBox(),
+                        ],
                       ),
                     ),
-                    SizedBox(width: 10),
-                  ],
-                ),
-                trailing: Icon(
-                  Icons.arrow_forward_ios,
-                  size: 15,
-                ),
-                onTap: () {},
+                  );
+                },
               ),
-            ),
-            Divider(height: 0.5),
-            Ink(
-              color: Colors.white,
-              child: ListTile(
-                dense: true,
-                contentPadding: EdgeInsets.symmetric(
-                  vertical: 0,
-                  horizontal: 15,
-                ),
-                title: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Text(
-                      '募集を停止する',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
+              Divider(height: 0.5),
+              SizedBox(height: 15),
+              Divider(height: 0.5),
+              Ink(
+                color: Colors.white,
+                child: ListTile(
+                  dense: true,
+                  contentPadding: EdgeInsets.symmetric(
+                    vertical: 0,
+                    horizontal: 15,
+                  ),
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Text(
+                        '講師を止める',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red,
+                        ),
                       ),
-                    ),
-                    Switch(
-                      value: false,
-                      onChanged: (value) => {},
-                    ),
-                  ],
+                      SizedBox(width: 10),
+                    ],
+                  ),
+                  trailing: Icon(
+                    Icons.arrow_forward_ios,
+                    size: 15,
+                  ),
+                  onTap: () {},
                 ),
               ),
-            ),
-            Divider(height: 0.5),
-            SizedBox(height: 15),
-            Divider(height: 0.5),
-            Ink(
-              color: Colors.white,
-              child: ListTile(
-                dense: true,
-                contentPadding: EdgeInsets.symmetric(
-                  vertical: 0,
-                  horizontal: 15,
-                ),
-                title: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Text(
-                      '講師を止める',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.red,
-                      ),
-                    ),
-                    SizedBox(width: 10),
-                  ],
-                ),
-                trailing: Icon(
-                  Icons.arrow_forward_ios,
-                  size: 15,
-                ),
-                onTap: () {},
-              ),
-            ),
-            Divider(height: 0.5),
-          ],
+              Divider(height: 0.5),
+            ],
+          ),
         ),
       ),
     );
