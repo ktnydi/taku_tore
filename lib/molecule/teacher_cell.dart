@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import '../domain/user.dart';
+import 'package:takutore/domain/teacher.dart';
 import '../presentation/teacher_detail/teacher_detail_page.dart';
 
 class TeacherCell extends StatelessWidget {
   TeacherCell({@required this.teacher});
 
-  final User teacher;
+  final Teacher teacher;
   @override
   Widget build(BuildContext context) {
     return Material(

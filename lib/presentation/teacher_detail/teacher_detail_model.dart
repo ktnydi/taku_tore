@@ -3,10 +3,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:takutore/domain/review.dart';
 import 'package:takutore/domain/room.dart';
+import 'package:takutore/domain/teacher.dart';
 import '../../domain/user.dart';
 
 class TeacherDetailModel extends ChangeNotifier {
-  User teacher;
+  Teacher teacher;
   ScrollController scrollController = ScrollController();
   List<Review> reviews = [];
   List<DocumentSnapshot> reviewDocList = [];
@@ -49,13 +50,13 @@ class TeacherDetailModel extends ChangeNotifier {
     });
   }
 
-  Future checkAuthor({User teacher}) async {
+  Future checkAuthor({Teacher teacher}) async {
     final currentUser = await FirebaseAuth.instance.currentUser();
     this.isAuthor = teacher.uid == currentUser.uid;
     notifyListeners();
   }
 
-  Future checkBookmark({User teacher}) async {
+  Future checkBookmark({Teacher teacher}) async {
     final currentUser = await FirebaseAuth.instance.currentUser();
     final query = Firestore.instance
         .collection('users')
@@ -70,7 +71,7 @@ class TeacherDetailModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future checkBlocked({User teacher}) async {
+  Future checkBlocked({Teacher teacher}) async {
     final currentUser = await FirebaseAuth.instance.currentUser();
 
     this.isBlocked = teacher.blockedUserID.contains(currentUser.uid);
@@ -78,7 +79,7 @@ class TeacherDetailModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future checkReview({User teacher}) async {
+  Future checkReview({Teacher teacher}) async {
     final currentUser = await FirebaseAuth.instance.currentUser();
     final query = Firestore.instance
         .collection('users')
@@ -126,7 +127,7 @@ class TeacherDetailModel extends ChangeNotifier {
         .delete();
   }
 
-  Future fetchReviews({User teacher}) async {
+  Future fetchReviews({Teacher teacher}) async {
     final collection = Firestore.instance
         .collection('users')
         .document(teacher.uid)
@@ -148,6 +149,7 @@ class TeacherDetailModel extends ChangeNotifier {
           photoURL: data['photoURL'],
           isTeacher: data['isTeacher'],
           createdAt: data['createdAt'],
+          blockedUserID: data['blockedUserID'],
         );
         return Review(doc, fromUser);
       }),
@@ -183,6 +185,7 @@ class TeacherDetailModel extends ChangeNotifier {
           photoURL: data['photoURL'],
           isTeacher: data['isTeacher'],
           createdAt: data['createdAt'],
+          blockedUserID: data['blockedUserID'],
         );
         return Review(doc, fromUser);
       }).toList(),
@@ -193,7 +196,7 @@ class TeacherDetailModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future checkRoom({User teacher}) async {
+  Future checkRoom({Teacher teacher}) async {
     beginLoading();
     final currentUser = await FirebaseAuth.instance.currentUser();
 
@@ -267,6 +270,7 @@ class TeacherDetailModel extends ChangeNotifier {
       photoURL: userSnapshot['photoURL'],
       isTeacher: userSnapshot['isTeacher'],
       createdAt: userSnapshot['createdAt'],
+      blockedUserID: userSnapshot['blockedUserID'],
     );
     return user;
   }

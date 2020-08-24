@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:provider/provider.dart';
+import 'package:takutore/domain/teacher.dart';
 import 'package:takutore/presentation/chat_room/chat_room_page.dart';
 import '../../atoms/rounded_button.dart';
 import 'package:timeago/timeago.dart';
-import '../../domain/user.dart';
 import '../../user_model.dart';
 import '../review/review_page.dart';
 import 'teacher_detail_model.dart';
@@ -12,7 +12,7 @@ import 'teacher_detail_model.dart';
 class TeacherDetail extends StatelessWidget {
   TeacherDetail({this.teacher});
 
-  final User teacher;
+  final Teacher teacher;
 
   Future addBookmark({
     @required TeacherDetailModel model,
@@ -240,7 +240,7 @@ class BlockedButton extends StatelessWidget {
 class ConsultButton extends StatelessWidget {
   ConsultButton(this.teacher);
 
-  final User teacher;
+  final Teacher teacher;
 
   Future<bool> _showDialog({
     BuildContext context,
@@ -315,9 +315,6 @@ class ConsultButton extends StatelessWidget {
           ),
         ),
       );
-
-      // TODO: トークルームを作成
-      // TODO: トークルームに遷移
     } catch (e) {
       model.endLoading();
       showDialog(
@@ -372,7 +369,7 @@ class ConsultButton extends StatelessWidget {
 class ReviewButton extends StatelessWidget {
   ReviewButton(this.teacher);
 
-  final User teacher;
+  final Teacher teacher;
   final horizontalMargin = 30;
 
   @override
@@ -415,7 +412,7 @@ class ReviewButton extends StatelessWidget {
 class Header extends StatelessWidget {
   Header({this.teacher});
 
-  final User teacher;
+  final Teacher teacher;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -436,7 +433,7 @@ class Header extends StatelessWidget {
 class Content extends StatelessWidget {
   Content({this.teacher});
 
-  final User teacher;
+  final Teacher teacher;
 
   @override
   Widget build(BuildContext context) {
@@ -458,7 +455,7 @@ class Content extends StatelessWidget {
               SizedBox(height: 15),
               Divider(height: 0.5),
               SizedBox(height: 10),
-              Teacher(teacher),
+              TeacherInfo(teacher),
               SizedBox(height: 10),
               Divider(height: 0.5),
               SizedBox(height: 15),
@@ -503,10 +500,10 @@ class Title extends StatelessWidget {
   }
 }
 
-class Teacher extends StatelessWidget {
-  Teacher(this.teacher);
+class TeacherInfo extends StatelessWidget {
+  TeacherInfo(this.teacher);
 
-  final User teacher;
+  final Teacher teacher;
   @override
   Widget build(BuildContext context) {
     return Row(
