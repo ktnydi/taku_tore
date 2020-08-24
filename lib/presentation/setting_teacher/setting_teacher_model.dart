@@ -126,6 +126,7 @@ class SettingTeacherModel extends ChangeNotifier {
       'recommend': this._recommend,
       'avgRating': 0.0,
       'numRatings': 0.0,
+      'isRecruiting': true,
     });
   }
 }

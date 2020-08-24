@@ -9,6 +9,7 @@ class Teacher extends User {
   String recommend;
   double avgRating;
   int numRatings;
+  bool isRecruiting;
 
   Teacher({
     @required uid,
@@ -24,6 +25,7 @@ class Teacher extends User {
     @required this.recommend,
     @required this.avgRating,
     @required this.numRatings,
+    @required this.isRecruiting,
   }) : super(
           uid: uid,
           displayName: displayName,
