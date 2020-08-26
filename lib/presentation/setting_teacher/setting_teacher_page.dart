@@ -444,6 +444,7 @@ class CanDo extends StatelessWidget {
               'サービス内容',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
+                fontSize: 16,
               ),
             ),
             SizedBox(height: 10),
@@ -502,6 +503,7 @@ class Recommend extends StatelessWidget {
               'こんな方におすすめ',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
+                fontSize: 16,
               ),
             ),
             SizedBox(height: 10),
