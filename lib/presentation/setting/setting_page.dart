@@ -367,6 +367,36 @@ class About extends StatelessWidget {
             }
           },
         ),
+        SectionCell(
+          title: Text(
+            'バージョン',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: '1.0.0',
+        ),
+        SectionCell(
+          title: Text(
+            'ライセンス',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          onTap: () async {
+            try {
+              showLicensePage(
+                context: context,
+                applicationVersion: '1.0.0',
+                applicationName: 'TakuTore',
+              );
+            } catch (e) {
+              this._alertDialog(context, errorText: e.toString());
+            }
+          },
+        ),
       ],
     );
   }
@@ -526,10 +556,12 @@ class SectionCell extends StatelessWidget {
               ),
             ],
           ),
-          trailing: Icon(
-            Icons.arrow_forward_ios,
-            size: 15,
-          ),
+          trailing: this.onTap != null
+              ? Icon(
+                  Icons.arrow_forward_ios,
+                  size: 15,
+                )
+              : null,
           onTap: this.onTap,
         );
       },
