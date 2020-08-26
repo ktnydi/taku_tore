@@ -26,16 +26,6 @@ class _ChatState extends State<Chat> with TickerProviderStateMixin {
     return Scaffold(
       appBar: AppBar(
         title: Text('チャット'),
-        actions: <Widget>[
-          IconButton(
-            onPressed: () {
-              // TODO: Add a future for searching teacher.
-            },
-            icon: Icon(
-              Icons.search,
-            ),
-          ),
-        ],
         bottom: PreferredSize(
           preferredSize: Size(double.infinity, 50),
           child: Container(

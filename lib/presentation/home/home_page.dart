@@ -416,16 +416,6 @@ class Home extends StatelessWidget {
         title: Text(
           '講師を探す',
         ),
-        actions: <Widget>[
-          IconButton(
-            onPressed: () {
-              // TODO: Add a future for searching teacher.
-            },
-            icon: Icon(
-              Icons.search,
-            ),
-          ),
-        ],
       ),
       body: ChangeNotifierProvider<HomeModel>(
         create: (_) => HomeModel()
