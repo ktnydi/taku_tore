@@ -11,7 +11,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>takutore</string>
+	<string>TakuTore</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -76,6 +76,5 @@
 	<false/>
 	<key>UIStatusBarHidden</key>
 	<true/>
-
 </dict>
 </plist>
