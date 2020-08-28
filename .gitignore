@@ -9,6 +9,8 @@
 .buildlog/
 .history
 .svn/
+android/**/google-services.json
+ios/**/GoogleService-info.plist
 
 # IntelliJ related
 *.iml
