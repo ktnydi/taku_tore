@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -8,8 +8,8 @@ import 'package:apple_sign_in/apple_sign_in.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 
 class AuthModel extends ChangeNotifier {
-  FirebaseAuth _auth = FirebaseAuth.instance;
-  Firestore _store = Firestore.instance;
+  auth.FirebaseAuth _auth = auth.FirebaseAuth.instance;
+  FirebaseFirestore _store = FirebaseFirestore.instance;
   FirebaseStorage _storage = FirebaseStorage.instance;
   FirebaseMessaging _messaging = FirebaseMessaging();
   GoogleSignIn _googleSignIn = GoogleSignIn();
@@ -25,12 +25,12 @@ class AuthModel extends ChangeNotifier {
     notifyListeners();
 
     GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-    AuthCredential credential = GoogleAuthProvider.getCredential(
+    auth.AuthCredential credential = auth.GoogleAuthProvider.credential(
       idToken: googleAuth.idToken,
       accessToken: googleAuth.accessToken,
     );
 
-    FirebaseUser user = (await _auth.signInWithCredential(credential)).user;
+    auth.User user = (await _auth.signInWithCredential(credential)).user;
 
     if (user == null) {
       isLoading = false;
@@ -39,17 +39,17 @@ class AuthModel extends ChangeNotifier {
     }
 
     final deviceToken = await _messaging.getToken();
-    final document = _store.collection('users').document(user.uid);
+    final document = _store.collection('users').doc(user.uid);
     bool registered = await hasAlreadyRegistered(userID: user.uid);
 
     if (!registered) {
       await _store.runTransaction(
         (transaction) async {
-          await transaction.set(
+          transaction.set(
             document,
             {
               'displayName': user.displayName,
-              'photoURL': user.photoUrl,
+              'photoURL': user.photoURL,
               'isTeacher': false,
               'blockedUserID': [],
               'createdAt': FieldValue.serverTimestamp(),
@@ -57,8 +57,8 @@ class AuthModel extends ChangeNotifier {
           );
 
           if (deviceToken != null && deviceToken.isNotEmpty) {
-            await transaction.set(
-              document.collection('tokens').document(deviceToken),
+            transaction.set(
+              document.collection('tokens').doc(deviceToken),
               {
                 'deviceToken': deviceToken,
                 'createdAt': FieldValue.serverTimestamp(),
@@ -69,7 +69,7 @@ class AuthModel extends ChangeNotifier {
       );
     } else {
       if (deviceToken != null && deviceToken.isNotEmpty) {
-        await document.collection('tokens').document(deviceToken).setData(
+        await document.collection('tokens').doc(deviceToken).set(
           {
             'deviceToken': deviceToken,
             'createdAt': FieldValue.serverTimestamp(),
@@ -108,13 +108,13 @@ class AuthModel extends ChangeNotifier {
       notifyListeners();
 
       final AppleIdCredential appleIdCredential = result.credential;
-      const oAuthProvider = OAuthProvider(providerId: 'apple.com');
-      final credential = oAuthProvider.getCredential(
+      final oAuthProvider = auth.OAuthProvider('apple.com');
+      final credential = oAuthProvider.credential(
         idToken: String.fromCharCodes(appleIdCredential.identityToken),
         accessToken: String.fromCharCodes(appleIdCredential.authorizationCode),
       );
 
-      FirebaseUser user = (await _auth.signInWithCredential(credential)).user;
+      auth.User user = (await _auth.signInWithCredential(credential)).user;
 
       if (user == null) {
         isLoading = false;
@@ -127,13 +127,13 @@ class AuthModel extends ChangeNotifier {
       }
 
       final deviceToken = await _messaging.getToken();
-      final document = _store.collection('users').document(user.uid);
+      final document = _store.collection('users').doc(user.uid);
       bool registered = await hasAlreadyRegistered(userID: user.uid);
 
       if (!registered) {
         await _store.runTransaction(
           (transaction) async {
-            await transaction.set(
+            transaction.set(
               document,
               {
                 'displayName': getFullName(appleIdCredential),
@@ -145,8 +145,8 @@ class AuthModel extends ChangeNotifier {
             );
 
             if (deviceToken != null && deviceToken.isNotEmpty) {
-              await transaction.set(
-                document.collection('tokens').document(deviceToken),
+              transaction.set(
+                document.collection('tokens').doc(deviceToken),
                 {
                   'deviceToken': deviceToken,
                   'createdAt': FieldValue.serverTimestamp(),
@@ -157,7 +157,7 @@ class AuthModel extends ChangeNotifier {
         );
       } else {
         if (deviceToken != null && deviceToken.isNotEmpty) {
-          await document.collection('tokens').document(deviceToken).setData(
+          await document.collection('tokens').doc(deviceToken).set(
             {
               'deviceToken': deviceToken,
               'createdAt': FieldValue.serverTimestamp(),
@@ -185,11 +185,11 @@ class AuthModel extends ChangeNotifier {
     isLoading = true;
     notifyListeners();
 
-    final credential = FacebookAuthProvider.getCredential(
-      accessToken: result.accessToken.token,
+    final credential = auth.FacebookAuthProvider.credential(
+      result.accessToken.token,
     );
 
-    FirebaseUser user = (await _auth.signInWithCredential(credential)).user;
+    auth.User user = (await _auth.signInWithCredential(credential)).user;
 
     if (user == null) {
       isLoading = false;
@@ -198,18 +198,18 @@ class AuthModel extends ChangeNotifier {
     }
 
     final deviceToken = await _messaging.getToken();
-    final document = _store.collection('users').document(user.uid);
+    final document = _store.collection('users').doc(user.uid);
     bool registered = await hasAlreadyRegistered(userID: user.uid);
 
     if (!registered) {
       await user.updateEmail(user.email);
       await _store.runTransaction(
         (transaction) async {
-          await transaction.set(
+          transaction.set(
             document,
             {
               'displayName': user.displayName,
-              'photoURL': user.photoUrl,
+              'photoURL': user.photoURL,
               'isTeacher': false,
               'blockedUserID': [],
               'createdAt': FieldValue.serverTimestamp(),
@@ -217,8 +217,8 @@ class AuthModel extends ChangeNotifier {
           );
 
           if (deviceToken != null && deviceToken.isNotEmpty) {
-            await transaction.set(
-              document.collection('tokens').document(deviceToken),
+            transaction.set(
+              document.collection('tokens').doc(deviceToken),
               {
                 'deviceToken': deviceToken,
                 'createdAt': FieldValue.serverTimestamp(),
@@ -229,7 +229,7 @@ class AuthModel extends ChangeNotifier {
       );
     } else {
       if (deviceToken != null && deviceToken.isNotEmpty) {
-        await document.collection('tokens').document(deviceToken).setData(
+        await document.collection('tokens').doc(deviceToken).set(
           {
             'deviceToken': deviceToken,
             'createdAt': FieldValue.serverTimestamp(),
@@ -254,7 +254,7 @@ class AuthModel extends ChangeNotifier {
   }
 
   Future<bool> hasAlreadyRegistered({String userID}) async {
-    final user = _store.collection('users').document(userID);
+    final user = _store.collection('users').doc(userID);
     final doc = await user.get();
     return doc.exists;
   }

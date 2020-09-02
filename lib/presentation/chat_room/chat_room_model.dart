@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/material.dart';
 import 'package:flutter_app_badger/flutter_app_badger.dart';
 import '../../domain/room.dart';
@@ -41,12 +41,12 @@ class ChatRoomModel extends ChangeNotifier {
   Future checkBlocked() async {
     beginLoading();
 
-    final currentUser = await FirebaseAuth.instance.currentUser();
+    final currentUser = auth.FirebaseAuth.instance.currentUser;
     final document =
-        Firestore.instance.collection('users').document(currentUser.uid);
+        FirebaseFirestore.instance.collection('users').doc(currentUser.uid);
     final doc = await document.get();
 
-    final isBlocking = doc['blockedUserID'].contains(this.user.uid);
+    final isBlocking = doc.data()['blockedUserID'].contains(this.user.uid);
     final isBlocked = this.user.blockedUserID.contains(currentUser.uid);
 
     this.isBlocked = isBlocking || isBlocked;
@@ -91,32 +91,32 @@ class ChatRoomModel extends ChangeNotifier {
   Future readMessage() async {
     if (!this.room.hasNewMessage) return;
 
-    final currentUser = await FirebaseAuth.instance.currentUser();
+    final currentUser = auth.FirebaseAuth.instance.currentUser;
 
     if (this.room.lastMessageFromUid == currentUser.uid) {
       return;
     }
 
-    final userDoc = await Firestore.instance
+    final userDoc = await FirebaseFirestore.instance
         .collection('users')
-        .document(currentUser.uid)
+        .doc(currentUser.uid)
         .get();
-    final numNotices = userDoc['numNotices'];
+    final numNotices = userDoc.data()['numNotices'];
 
-    final document = Firestore.instance
+    final document = FirebaseFirestore.instance
         .collection('users')
-        .document(currentUser.uid)
+        .doc(currentUser.uid)
         .collection('rooms')
-        .document(this.room.documentId);
+        .doc(this.room.documentId);
 
-    final numNewMessage = (await document.get()).data['numNewMessage'];
+    final numNewMessage = (await document.get()).data()['numNewMessage'];
 
     final latestNumNotices = numNotices - numNewMessage;
 
-    await Firestore.instance
+    await FirebaseFirestore.instance
         .collection('users')
-        .document(currentUser.uid)
-        .updateData(
+        .doc(currentUser.uid)
+        .update(
       {
         'numNotices': latestNumNotices,
       },
@@ -124,7 +124,7 @@ class ChatRoomModel extends ChangeNotifier {
 
     FlutterAppBadger.updateBadgeCount(latestNumNotices);
 
-    document.updateData(
+    document.update(
       {
         'numNewMessage': 0,
       },
@@ -132,13 +132,13 @@ class ChatRoomModel extends ChangeNotifier {
   }
 
   Future fetchExtraMessage() async {
-    final currentUser = await FirebaseAuth.instance.currentUser();
+    final currentUser = auth.FirebaseAuth.instance.currentUser;
 
-    final collection = Firestore.instance
+    final collection = FirebaseFirestore.instance
         .collection('users')
-        .document(currentUser.uid)
+        .doc(currentUser.uid)
         .collection('rooms')
-        .document(this.room.documentId)
+        .doc(this.room.documentId)
         .collection('messages');
 
     final query = collection
@@ -146,7 +146,7 @@ class ChatRoomModel extends ChangeNotifier {
         .startAfterDocument(this.start)
         .limit(30);
 
-    final docs = (await query.getDocuments()).documents;
+    final docs = (await query.get()).docs;
 
     if (docs.isEmpty) {
       this.showAllMessage = true;
@@ -159,34 +159,36 @@ class ChatRoomModel extends ChangeNotifier {
   }
 
   Future addMessageWithTransition() async {
-    final currentUser = await FirebaseAuth.instance.currentUser();
+    final currentUser = auth.FirebaseAuth.instance.currentUser;
 
-    final roomRef = Firestore.instance
+    final roomRef = FirebaseFirestore.instance
         .collection('users')
-        .document(currentUser.uid)
+        .doc(currentUser.uid)
         .collection('rooms')
-        .document(room.documentId);
+        .doc(room.documentId);
 
-    final messageRef = roomRef.collection('messages').document();
+    final messageRef = roomRef.collection('messages').doc();
 
     final from = currentUser.uid;
     final to = this.room.student.uid == currentUser.uid
         ? this.room.teacher.uid
         : this.room.student.uid;
 
-    final batch = Firestore.instance.batch();
+    final batch = FirebaseFirestore.instance.batch();
 
-    batch.setData(
+    batch.set(
       roomRef,
       {
         'updatedAt': FieldValue.serverTimestamp(),
         'lastMessage': this.messageController.text,
         'lastMessageFromUid': currentUser.uid,
       },
-      merge: true,
+      SetOptions(
+        merge: true,
+      ),
     );
 
-    batch.setData(
+    batch.set(
       messageRef,
       {
         'fromUid': from,

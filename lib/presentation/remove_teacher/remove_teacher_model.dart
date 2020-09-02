@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../domain/user.dart';
 
@@ -25,11 +25,11 @@ class RemoveTeacherModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<AuthResult> confirmPassword(password) async {
+  Future<auth.UserCredential> confirmPassword(password) async {
     beginLoading();
-    FirebaseUser user = await FirebaseAuth.instance.currentUser();
-    AuthResult result = await user.reauthenticateWithCredential(
-      EmailAuthProvider.getCredential(
+    auth.User user = auth.FirebaseAuth.instance.currentUser;
+    auth.UserCredential result = await user.reauthenticateWithCredential(
+      auth.EmailAuthProvider.credential(
         email: user.email,
         password: password,
       ),
@@ -40,12 +40,12 @@ class RemoveTeacherModel extends ChangeNotifier {
 
   Future removeAsTeacher() async {
     beginLoading();
-    final AuthResult result = await confirmPassword(this._password);
+    final auth.UserCredential result = await confirmPassword(this._password);
 
     final doc =
-        Firestore.instance.collection('users').document(result.user.uid);
+        FirebaseFirestore.instance.collection('users').doc(result.user.uid);
 
-    await doc.updateData({
+    await doc.update({
       'isTeacher': false,
       'thumbnail': FieldValue.delete(),
       'title': FieldValue.delete(),

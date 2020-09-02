@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +7,7 @@ import 'domain/user.dart';
 
 class UserModel extends ChangeNotifier {
   User user;
-  final Firestore _store = Firestore.instance;
+  final FirebaseFirestore _store = FirebaseFirestore.instance;
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   bool isLoading = false;
 
@@ -51,11 +51,12 @@ class UserModel extends ChangeNotifier {
   }
 
   void checkUserSignIn() {
-    FirebaseAuth.instance.onAuthStateChanged.listen((user) async {
+    auth.FirebaseAuth.instance.authStateChanges().listen((user) async {
       if (user != null) {
-        final doc = Firestore.instance.collection('users').document(user.uid);
+        final doc =
+            FirebaseFirestore.instance.collection('users').doc(user.uid);
         doc.snapshots().listen((snapshot) {
-          final userData = snapshot.data;
+          final userData = snapshot.data();
 
           if (userData != null) {
             this.user = User(
@@ -84,17 +85,17 @@ class UserModel extends ChangeNotifier {
   Future signOut() async {
     final deviceToken = await _firebaseMessaging.getToken();
 
-    await Firestore.instance
+    await FirebaseFirestore.instance
         .collection('users')
-        .document(user.uid)
+        .doc(user.uid)
         .collection('tokens')
-        .document(deviceToken)
+        .doc(deviceToken)
         .delete();
 
-    await FirebaseAuth.instance.signOut();
+    await auth.FirebaseAuth.instance.signOut();
   }
 
-  Future<bool> hasAvatar({FirebaseUser user}) async {
+  Future<bool> hasAvatar({auth.User user}) async {
     try {
       await FirebaseStorage.instance
           .ref()
@@ -107,10 +108,10 @@ class UserModel extends ChangeNotifier {
   }
 
   Future removeUser({String password}) async {
-    FirebaseUser user = await FirebaseAuth.instance.currentUser();
+    auth.User user = auth.FirebaseAuth.instance.currentUser;
 
     final result = await user.reauthenticateWithCredential(
-      EmailAuthProvider.getCredential(
+      auth.EmailAuthProvider.credential(
         email: user.email,
         password: password,
       ),
@@ -124,61 +125,61 @@ class UserModel extends ChangeNotifier {
           .child('/images/${user.uid}.jpg')
           .delete();
     }
-    final userRef = _store.collection('users').document(user.uid);
+    final userRef = _store.collection('users').doc(user.uid);
     final roomRef = userRef.collection('rooms');
     final bookmarkRef = userRef.collection('bookmarks');
     final reviewRef = userRef.collection('reviews');
     final noticeRef = userRef.collection('notices');
 
     // rooms, messagesのデータ削除
-    final roomDocs = await roomRef.getDocuments();
+    final roomDocs = await roomRef.get();
     await Future.forEach(
-      roomDocs.documents,
+      roomDocs.docs,
       (DocumentSnapshot doc) async {
-        final msgRef = roomRef.document(doc.documentID).collection('messages');
-        final msgDocs = await msgRef.getDocuments();
+        final msgRef = roomRef.doc(doc.id).collection('messages');
+        final msgDocs = await msgRef.get();
 
         await Future.forEach(
-          msgDocs.documents,
+          msgDocs.docs,
           (DocumentSnapshot doc) async {
-            await msgRef.document(doc.documentID).delete();
+            await msgRef.doc(doc.id).delete();
           },
         );
 
-        await roomRef.document(doc.documentID).delete();
+        await roomRef.doc(doc.id).delete();
       },
     );
 
     // bookmarksのデータ削除
-    final bookmarkDocs = await bookmarkRef.getDocuments();
+    final bookmarkDocs = await bookmarkRef.get();
     Future.forEach(
-      bookmarkDocs.documents,
+      bookmarkDocs.docs,
       (DocumentSnapshot doc) async {
-        await bookmarkRef.document(doc.documentID).delete();
+        await bookmarkRef.doc(doc.id).delete();
       },
     );
 
     // reviewsのデータ削除
-    final reviewDocs = await reviewRef.getDocuments();
+    final reviewDocs = await reviewRef.get();
     Future.forEach(
-      reviewDocs.documents,
+      reviewDocs.docs,
       (DocumentSnapshot doc) async {
-        await reviewRef.document(doc.documentID).delete();
+        await reviewRef.doc(doc.id).delete();
       },
     );
 
     // noticesのデータ削除
-    final noticeDocs = await noticeRef.getDocuments();
+    final noticeDocs = await noticeRef.get();
     Future.forEach(
-      noticeDocs.documents,
+      noticeDocs.docs,
       (DocumentSnapshot doc) async {
-        await noticeRef.document(doc.documentID).delete();
+        await noticeRef.doc(doc.id).delete();
       },
     );
 
     final userDoc = await userRef.get();
 
-    if (userDoc['isTeacher']) {
+    if (userDoc.data()['isTeacher']) {
       await FirebaseStorage.instance
           .ref()
           .child('/images/${user.uid}_thumbnail.jpg')
@@ -186,9 +187,9 @@ class UserModel extends ChangeNotifier {
     }
 
     // tokenの削除
-    final docs = await userRef.collection('tokens').getDocuments();
+    final docs = await userRef.collection('tokens').get();
     await Future.forEach(
-      docs.documents,
+      docs.docs,
       (DocumentSnapshot doc) async {
         await doc.reference.delete();
       },
@@ -200,11 +201,11 @@ class UserModel extends ChangeNotifier {
     await user.delete();
   }
 
-  Future<AuthResult> confirmPassword(password) async {
+  Future<auth.UserCredential> confirmPassword(password) async {
     beginLoading();
-    FirebaseUser user = await FirebaseAuth.instance.currentUser();
-    AuthResult result = await user.reauthenticateWithCredential(
-      EmailAuthProvider.getCredential(
+    auth.User user = auth.FirebaseAuth.instance.currentUser;
+    auth.UserCredential result = await user.reauthenticateWithCredential(
+      auth.EmailAuthProvider.credential(
         email: user.email,
         password: password,
       ),
@@ -220,8 +221,9 @@ class UserModel extends ChangeNotifier {
       throw ('名前が長すぎます。');
     }
 
-    final doc = Firestore.instance.collection('users').document(this.user.uid);
-    await doc.updateData({
+    final doc =
+        FirebaseFirestore.instance.collection('users').doc(this.user.uid);
+    await doc.update({
       'displayName': name,
     });
 
@@ -234,9 +236,9 @@ class UserModel extends ChangeNotifier {
   }) async {
     beginLoading();
 
-    FirebaseUser user = await FirebaseAuth.instance.currentUser();
-    AuthResult result = await user.reauthenticateWithCredential(
-      EmailAuthProvider.getCredential(
+    auth.User user = auth.FirebaseAuth.instance.currentUser;
+    auth.UserCredential result = await user.reauthenticateWithCredential(
+      auth.EmailAuthProvider.credential(
         email: user.email,
         password: password,
       ),
@@ -257,9 +259,9 @@ class UserModel extends ChangeNotifier {
       throw ('新しいパスワードを一致させてください。');
     }
 
-    FirebaseUser user = await FirebaseAuth.instance.currentUser();
-    AuthResult result = await user.reauthenticateWithCredential(
-      EmailAuthProvider.getCredential(
+    auth.User user = auth.FirebaseAuth.instance.currentUser;
+    auth.UserCredential result = await user.reauthenticateWithCredential(
+      auth.EmailAuthProvider.credential(
         email: user.email,
         password: currentPassword,
       ),
@@ -275,9 +277,10 @@ class UserModel extends ChangeNotifier {
     @required String recommend,
   }) async {
     beginLoading();
-    final doc = Firestore.instance.collection('users').document(this.user.uid);
+    final doc =
+        FirebaseFirestore.instance.collection('users').doc(this.user.uid);
 
-    await doc.updateData({
+    await doc.update({
       'isTeacher': true,
       'about': about,
       'canDo': canDo,
@@ -289,9 +292,10 @@ class UserModel extends ChangeNotifier {
   Future removeAsTeacher({@required String password}) async {
     await confirmPassword(password);
 
-    final doc = Firestore.instance.collection('users').document(this.user.uid);
+    final doc =
+        FirebaseFirestore.instance.collection('users').doc(this.user.uid);
 
-    await doc.updateData({
+    await doc.update({
       'isTeacher': false,
     });
   }

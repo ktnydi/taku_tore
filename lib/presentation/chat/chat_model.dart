@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/material.dart';
 import '../../domain/room.dart';
 import '../../domain/user.dart';
@@ -60,54 +60,54 @@ class ChatModel extends ChangeNotifier {
   }
 
   Future<User> fetchUserFromFirebase({@required String userId}) async {
-    final userRef = Firestore.instance.collection('users').document(userId);
+    final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
     final user = await userRef.get();
     return User(
-      uid: user.documentID,
-      displayName: user['displayName'],
-      photoURL: user['photoURL'],
-      isTeacher: user['isTeacher'],
-      createdAt: user['createdAt'],
-      blockedUserID: user['blockedUserID'],
+      uid: user.id,
+      displayName: user.data()['displayName'],
+      photoURL: user.data()['photoURL'],
+      isTeacher: user.data()['isTeacher'],
+      createdAt: user.data()['createdAt'],
+      blockedUserID: user.data()['blockedUserID'],
     );
   }
 
   Future<Room> convertSnapshotToDomain({DocumentSnapshot doc}) async {
-    final teacherID = doc['member']['teacherID'];
-    final studentID = doc['member']['studentID'];
+    final teacherID = doc.data()['member']['teacherID'];
+    final studentID = doc.data()['member']['studentID'];
 
     final teacher = await fetchUserFromFirebase(userId: teacherID);
     final student = await fetchUserFromFirebase(userId: studentID);
 
     return Room(
-      documentId: doc.documentID,
+      documentId: doc.id,
       teacher: teacher,
       student: student,
-      lastMessage: doc['lastMessage'],
-      updatedAt: doc['updatedAt'],
-      createdAt: doc['createdAt'],
-      lastMessageFromUid: doc['lastMessageFromUid'],
-      numNewMessage: doc['numNewMessage'],
-      hasNewMessage: doc['numNewMessage'].toDouble() > 0,
-      isAllow: doc['isAllow'],
+      lastMessage: doc.data()['lastMessage'],
+      updatedAt: doc.data()['updatedAt'],
+      createdAt: doc.data()['createdAt'],
+      lastMessageFromUid: doc.data()['lastMessageFromUid'],
+      numNewMessage: doc.data()['numNewMessage'],
+      hasNewMessage: doc.data()['numNewMessage'].toDouble() > 0,
+      isAllow: doc.data()['isAllow'],
     );
   }
 
   Future fetchTeacherRooms() async {
-    final currentUser = await FirebaseAuth.instance.currentUser();
+    final currentUser = auth.FirebaseAuth.instance.currentUser;
 
-    final collection = Firestore.instance
+    final collection = FirebaseFirestore.instance
         .collection('users')
-        .document(currentUser.uid)
+        .doc(currentUser.uid)
         .collection('rooms')
         .where('member.studentID', isEqualTo: currentUser.uid)
         .orderBy('createdAt', descending: true)
         .limit(50);
-    final docs = await collection.getDocuments();
-    this.teacherSnapshot = docs.documents;
+    final docs = await collection.get();
+    this.teacherSnapshot = docs.docs;
 
     final rooms = await Future.wait(
-      docs.documents.map(
+      docs.docs.map(
         (doc) async => await convertSnapshotToDomain(doc: doc),
       ),
     );
@@ -115,11 +115,11 @@ class ChatModel extends ChangeNotifier {
   }
 
   Future fetchExtraTeacherRooms() async {
-    final currentUser = await FirebaseAuth.instance.currentUser();
+    final currentUser = auth.FirebaseAuth.instance.currentUser;
 
-    final collection = Firestore.instance
+    final collection = FirebaseFirestore.instance
         .collection('users')
-        .document(currentUser.uid)
+        .doc(currentUser.uid)
         .collection('rooms')
         .where('member.studentID', isEqualTo: currentUser.uid)
         .orderBy('createdAt', descending: true)
@@ -127,11 +127,11 @@ class ChatModel extends ChangeNotifier {
           this.teacherSnapshot[this.teacherSnapshot.length - 1],
         )
         .limit(50);
-    final docs = await collection.getDocuments();
-    this.teacherSnapshot = [...this.teacherSnapshot, ...docs.documents];
+    final docs = await collection.get();
+    this.teacherSnapshot = [...this.teacherSnapshot, ...docs.docs];
 
     final rooms = await Future.wait(
-      docs.documents.map(
+      docs.docs.map(
         (doc) async => await convertSnapshotToDomain(doc: doc),
       ),
     );
@@ -141,20 +141,20 @@ class ChatModel extends ChangeNotifier {
   }
 
   Future fetchStudentRooms() async {
-    final currentUser = await FirebaseAuth.instance.currentUser();
+    final currentUser = auth.FirebaseAuth.instance.currentUser;
 
-    final collection = Firestore.instance
+    final collection = FirebaseFirestore.instance
         .collection('users')
-        .document(currentUser.uid)
+        .doc(currentUser.uid)
         .collection('rooms')
         .where('member.teacherID', isEqualTo: currentUser.uid)
         .orderBy('createdAt', descending: true)
         .limit(50);
-    final docs = await collection.getDocuments();
-    this.studentSnapshot = docs.documents;
+    final docs = await collection.get();
+    this.studentSnapshot = docs.docs;
 
     final rooms = await Future.wait(
-      docs.documents.map(
+      docs.docs.map(
         (doc) async => await convertSnapshotToDomain(doc: doc),
       ),
     );
@@ -162,11 +162,11 @@ class ChatModel extends ChangeNotifier {
   }
 
   Future fetchExtraStudentRooms() async {
-    final currentUser = await FirebaseAuth.instance.currentUser();
+    final currentUser = auth.FirebaseAuth.instance.currentUser;
 
-    final collection = Firestore.instance
+    final collection = FirebaseFirestore.instance
         .collection('users')
-        .document(currentUser.uid)
+        .doc(currentUser.uid)
         .collection('rooms')
         .where('member.teacherID', isEqualTo: currentUser.uid)
         .orderBy('createdAt', descending: true)
@@ -174,11 +174,11 @@ class ChatModel extends ChangeNotifier {
           this.studentSnapshot[this.studentSnapshot.length - 1],
         )
         .limit(50);
-    final docs = await collection.getDocuments();
-    this.studentSnapshot = [...this.studentSnapshot, ...docs.documents];
+    final docs = await collection.get();
+    this.studentSnapshot = [...this.studentSnapshot, ...docs.docs];
 
     final rooms = await Future.wait(
-      docs.documents.map(
+      docs.docs.map(
         (doc) async => await convertSnapshotToDomain(doc: doc),
       ),
     );

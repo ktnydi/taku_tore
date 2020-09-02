@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
@@ -98,7 +98,7 @@ class SettingTeacherModel extends ChangeNotifier {
       throw ('サムネイルを選択してください');
     }
 
-    final user = await FirebaseAuth.instance.currentUser();
+    final user = auth.FirebaseAuth.instance.currentUser;
 
     // Firebase Storageに画像をアップロード
     final path = '/images/${user.uid}_thumbnail.jpg';
@@ -116,8 +116,8 @@ class SettingTeacherModel extends ChangeNotifier {
     StorageTaskSnapshot snapshot = await uploadTask.onComplete;
     String thumbnail = await snapshot.ref.getDownloadURL();
 
-    final doc = Firestore.instance.collection('users').document(user.uid);
-    await doc.updateData({
+    final doc = FirebaseFirestore.instance.collection('users').doc(user.uid);
+    await doc.update({
       'thumbnail': thumbnail,
       'isTeacher': true,
       'title': this._title,

@@ -32,9 +32,9 @@ class _ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
       return false;
     }
 
-    final beforeDate = getDate(documents[index - 1]['createdAt']);
-    final currentDate = getDate(documents[index]['createdAt']);
-    return documents[index - 1]['fromUid'] == model.user.uid &&
+    final beforeDate = getDate(documents[index - 1].data()['createdAt']);
+    final currentDate = getDate(documents[index].data()['createdAt']);
+    return documents[index - 1].data()['fromUid'] == model.user.uid &&
         beforeDate == currentDate;
   }
 
@@ -47,9 +47,9 @@ class _ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
       return false;
     }
 
-    final beforeDate = getDate(documents[index - 1]['createdAt']);
-    final currentDate = getDate(documents[index]['createdAt']);
-    return documents[index - 1]['fromUid'] != model.user.uid &&
+    final beforeDate = getDate(documents[index - 1].data()['createdAt']);
+    final currentDate = getDate(documents[index].data()['createdAt']);
+    return documents[index - 1].data()['fromUid'] != model.user.uid &&
         beforeDate == currentDate;
   }
 
@@ -62,10 +62,10 @@ class _ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
     documents.asMap().forEach(
       (index, doc) {
         final message = Message(
-          fromUid: doc['fromUid'],
-          toUid: doc['toUid'],
-          content: doc['content'],
-          createdAt: doc['createdAt'],
+          fromUid: doc.data()['fromUid'],
+          toUid: doc.data()['toUid'],
+          content: doc.data()['content'],
+          createdAt: doc.data()['createdAt'],
         );
 
         final isLastMessageRight = this.isLastMessageRight(
@@ -151,11 +151,11 @@ class _ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
               Expanded(
                 child: Consumer2<UserModel, ChatRoomModel>(
                   builder: (_, um, cm, __) {
-                    Query query = Firestore.instance
+                    Query query = FirebaseFirestore.instance
                         .collection('users')
-                        .document(um.user.uid)
+                        .doc(um.user.uid)
                         .collection('rooms')
-                        .document(widget.room.documentId)
+                        .doc(widget.room.documentId)
                         .collection('messages')
                         .orderBy('createdAt', descending: true);
                     Stream<QuerySnapshot> watch;
@@ -179,7 +179,7 @@ class _ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
                         }
 
                         final QuerySnapshot docs = snapshot.data;
-                        final List<DocumentSnapshot> documents = docs.documents;
+                        final List<DocumentSnapshot> documents = docs.docs;
 
                         if (documents.isNotEmpty && documents.length >= 30) {
                           cm.start = documents[documents.length - 1];

@@ -1,4 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:takutore/domain/review.dart';
@@ -51,28 +51,28 @@ class TeacherDetailModel extends ChangeNotifier {
   }
 
   Future checkAuthor({Teacher teacher}) async {
-    final currentUser = await FirebaseAuth.instance.currentUser();
+    final currentUser = auth.FirebaseAuth.instance.currentUser;
     this.isAuthor = teacher.uid == currentUser.uid;
     notifyListeners();
   }
 
   Future checkBookmark({Teacher teacher}) async {
-    final currentUser = await FirebaseAuth.instance.currentUser();
-    final query = Firestore.instance
+    final currentUser = auth.FirebaseAuth.instance.currentUser;
+    final query = FirebaseFirestore.instance
         .collection('users')
-        .document(currentUser.uid)
+        .doc(currentUser.uid)
         .collection('bookmarks')
         .where(
           'teacherId',
           isEqualTo: teacher.uid,
         );
-    final docs = await query.getDocuments();
-    this.isBookmarked = docs.documents.isNotEmpty;
+    final docs = await query.get();
+    this.isBookmarked = docs.docs.isNotEmpty;
     notifyListeners();
   }
 
   Future checkBlocked({Teacher teacher}) async {
-    final currentUser = await FirebaseAuth.instance.currentUser();
+    final currentUser = auth.FirebaseAuth.instance.currentUser;
 
     this.isBlocked = teacher.blockedUserID.contains(currentUser.uid);
 
@@ -80,25 +80,25 @@ class TeacherDetailModel extends ChangeNotifier {
   }
 
   Future checkReview({Teacher teacher}) async {
-    final currentUser = await FirebaseAuth.instance.currentUser();
-    final query = Firestore.instance
+    final currentUser = auth.FirebaseAuth.instance.currentUser;
+    final query = FirebaseFirestore.instance
         .collection('users')
-        .document(teacher.uid)
+        .doc(teacher.uid)
         .collection('reviews')
         .where('fromUid', isEqualTo: currentUser.uid);
-    final docs = await query.getDocuments();
-    final isExist = docs.documents.isNotEmpty;
+    final docs = await query.get();
+    final isExist = docs.docs.isNotEmpty;
     this.isAlreadyReviewed = isExist;
 
     notifyListeners();
   }
 
   Future addBookmark() async {
-    final user = await FirebaseAuth.instance.currentUser();
+    final user = auth.FirebaseAuth.instance.currentUser;
 
-    final collection = Firestore.instance
+    final collection = FirebaseFirestore.instance
         .collection('users')
-        .document(user.uid)
+        .doc(user.uid)
         .collection('bookmarks');
     await collection.add({
       'teacherId': teacher.uid,
@@ -108,48 +108,49 @@ class TeacherDetailModel extends ChangeNotifier {
   }
 
   Future deleteBookmark() async {
-    final currentUser = await FirebaseAuth.instance.currentUser();
-    final query = Firestore.instance
+    final currentUser = auth.FirebaseAuth.instance.currentUser;
+    final query = FirebaseFirestore.instance
         .collection('users')
-        .document(currentUser.uid)
+        .doc(currentUser.uid)
         .collection('bookmarks')
         .where(
           'teacherId',
           isEqualTo: teacher.uid,
         );
-    final docs = await query.getDocuments();
-    final docId = docs.documents.first.documentID;
-    Firestore.instance
+    final docs = await query.get();
+    final docId = docs.docs.first.id;
+    FirebaseFirestore.instance
         .collection('users')
-        .document(currentUser.uid)
+        .doc(currentUser.uid)
         .collection('bookmarks')
-        .document(docId)
+        .doc(docId)
         .delete();
   }
 
   Future fetchReviews({Teacher teacher}) async {
-    final collection = Firestore.instance
+    final collection = FirebaseFirestore.instance
         .collection('users')
-        .document(teacher.uid)
+        .doc(teacher.uid)
         .collection('reviews')
         .orderBy('createdAt', descending: true)
         .limit(2);
-    final docs = await collection.getDocuments();
+    final docs = await collection.get();
 
-    this.reviewDocList = docs.documents;
+    this.reviewDocList = docs.docs;
 
     final reviews = await Future.wait(
-      docs.documents.map((doc) async {
-        final document =
-            Firestore.instance.collection('users').document(doc['fromUid']);
+      docs.docs.map((doc) async {
+        final document = FirebaseFirestore.instance
+            .collection('users')
+            .doc(doc.data()['fromUid']);
         final data = await document.get();
         final fromUser = User(
-          uid: data['uid'],
-          displayName: data['displayName'],
-          photoURL: data['photoURL'],
-          isTeacher: data['isTeacher'],
-          createdAt: data['createdAt'],
-          blockedUserID: data['blockedUserID'],
+          uid: data.data()['uid'],
+          displayName: data.data()['displayName'],
+          photoURL: data.data()['photoURL'],
+          isTeacher: data.data()['isTeacher'],
+          createdAt: data.data()['createdAt'],
+          blockedUserID: data.data()['blockedUserID'],
         );
         return Review(doc, fromUser);
       }),
@@ -163,29 +164,30 @@ class TeacherDetailModel extends ChangeNotifier {
     if (reviews.isEmpty) {
       return;
     }
-    final collection = Firestore.instance
+    final collection = FirebaseFirestore.instance
         .collection('users')
-        .document(teacher.uid)
+        .doc(teacher.uid)
         .collection('reviews')
         .orderBy('createdAt', descending: true)
         .startAfterDocument(reviewDocList[reviewDocList.length - 1])
         .limit(10);
-    final docs = await collection.getDocuments();
+    final docs = await collection.get();
 
-    this.reviewDocList = [...this.reviewDocList, ...docs.documents];
+    this.reviewDocList = [...this.reviewDocList, ...docs.docs];
 
     final extraReviews = await Future.wait(
-      docs.documents.map((doc) async {
-        final document =
-            Firestore.instance.collection('users').document(doc['fromUid']);
+      docs.docs.map((doc) async {
+        final document = FirebaseFirestore.instance
+            .collection('users')
+            .doc(doc.data()['fromUid']);
         final data = await document.get();
         final fromUser = User(
-          uid: data['uid'],
-          displayName: data['displayName'],
-          photoURL: data['photoURL'],
-          isTeacher: data['isTeacher'],
-          createdAt: data['createdAt'],
-          blockedUserID: data['blockedUserID'],
+          uid: data.data()['uid'],
+          displayName: data.data()['displayName'],
+          photoURL: data.data()['photoURL'],
+          isTeacher: data.data()['isTeacher'],
+          createdAt: data.data()['createdAt'],
+          blockedUserID: data.data()['blockedUserID'],
         );
         return Review(doc, fromUser);
       }).toList(),
@@ -198,35 +200,35 @@ class TeacherDetailModel extends ChangeNotifier {
 
   Future checkRoom({Teacher teacher}) async {
     beginLoading();
-    final currentUser = await FirebaseAuth.instance.currentUser();
+    final currentUser = auth.FirebaseAuth.instance.currentUser;
 
-    final query = Firestore.instance
+    final query = FirebaseFirestore.instance
         .collection('users')
-        .document(currentUser.uid)
+        .doc(currentUser.uid)
         .collection('rooms')
         .where('member.teacherID', isEqualTo: teacher.uid)
         .where('member.studentID', isEqualTo: currentUser.uid);
-    final docs = await query.getDocuments();
-    this.isAlreadyExist = docs.documents.isNotEmpty;
+    final docs = await query.get();
+    this.isAlreadyExist = docs.docs.isNotEmpty;
 
     endLoading();
     notifyListeners();
   }
 
   Future<Room> addRoom() async {
-    final currentUser = await FirebaseAuth.instance.currentUser();
+    final currentUser = auth.FirebaseAuth.instance.currentUser;
 
     if (this.teacher.uid == currentUser.uid) {
       throw ('自分には相談できません。');
     }
 
-    final document = Firestore.instance
+    final document = FirebaseFirestore.instance
         .collection('users')
-        .document(currentUser.uid)
+        .doc(currentUser.uid)
         .collection('rooms')
-        .document('${this.teacher.uid}_${currentUser.uid}');
+        .doc('${this.teacher.uid}_${currentUser.uid}');
 
-    await document.setData(
+    await document.set(
       {
         'member': {
           'teacherID': this.teacher.uid,
@@ -242,20 +244,20 @@ class TeacherDetailModel extends ChangeNotifier {
     );
 
     final doc = await document.get();
-    final teacher = await fetchUser(id: doc['member']['teacherID']);
-    final student = await fetchUser(id: doc['member']['studentID']);
+    final teacher = await fetchUser(id: doc.data()['member']['teacherID']);
+    final student = await fetchUser(id: doc.data()['member']['studentID']);
 
     final room = Room(
-      documentId: doc.documentID,
+      documentId: doc.id,
       teacher: teacher,
       student: student,
-      lastMessage: doc['lastMessage'],
-      updatedAt: doc['updatedAt'],
-      createdAt: doc['createdAt'],
-      numNewMessage: doc['numNewMessage'],
-      hasNewMessage: doc['numNewMessage'] > 0,
-      lastMessageFromUid: doc['lastMessageFromUid'],
-      isAllow: doc['isAllow'],
+      lastMessage: doc.data()['lastMessage'],
+      updatedAt: doc.data()['updatedAt'],
+      createdAt: doc.data()['createdAt'],
+      numNewMessage: doc.data()['numNewMessage'],
+      hasNewMessage: doc.data()['numNewMessage'] > 0,
+      lastMessageFromUid: doc.data()['lastMessageFromUid'],
+      isAllow: doc.data()['isAllow'],
     );
 
     return room;
@@ -263,14 +265,14 @@ class TeacherDetailModel extends ChangeNotifier {
 
   Future<User> fetchUser({String id}) async {
     final userSnapshot =
-        await Firestore.instance.collection('users').document(id).get();
+        await FirebaseFirestore.instance.collection('users').doc(id).get();
     final user = User(
-      uid: userSnapshot.documentID,
-      displayName: userSnapshot['displayName'],
-      photoURL: userSnapshot['photoURL'],
-      isTeacher: userSnapshot['isTeacher'],
-      createdAt: userSnapshot['createdAt'],
-      blockedUserID: userSnapshot['blockedUserID'],
+      uid: userSnapshot.id,
+      displayName: userSnapshot.data()['displayName'],
+      photoURL: userSnapshot.data()['photoURL'],
+      isTeacher: userSnapshot.data()['isTeacher'],
+      createdAt: userSnapshot.data()['createdAt'],
+      blockedUserID: userSnapshot.data()['blockedUserID'],
     );
     return user;
   }
