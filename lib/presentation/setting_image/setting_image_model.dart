@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -25,16 +25,17 @@ class SettingImageModel extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    final user = await FirebaseAuth.instance.currentUser();
-    final document = Firestore.instance.collection('users').document(user.uid);
+    final user = auth.FirebaseAuth.instance.currentUser;
+    final document =
+        FirebaseFirestore.instance.collection('users').doc(user.uid);
     final doc = await document.get();
     this.currentUser = User(
-      uid: doc.documentID,
-      displayName: doc['displayName'],
-      photoURL: doc['photoURL'],
-      isTeacher: doc['isTeacher'],
-      createdAt: doc['createdAt'],
-      blockedUserID: doc['blockedUserID'],
+      uid: doc.id,
+      displayName: doc.data()['displayName'],
+      photoURL: doc.data()['photoURL'],
+      isTeacher: doc.data()['isTeacher'],
+      createdAt: doc.data()['createdAt'],
+      blockedUserID: doc.data()['blockedUserID'],
     );
 
     _isLoading = false;
@@ -93,9 +94,10 @@ class SettingImageModel extends ChangeNotifier {
     // 画像の保存完了時にFirebaseにURLを保存する。
     StorageTaskSnapshot snapshot = await uploadTask.onComplete;
     String photoURL = await snapshot.ref.getDownloadURL();
-    final doc =
-        Firestore.instance.collection('users').document(this.currentUser.uid);
-    await doc.updateData({
+    final doc = FirebaseFirestore.instance
+        .collection('users')
+        .doc(this.currentUser.uid);
+    await doc.update({
       'photoURL': photoURL,
     });
 

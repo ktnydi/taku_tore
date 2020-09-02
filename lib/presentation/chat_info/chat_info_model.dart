@@ -1,12 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/material.dart';
 import 'package:takutore/domain/room.dart';
 import 'package:takutore/domain/user.dart';
 
 class ChatInfoModel extends ChangeNotifier {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final Firestore _store = Firestore.instance;
+  final auth.FirebaseAuth _auth = auth.FirebaseAuth.instance;
+  final FirebaseFirestore _store = FirebaseFirestore.instance;
   final Room room;
   final User user;
   bool isLoading = false;
@@ -25,18 +25,18 @@ class ChatInfoModel extends ChangeNotifier {
   }
 
   Future checkBlockedUser() async {
-    final currentUser = await _auth.currentUser();
-    final document = _store.collection('users').document(currentUser.uid);
+    final currentUser = _auth.currentUser;
+    final document = _store.collection('users').doc(currentUser.uid);
     final doc = await document.get();
 
-    this.isBlocked = doc['blockedUserID'].contains(this.user.uid);
+    this.isBlocked = doc.data()['blockedUserID'].contains(this.user.uid);
     notifyListeners();
   }
 
   Future addBlock() async {
-    final currentUser = await _auth.currentUser();
-    final document = _store.collection('users').document(currentUser.uid);
-    await document.updateData(
+    final currentUser = _auth.currentUser;
+    final document = _store.collection('users').doc(currentUser.uid);
+    await document.update(
       {
         'blockedUserID': FieldValue.arrayUnion([this.user.uid]),
       },
@@ -44,9 +44,9 @@ class ChatInfoModel extends ChangeNotifier {
   }
 
   Future removeBlock() async {
-    final currentUser = await _auth.currentUser();
-    final document = _store.collection('users').document(currentUser.uid);
-    await document.updateData(
+    final currentUser = _auth.currentUser;
+    final document = _store.collection('users').doc(currentUser.uid);
+    await document.update(
       {
         'blockedUserID': FieldValue.arrayRemove([this.user.uid]),
       },
@@ -54,22 +54,22 @@ class ChatInfoModel extends ChangeNotifier {
   }
 
   Future removeTalk() async {
-    final user = await _auth.currentUser();
+    final user = _auth.currentUser;
     final collection = _store
         .collection('users')
-        .document(user.uid)
+        .doc(user.uid)
         .collection('rooms')
-        .document(room.documentId)
+        .doc(room.documentId)
         .collection('messages');
 
-    final docs = await collection.getDocuments();
+    final docs = await collection.get();
 
-    if (docs.documents.isEmpty) return;
+    if (docs.docs.isEmpty) return;
 
     await Future.forEach(
-      docs.documents,
+      docs.docs,
       (doc) async {
-        final document = collection.document(doc.documentID);
+        final document = collection.doc(doc.documentID);
         await document.delete();
       },
     );

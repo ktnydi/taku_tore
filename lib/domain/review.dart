@@ -3,10 +3,10 @@ import 'user.dart';
 
 class Review {
   Review(DocumentSnapshot doc, User user) {
-    documentID = doc.documentID;
-    rating = doc['rating'].toDouble();
-    comment = doc['comment'];
-    createdAt = doc['createdAt'];
+    documentID = doc.id;
+    rating = doc.data()['rating'].toDouble();
+    comment = doc.data()['comment'];
+    createdAt = doc.data()['createdAt'];
     fromUser = user;
   }
 

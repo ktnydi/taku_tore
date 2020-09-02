@@ -5,7 +5,7 @@ import 'presentation/chat/chat_page.dart';
 import 'presentation/home/home_page.dart';
 import 'presentation/notice_list/notice_list_page.dart';
 import 'presentation/setting/setting_page.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class BottomTabNavigator extends StatefulWidget {
@@ -17,8 +17,8 @@ class _BottomTabNavigator extends State<BottomTabNavigator> {
   int currentIndex = 0;
   int noticeBadger = 0;
   int messageBadger = 0;
-  final _auth = FirebaseAuth.instance;
-  final _store = Firestore.instance;
+  final _auth = auth.FirebaseAuth.instance;
+  final _store = FirebaseFirestore.instance;
 
   final List<Widget> _widgetOptions = [
     Home(),
@@ -28,11 +28,11 @@ class _BottomTabNavigator extends State<BottomTabNavigator> {
   ];
 
   Future<void> _newMessageSnapshot() async {
-    final currentUser = await _auth.currentUser();
+    final currentUser = _auth.currentUser;
 
     final rooms = _store
         .collection('users')
-        .document(currentUser.uid)
+        .doc(currentUser.uid)
         .collection('rooms')
         .where('numNewMessage', isGreaterThan: 0);
 
@@ -40,9 +40,9 @@ class _BottomTabNavigator extends State<BottomTabNavigator> {
       (snapshot) async {
         int messageBadger = 0;
         await Future.forEach(
-          snapshot.documents,
+          snapshot.docs,
           (DocumentSnapshot doc) async {
-            messageBadger += doc['numNewMessage'];
+            messageBadger += doc.data()['numNewMessage'];
           },
         );
         setState(
@@ -55,11 +55,11 @@ class _BottomTabNavigator extends State<BottomTabNavigator> {
   }
 
   Future<void> _newNoticeSnapshot() async {
-    final currentUser = await _auth.currentUser();
+    final currentUser = _auth.currentUser;
 
     final notices = _store
         .collection('users')
-        .document(currentUser.uid)
+        .doc(currentUser.uid)
         .collection('notices')
         .where('isRead', isEqualTo: false);
 
@@ -67,7 +67,7 @@ class _BottomTabNavigator extends State<BottomTabNavigator> {
       (snapshot) {
         setState(
           () {
-            noticeBadger = snapshot.documents.length;
+            noticeBadger = snapshot.docs.length;
           },
         );
       },

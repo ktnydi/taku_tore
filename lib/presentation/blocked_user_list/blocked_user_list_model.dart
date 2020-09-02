@@ -1,11 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/material.dart';
 import 'package:takutore/domain/user.dart';
 
 class BlockedUserListModel extends ChangeNotifier {
-  FirebaseAuth _auth = FirebaseAuth.instance;
-  Firestore _store = Firestore.instance;
+  auth.FirebaseAuth _auth = auth.FirebaseAuth.instance;
+  FirebaseFirestore _store = FirebaseFirestore.instance;
   List<User> blockedUsers = [];
   bool isLoading = false;
 
@@ -20,9 +20,9 @@ class BlockedUserListModel extends ChangeNotifier {
   }
 
   Future removeBlock({User user}) async {
-    final currentUser = await _auth.currentUser();
-    final document = _store.collection('users').document(currentUser.uid);
-    await document.updateData(
+    final currentUser = _auth.currentUser;
+    final document = _store.collection('users').doc(currentUser.uid);
+    await document.update(
       {
         'blockedUserID': FieldValue.arrayRemove([user.uid]),
       },
@@ -32,22 +32,22 @@ class BlockedUserListModel extends ChangeNotifier {
   Future fetchBlockedUsers() async {
     beginLoading();
 
-    final currentUser = await _auth.currentUser();
-    final document = _store.collection('users').document(currentUser.uid);
+    final currentUser = _auth.currentUser;
+    final document = _store.collection('users').doc(currentUser.uid);
     final doc = await document.get();
-    List<dynamic> blockedUserID = doc['blockedUserID'];
+    List<dynamic> blockedUserID = doc.data()['blockedUserID'];
 
     final blockedUsers = await Future.wait(blockedUserID.map(
       (userID) async {
-        final userDoc = _store.collection('users').document(userID);
+        final userDoc = _store.collection('users').doc(userID);
         final data = await userDoc.get();
         return User(
-          uid: data.documentID,
-          displayName: data['displayName'],
-          photoURL: data['photoURL'],
-          isTeacher: data['isTeacher'],
-          createdAt: data['createdAt'],
-          blockedUserID: data['blockedUserID'],
+          uid: data.id,
+          displayName: data.data()['displayName'],
+          photoURL: data.data()['photoURL'],
+          isTeacher: data.data()['isTeacher'],
+          createdAt: data.data()['createdAt'],
+          blockedUserID: data.data()['blockedUserID'],
         );
       },
     ));

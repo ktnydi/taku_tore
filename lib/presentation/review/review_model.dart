@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../domain/user.dart';
 
@@ -44,14 +44,14 @@ class ReviewModel extends ChangeNotifier {
       throw ('評価を決めてください。');
     }
 
-    final currentUser = await FirebaseAuth.instance.currentUser();
+    final currentUser = auth.FirebaseAuth.instance.currentUser;
 
     final userRef =
-        Firestore.instance.collection('users').document(this._teacher.uid);
+        FirebaseFirestore.instance.collection('users').doc(this._teacher.uid);
 
-    final reviewRef = userRef.collection('reviews').document();
+    final reviewRef = userRef.collection('reviews').doc();
 
-    await Firestore.instance.runTransaction(
+    await FirebaseFirestore.instance.runTransaction(
       (transaction) async {
         final doc = await transaction.get(userRef);
 
@@ -59,15 +59,15 @@ class ReviewModel extends ChangeNotifier {
           return;
         }
 
-        final double oldNumRatings = doc.data['numRatings'];
-        final double oldAvgRating = doc.data['avgRating'].toDouble();
+        final double oldNumRatings = doc.data()['numRatings'];
+        final double oldAvgRating = doc.data()['avgRating'].toDouble();
 
         final double newNumRatings = oldNumRatings + 1;
         final double oldRatingTotal = oldAvgRating * oldNumRatings;
         final double newRatingTotal = oldRatingTotal + this._rating;
         final double newAvgRating = newRatingTotal / newNumRatings;
 
-        await transaction.update(
+        transaction.update(
           userRef,
           {
             'avgRating': (newAvgRating * 10.0).floor() / 10.0,
@@ -75,7 +75,7 @@ class ReviewModel extends ChangeNotifier {
           },
         );
 
-        await transaction.set(
+        transaction.set(
           reviewRef,
           {
             'teacherID': this._teacher.uid,

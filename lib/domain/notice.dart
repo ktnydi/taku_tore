@@ -12,15 +12,15 @@ class Notice {
   Room room;
   String message;
   bool isRead;
-  Firestore _store = Firestore.instance;
+  FirebaseFirestore _store = FirebaseFirestore.instance;
 
   Notice(DocumentSnapshot doc) {
-    this.type = doc['type'];
-    this.data = doc['data'];
-    this.createdAt = format(doc['createdAt'].toDate(), locale: 'ja');
-    this.message = _typeParser(doc['type']);
-    this._senderID = doc['senderID'];
-    this.isRead = doc['isRead'];
+    this.type = doc.data()['type'];
+    this.data = doc.data()['data'];
+    this.createdAt = format(doc.data()['createdAt'].toDate(), locale: 'ja');
+    this.message = _typeParser(doc.data()['type']);
+    this._senderID = doc.data()['senderID'];
+    this.isRead = doc.data()['isRead'];
   }
 
   String _typeParser(String type) {
@@ -33,15 +33,15 @@ class Notice {
   }
 
   Future<User> _fetchUserFromFirebase({String uid}) async {
-    final document = _store.collection('users').document(uid);
+    final document = _store.collection('users').doc(uid);
     final doc = await document.get();
     final user = User(
-      uid: doc.documentID,
-      displayName: doc['displayName'],
-      photoURL: doc['photoURL'],
-      isTeacher: doc['isTeacher'],
-      createdAt: doc['createdAt'],
-      blockedUserID: doc['blockedUserID'],
+      uid: doc.id,
+      displayName: doc.data()['displayName'],
+      photoURL: doc.data()['photoURL'],
+      isTeacher: doc.data()['isTeacher'],
+      createdAt: doc.data()['createdAt'],
+      blockedUserID: doc.data()['blockedUserID'],
     );
     return user;
   }

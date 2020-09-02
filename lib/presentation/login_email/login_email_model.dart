@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
@@ -7,8 +7,8 @@ class LoginEmailModel extends ChangeNotifier {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final FocusNode myFocusNode = FocusNode();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final Firestore _store = Firestore.instance;
+  final auth.FirebaseAuth _auth = auth.FirebaseAuth.instance;
+  final FirebaseFirestore _store = FirebaseFirestore.instance;
   final FirebaseMessaging _message = FirebaseMessaging();
   bool isLoading = false;
 
@@ -52,10 +52,10 @@ class LoginEmailModel extends ChangeNotifier {
     if (deviceToken != null && deviceToken.isNotEmpty) {
       final document = _store
           .collection('users')
-          .document(user.uid)
+          .doc(user.uid)
           .collection('tokens')
-          .document(deviceToken);
-      await document.setData(
+          .doc(deviceToken);
+      await document.set(
         {
           'deviceToken': deviceToken,
           'createdAt': FieldValue.serverTimestamp(),

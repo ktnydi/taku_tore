@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -9,8 +9,8 @@ class SignUpEmailModel extends ChangeNotifier {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final FocusNode myFocusNode = FocusNode();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final Firestore _store = Firestore.instance;
+  final auth.FirebaseAuth _auth = auth.FirebaseAuth.instance;
+  final FirebaseFirestore _store = FirebaseFirestore.instance;
   final FirebaseStorage _storage = FirebaseStorage.instance;
   final FirebaseMessaging _message = FirebaseMessaging();
   bool isObscureText = true;
@@ -59,8 +59,8 @@ class SignUpEmailModel extends ChangeNotifier {
 
       await _store.runTransaction(
         (transaction) async {
-          await transaction.set(
-            _store.collection('users').document(result.user.uid),
+          transaction.set(
+            _store.collection('users').doc(result.user.uid),
             {
               'displayName': this.nameController.text,
               'photoURL': photoURL,
@@ -71,12 +71,12 @@ class SignUpEmailModel extends ChangeNotifier {
           );
 
           if (deviceToken != null || deviceToken.isNotEmpty) {
-            await transaction.set(
+            transaction.set(
               _store
                   .collection('users')
-                  .document(result.user.uid)
+                  .doc(result.user.uid)
                   .collection('tokens')
-                  .document(deviceToken),
+                  .doc(deviceToken),
               {
                 'deviceToken': deviceToken,
                 'createdAt': FieldValue.serverTimestamp(),

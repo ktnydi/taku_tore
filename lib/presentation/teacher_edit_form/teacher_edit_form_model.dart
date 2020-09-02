@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -91,7 +91,7 @@ class TeacherEditFormModel extends ChangeNotifier {
   }
 
   Future updateTeacher() async {
-    final user = await FirebaseAuth.instance.currentUser();
+    final user = auth.FirebaseAuth.instance.currentUser;
 
     if (imageData != null) {
       // Firebase Storageに画像をアップロード
@@ -111,8 +111,8 @@ class TeacherEditFormModel extends ChangeNotifier {
       this.thumbnail = await snapshot.ref.getDownloadURL();
     }
 
-    final doc = Firestore.instance.collection('users').document(user.uid);
-    await doc.updateData({
+    final doc = FirebaseFirestore.instance.collection('users').doc(user.uid);
+    await doc.update({
       'thumbnail': this.thumbnail,
       'title': this.title.text,
       'canDo': this.canDo.text,

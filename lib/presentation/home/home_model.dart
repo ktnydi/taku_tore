@@ -1,4 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
@@ -45,30 +45,30 @@ class HomeModel extends ChangeNotifier {
   }
 
   Future fetchTeachers() async {
-    final query = Firestore.instance
+    final query = FirebaseFirestore.instance
         .collection('users')
         .where('isTeacher', isEqualTo: true)
         .orderBy('avgRating', descending: true)
         .limit(50);
-    final docs = await query.getDocuments();
-    this.docSnapshot = docs.documents;
+    final docs = await query.get();
+    this.docSnapshot = docs.docs;
 
-    final teachers = docs.documents.map((doc) {
+    final teachers = docs.docs.map((doc) {
       return Teacher(
-        uid: doc.documentID,
-        displayName: doc['displayName'],
-        photoURL: doc['photoURL'],
-        isTeacher: doc['isTeacher'],
-        createdAt: doc['createdAt'],
-        thumbnail: doc['thumbnail'],
-        title: doc['title'],
-        about: doc['about'],
-        canDo: doc['canDo'],
-        recommend: doc['recommend'],
-        avgRating: doc['avgRating'].toDouble(),
-        numRatings: doc['numRatings'].toInt(),
-        blockedUserID: doc['blockedUserID'],
-        isRecruiting: doc['isRecruiting'],
+        uid: doc.id,
+        displayName: doc.data()['displayName'],
+        photoURL: doc.data()['photoURL'],
+        isTeacher: doc.data()['isTeacher'],
+        createdAt: doc.data()['createdAt'],
+        thumbnail: doc.data()['thumbnail'],
+        title: doc.data()['title'],
+        about: doc.data()['about'],
+        canDo: doc.data()['canDo'],
+        recommend: doc.data()['recommend'],
+        avgRating: doc.data()['avgRating'].toDouble(),
+        numRatings: doc.data()['numRatings'].toInt(),
+        blockedUserID: doc.data()['blockedUserID'],
+        isRecruiting: doc.data()['isRecruiting'],
       );
     }).toList();
 
@@ -80,7 +80,7 @@ class HomeModel extends ChangeNotifier {
     this.isFetchingTeachers = true;
     notifyListeners();
 
-    final query = Firestore.instance
+    final query = FirebaseFirestore.instance
         .collection('users')
         .where('isTeacher', isEqualTo: true)
         .orderBy('avgRating', descending: true)
@@ -88,25 +88,25 @@ class HomeModel extends ChangeNotifier {
           this.docSnapshot[this.docSnapshot.length - 1],
         )
         .limit(50);
-    final docs = await query.getDocuments();
-    this.docSnapshot = [...this.docSnapshot, ...docs.documents];
+    final docs = await query.get();
+    this.docSnapshot = [...this.docSnapshot, ...docs.docs];
 
-    final teachers = docs.documents.map((doc) {
+    final teachers = docs.docs.map((doc) {
       return Teacher(
-        uid: doc.documentID,
-        displayName: doc['displayName'],
-        photoURL: doc['photoURL'],
-        isTeacher: doc['isTeacher'],
-        createdAt: doc['createdAt'],
-        thumbnail: doc['thumbnail'],
-        title: doc['title'],
-        about: doc['about'],
-        canDo: doc['canDo'],
-        recommend: doc['recommend'],
-        avgRating: doc['avgRating'].toDouble(),
-        numRatings: doc['numRatings'].toInt(),
-        blockedUserID: doc['blockedUserID'],
-        isRecruiting: doc['isRecruiting'],
+        uid: doc.id,
+        displayName: doc.data()['displayName'],
+        photoURL: doc.data()['photoURL'],
+        isTeacher: doc.data()['isTeacher'],
+        createdAt: doc.data()['createdAt'],
+        thumbnail: doc.data()['thumbnail'],
+        title: doc.data()['title'],
+        about: doc.data()['about'],
+        canDo: doc.data()['canDo'],
+        recommend: doc.data()['recommend'],
+        avgRating: doc.data()['avgRating'].toDouble(),
+        numRatings: doc.data()['numRatings'].toInt(),
+        blockedUserID: doc.data()['blockedUserID'],
+        isRecruiting: doc.data()['isRecruiting'],
       );
     }).toList();
     this.teachers = [...this.teachers, ...teachers];
@@ -116,20 +116,20 @@ class HomeModel extends ChangeNotifier {
   }
 
   Future checkBlockedUser() async {
-    final currentUser = await FirebaseAuth.instance.currentUser();
+    final currentUser = auth.FirebaseAuth.instance.currentUser;
     final document =
-        Firestore.instance.collection('users').document(currentUser.uid);
+        FirebaseFirestore.instance.collection('users').doc(currentUser.uid);
     final doc = await document.get();
-    final blockedUserID = doc['blockedUserID'];
+    final blockedUserID = doc.data()['blockedUserID'];
     this.blockedUserID = blockedUserID;
   }
 
   Future blockedUser({User user}) async {
-    final currentUser = await FirebaseAuth.instance.currentUser();
+    final currentUser = auth.FirebaseAuth.instance.currentUser;
     final document =
-        Firestore.instance.collection('users').document(currentUser.uid);
+        FirebaseFirestore.instance.collection('users').doc(currentUser.uid);
 
-    await document.updateData(
+    await document.update(
       {
         'blockedUserID': FieldValue.arrayUnion(
           [user.uid],
@@ -143,11 +143,11 @@ class HomeModel extends ChangeNotifier {
 
     if (!contentTypes.contains(contentType)) return;
 
-    final currentUser = await FirebaseAuth.instance.currentUser();
+    final currentUser = auth.FirebaseAuth.instance.currentUser;
 
     if (user.uid == currentUser.uid) return;
 
-    final collection = Firestore.instance.collection('reports');
+    final collection = FirebaseFirestore.instance.collection('reports');
 
     final result = await collection.add(
       {
@@ -165,11 +165,11 @@ class HomeModel extends ChangeNotifier {
     http.post(
       webAppURL,
       body: {
-        'documentID': doc.documentID,
-        'userID': doc['userID'],
-        'senderID': doc['senderID'],
-        'contentType': doc['contentType'],
-        'createdAt': doc['createdAt'].toDate().toString(),
+        'documentID': doc.id,
+        'userID': doc.data()['userID'],
+        'senderID': doc.data()['senderID'],
+        'contentType': doc.data()['contentType'],
+        'createdAt': doc.data()['createdAt'].toDate().toString(),
       },
     );
   }
