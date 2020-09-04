@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
 
 class SettingTeacherModel extends ChangeNotifier {
+  final _store = FirebaseFirestore.instance;
   File imageFile;
   Uint8List imageData;
   String _title = '';
@@ -116,17 +117,36 @@ class SettingTeacherModel extends ChangeNotifier {
     StorageTaskSnapshot snapshot = await uploadTask.onComplete;
     String thumbnail = await snapshot.ref.getDownloadURL();
 
-    final doc = FirebaseFirestore.instance.collection('users').doc(user.uid);
-    await doc.update({
-      'thumbnail': thumbnail,
-      'isTeacher': true,
-      'title': this._title,
-      'about': this._about,
-      'canDo': this._canDo,
-      'recommend': this._recommend,
-      'avgRating': 0.0,
-      'numRatings': 0.0,
-      'isRecruiting': true,
-    });
+    final userSnapshot = await _store.collection('users').doc(user.uid).get();
+    final teacherRef =
+        userSnapshot.reference.collection('teachers').doc(userSnapshot.id);
+
+    final batch = _store.batch();
+
+    batch.update(
+      userSnapshot.reference,
+      {
+        'isTeacher': true,
+      },
+    );
+
+    batch.set(
+      teacherRef,
+      {
+        ...userSnapshot.data(),
+        'isTeacher': true, // userSnapshot.data()の内容を上書き
+        'userID': userSnapshot.id,
+        'thumbnail': thumbnail,
+        'title': this._title,
+        'about': this._about,
+        'canDo': this._canDo,
+        'recommend': this._recommend,
+        'avgRating': 0.0,
+        'numRatings': 0,
+        'isRecruiting': true,
+      },
+    );
+
+    await batch.commit();
   }
 }
