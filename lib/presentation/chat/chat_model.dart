@@ -146,6 +146,8 @@ class ChatModel extends ChangeNotifier {
     final collection = FirebaseFirestore.instance
         .collection('users')
         .doc(currentUser.uid)
+        .collection('teachers')
+        .doc(currentUser.uid)
         .collection('rooms')
         .where('member.teacherID', isEqualTo: currentUser.uid)
         .orderBy('createdAt', descending: true)
@@ -166,6 +168,8 @@ class ChatModel extends ChangeNotifier {
 
     final collection = FirebaseFirestore.instance
         .collection('users')
+        .doc(currentUser.uid)
+        .collection('teachers')
         .doc(currentUser.uid)
         .collection('rooms')
         .where('member.teacherID', isEqualTo: currentUser.uid)

@@ -151,13 +151,24 @@ class _ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
               Expanded(
                 child: Consumer2<UserModel, ChatRoomModel>(
                   builder: (_, um, cm, __) {
-                    Query query = FirebaseFirestore.instance
-                        .collection('users')
-                        .doc(um.user.uid)
-                        .collection('rooms')
-                        .doc(widget.room.documentId)
-                        .collection('messages')
-                        .orderBy('createdAt', descending: true);
+                    Query query = context.read<UserModel>().user.uid ==
+                            widget.room.teacher.uid
+                        ? FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(um.user.uid)
+                            .collection('teachers')
+                            .doc(um.user.uid)
+                            .collection('rooms')
+                            .doc(widget.room.documentId)
+                            .collection('messages')
+                            .orderBy('createdAt', descending: true)
+                        : FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(um.user.uid)
+                            .collection('rooms')
+                            .doc(widget.room.documentId)
+                            .collection('messages')
+                            .orderBy('createdAt', descending: true);
                     Stream<QuerySnapshot> watch;
 
                     if (cm.start != null) {

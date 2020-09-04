@@ -103,11 +103,13 @@ class ChatRoomModel extends ChangeNotifier {
         .get();
     final numNotices = userDoc.data()['numNotices'];
 
-    final document = FirebaseFirestore.instance
-        .collection('users')
-        .doc(currentUser.uid)
-        .collection('rooms')
-        .doc(this.room.documentId);
+    final document = this.room.teacher.uid == currentUser.uid
+        ? userDoc.reference
+            .collection('teachers')
+            .doc(currentUser.uid)
+            .collection('rooms')
+            .doc(this.room.documentId)
+        : userDoc.reference.collection('rooms').doc(this.room.documentId);
 
     final numNewMessage = (await document.get()).data()['numNewMessage'];
 
@@ -134,12 +136,21 @@ class ChatRoomModel extends ChangeNotifier {
   Future fetchExtraMessage() async {
     final currentUser = auth.FirebaseAuth.instance.currentUser;
 
-    final collection = FirebaseFirestore.instance
-        .collection('users')
-        .doc(currentUser.uid)
-        .collection('rooms')
-        .doc(this.room.documentId)
-        .collection('messages');
+    final collection = this.room.teacher.uid == currentUser.uid
+        ? FirebaseFirestore.instance
+            .collection('users')
+            .doc(currentUser.uid)
+            .collection('teachers')
+            .doc(currentUser.uid)
+            .collection('rooms')
+            .doc(this.room.documentId)
+            .collection('messages')
+        : FirebaseFirestore.instance
+            .collection('users')
+            .doc(currentUser.uid)
+            .collection('rooms')
+            .doc(this.room.documentId)
+            .collection('messages');
 
     final query = collection
         .orderBy('createdAt', descending: true)
@@ -161,11 +172,19 @@ class ChatRoomModel extends ChangeNotifier {
   Future addMessageWithTransition() async {
     final currentUser = auth.FirebaseAuth.instance.currentUser;
 
-    final roomRef = FirebaseFirestore.instance
-        .collection('users')
-        .doc(currentUser.uid)
-        .collection('rooms')
-        .doc(room.documentId);
+    final roomRef = this.room.teacher.uid == currentUser.uid
+        ? FirebaseFirestore.instance
+            .collection('users')
+            .doc(currentUser.uid)
+            .collection('teachers')
+            .doc(currentUser.uid)
+            .collection('rooms')
+            .doc(this.room.documentId)
+        : FirebaseFirestore.instance
+            .collection('users')
+            .doc(currentUser.uid)
+            .collection('rooms')
+            .doc(this.room.documentId);
 
     final messageRef = roomRef.collection('messages').doc();
 
