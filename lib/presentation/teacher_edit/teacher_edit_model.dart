@@ -23,7 +23,12 @@ class TeacherEditModel extends ChangeNotifier {
   Future switchRecruiting(bool isRecruiting) async {
     this.isRecruiting = isRecruiting;
     final currentUser = _auth.currentUser;
-    await _store.collection('users').doc(currentUser.uid).update(
+    await _store
+        .collection('users')
+        .doc(currentUser.uid)
+        .collection('teachers')
+        .doc(currentUser.uid)
+        .update(
       {
         'isRecruiting': isRecruiting,
       },
@@ -49,8 +54,12 @@ class TeacherEditModel extends ChangeNotifier {
 
     final currentUser = _auth.currentUser;
 
-    final userSnapshot =
-        await _store.collection('users').doc(currentUser.uid).get();
+    final userSnapshot = await _store
+        .collection('users')
+        .doc(currentUser.uid)
+        .collection('teachers')
+        .doc(currentUser.uid)
+        .get();
 
     final teacher = Teacher(
       uid: userSnapshot.id,

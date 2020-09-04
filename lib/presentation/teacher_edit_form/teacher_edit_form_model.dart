@@ -111,7 +111,11 @@ class TeacherEditFormModel extends ChangeNotifier {
       this.thumbnail = await snapshot.ref.getDownloadURL();
     }
 
-    final doc = FirebaseFirestore.instance.collection('users').doc(user.uid);
+    final doc = FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .collection('teachers')
+        .doc(user.uid);
     await doc.update({
       'thumbnail': this.thumbnail,
       'title': this.title.text,
