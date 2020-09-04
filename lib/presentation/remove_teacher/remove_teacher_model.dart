@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../domain/user.dart';
 
 class RemoveTeacherModel extends ChangeNotifier {
+  final _store = FirebaseFirestore.instance;
   User user;
   String _password = '';
   bool isLoading = false;
@@ -42,20 +43,22 @@ class RemoveTeacherModel extends ChangeNotifier {
     beginLoading();
     final auth.UserCredential result = await confirmPassword(this._password);
 
-    final doc =
-        FirebaseFirestore.instance.collection('users').doc(result.user.uid);
+    final userRef = _store.collection('users').doc(result.user.uid);
 
-    await doc.update({
-      'isTeacher': false,
-      'thumbnail': FieldValue.delete(),
-      'title': FieldValue.delete(),
-      'canDo': FieldValue.delete(),
-      'recommend': FieldValue.delete(),
-      'about': FieldValue.delete(),
-      'avgRating': FieldValue.delete(),
-      'numRatings': FieldValue.delete(),
-      'isRecruiting': FieldValue.delete(),
-    });
+    final batch = _store.batch();
+
+    batch.update(
+      userRef,
+      {
+        'isTeacher': false,
+      },
+    );
+
+    batch.delete(
+      userRef.collection('teachers').doc(result.user.uid),
+    );
+
+    await batch.commit();
     endLoading();
   }
 }
