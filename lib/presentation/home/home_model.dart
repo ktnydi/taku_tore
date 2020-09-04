@@ -46,8 +46,7 @@ class HomeModel extends ChangeNotifier {
 
   Future fetchTeachers() async {
     final query = FirebaseFirestore.instance
-        .collection('users')
-        .where('isTeacher', isEqualTo: true)
+        .collectionGroup('teachers')
         .orderBy('avgRating', descending: true)
         .limit(50);
     final docs = await query.get();
@@ -81,8 +80,7 @@ class HomeModel extends ChangeNotifier {
     notifyListeners();
 
     final query = FirebaseFirestore.instance
-        .collection('users')
-        .where('isTeacher', isEqualTo: true)
+        .collectionGroup('teachers')
         .orderBy('avgRating', descending: true)
         .startAfterDocument(
           this.docSnapshot[this.docSnapshot.length - 1],
