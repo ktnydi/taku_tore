@@ -30,6 +30,8 @@ class BookmarkModel extends ChangeNotifier {
       docs.docs.map((doc) async {
         final teacherRef = FirebaseFirestore.instance
             .collection('users')
+            .doc(doc.data()['teacherId'])
+            .collection('teachers')
             .doc(doc.data()['teacherId']);
         final document = await teacherRef.get();
         return Teacher(
