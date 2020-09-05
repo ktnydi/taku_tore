@@ -97,9 +97,23 @@ class SettingImageModel extends ChangeNotifier {
     final doc = FirebaseFirestore.instance
         .collection('users')
         .doc(this.currentUser.uid);
-    await doc.update({
-      'photoURL': photoURL,
-    });
+    final batch = FirebaseFirestore.instance.batch();
+
+    batch.update(
+      doc,
+      {
+        'photoURL': photoURL,
+      },
+    );
+
+    batch.update(
+      doc.collection('teachers').doc(this.currentUser.uid),
+      {
+        'photoURL': photoURL,
+      },
+    );
+
+    await batch.commit();
 
     _isLoading = false;
     notifyListeners();

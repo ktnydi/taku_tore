@@ -232,9 +232,23 @@ class UserModel extends ChangeNotifier {
 
     final doc =
         FirebaseFirestore.instance.collection('users').doc(this.user.uid);
-    await doc.update({
-      'displayName': name,
-    });
+    final batch = FirebaseFirestore.instance.batch();
+
+    batch.update(
+      doc,
+      {
+        'displayName': name,
+      },
+    );
+
+    batch.update(
+      doc.collection('teachers').doc(this.user.uid),
+      {
+        'displayName': name,
+      },
+    );
+
+    await batch.commit();
 
     endLoading();
   }
