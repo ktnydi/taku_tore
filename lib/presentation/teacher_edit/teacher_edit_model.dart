@@ -42,6 +42,8 @@ class TeacherEditModel extends ChangeNotifier {
     final roomSnapshot = await _store
         .collection('users')
         .doc(currentUser.uid)
+        .collection('teachers')
+        .doc()
         .collection('rooms')
         .where('member.teacherID', isEqualTo: currentUser.uid)
         .get();

@@ -55,12 +55,21 @@ class ChatInfoModel extends ChangeNotifier {
 
   Future removeTalk() async {
     final user = _auth.currentUser;
-    final collection = _store
-        .collection('users')
-        .doc(user.uid)
-        .collection('rooms')
-        .doc(room.documentId)
-        .collection('messages');
+    final collection = this.room.teacher.uid == user.uid
+        ? _store
+            .collection('users')
+            .doc(user.uid)
+            .collection('teachers')
+            .doc(user.uid)
+            .collection('rooms')
+            .doc(room.documentId)
+            .collection('messages')
+        : _store
+            .collection('users')
+            .doc(user.uid)
+            .collection('rooms')
+            .doc(this.room.documentId)
+            .collection('messages');
 
     final docs = await collection.get();
 

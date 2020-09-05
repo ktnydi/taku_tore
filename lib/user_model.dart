@@ -126,27 +126,34 @@ class UserModel extends ChangeNotifier {
           .delete();
     }
     final userRef = _store.collection('users').doc(user.uid);
-    final roomRef = userRef.collection('rooms');
+    final teacherRef = userRef.collection('teachers').doc(user.uid);
+    final studentRoomRef = userRef.collection('rooms');
+    final teacherRoomRef = teacherRef.collection('rooms');
     final bookmarkRef = userRef.collection('bookmarks');
     final reviewRef = userRef.collection('reviews');
     final noticeRef = userRef.collection('notices');
 
     // rooms, messagesのデータ削除
-    final roomDocs = await roomRef.get();
     await Future.forEach(
-      roomDocs.docs,
-      (DocumentSnapshot doc) async {
-        final msgRef = roomRef.doc(doc.id).collection('messages');
-        final msgDocs = await msgRef.get();
-
+      [studentRoomRef, teacherRoomRef],
+      (CollectionReference roomRef) async {
+        final roomDocs = await roomRef.get();
         await Future.forEach(
-          msgDocs.docs,
+          roomDocs.docs,
           (DocumentSnapshot doc) async {
-            await msgRef.doc(doc.id).delete();
+            final msgRef = doc.reference.collection('messages');
+            final msgDocs = await msgRef.get();
+
+            await Future.forEach(
+              msgDocs.docs,
+              (DocumentSnapshot doc) async {
+                await doc.reference.delete();
+              },
+            );
+
+            await doc.reference.delete();
           },
         );
-
-        await roomRef.doc(doc.id).delete();
       },
     );
 
@@ -194,6 +201,8 @@ class UserModel extends ChangeNotifier {
         await doc.reference.delete();
       },
     );
+
+    await teacherRef.delete();
 
     // userのデータ削除
     await userRef.delete();
