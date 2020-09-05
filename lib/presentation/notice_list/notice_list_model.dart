@@ -108,6 +108,8 @@ class NoticeListModel extends ChangeNotifier {
     final document = _store
         .collection('users')
         .doc(user.uid)
+        .collection('teachers')
+        .doc(user.uid)
         .collection('rooms')
         .doc(notice.data['documentID']);
     final doc = await document.get();
