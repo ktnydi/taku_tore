@@ -17,6 +17,8 @@ class _BottomTabNavigator extends State<BottomTabNavigator> {
   int currentIndex = 0;
   int noticeBadger = 0;
   int messageBadger = 0;
+  int newTeacherNumMessage = 0;
+  int newStudentNumMessage = 0;
   final _auth = auth.FirebaseAuth.instance;
   final _store = FirebaseFirestore.instance;
 
@@ -30,13 +32,13 @@ class _BottomTabNavigator extends State<BottomTabNavigator> {
   Future<void> _newMessageSnapshot() async {
     final currentUser = _auth.currentUser;
 
-    final rooms = _store
+    final studentRooms = _store
         .collection('users')
         .doc(currentUser.uid)
         .collection('rooms')
         .where('numNewMessage', isGreaterThan: 0);
 
-    rooms.snapshots().listen(
+    studentRooms.snapshots().listen(
       (snapshot) async {
         int messageBadger = 0;
         await Future.forEach(
@@ -47,7 +49,36 @@ class _BottomTabNavigator extends State<BottomTabNavigator> {
         );
         setState(
           () {
-            this.messageBadger = messageBadger;
+            this.newStudentNumMessage = messageBadger;
+            this.messageBadger =
+                this.newStudentNumMessage + this.newTeacherNumMessage;
+          },
+        );
+      },
+    );
+
+    final teacherRooms = _store
+        .collection('users')
+        .doc(currentUser.uid)
+        .collection('teachers')
+        .doc(currentUser.uid)
+        .collection('rooms')
+        .where('numNewMessage', isGreaterThan: 0);
+
+    teacherRooms.snapshots().listen(
+      (snapshot) async {
+        int messageBadger = 0;
+        await Future.forEach(
+          snapshot.docs,
+          (DocumentSnapshot doc) async {
+            messageBadger += doc.data()['numNewMessage'];
+          },
+        );
+        setState(
+          () {
+            this.newTeacherNumMessage = messageBadger;
+            this.messageBadger =
+                this.newStudentNumMessage + this.newTeacherNumMessage;
           },
         );
       },
