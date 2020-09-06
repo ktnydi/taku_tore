@@ -46,34 +46,21 @@ class ReviewModel extends ChangeNotifier {
 
     final currentUser = auth.FirebaseAuth.instance.currentUser;
 
-    final userRef =
-        FirebaseFirestore.instance.collection('users').doc(this._teacher.uid);
+    final teacherRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(this._teacher.uid)
+        .collection('teachers')
+        .doc(this._teacher.uid);
 
-    final reviewRef = userRef.collection('reviews').doc();
+    final reviewRef = teacherRef.collection('reviews').doc();
 
     await FirebaseFirestore.instance.runTransaction(
       (transaction) async {
-        final doc = await transaction.get(userRef);
+        final doc = await transaction.get(teacherRef);
 
         if (!doc.exists) {
           return;
         }
-
-        final double oldNumRatings = doc.data()['numRatings'];
-        final double oldAvgRating = doc.data()['avgRating'].toDouble();
-
-        final double newNumRatings = oldNumRatings + 1;
-        final double oldRatingTotal = oldAvgRating * oldNumRatings;
-        final double newRatingTotal = oldRatingTotal + this._rating;
-        final double newAvgRating = newRatingTotal / newNumRatings;
-
-        transaction.update(
-          userRef,
-          {
-            'avgRating': (newAvgRating * 10.0).floor() / 10.0,
-            'numRatings': newNumRatings,
-          },
-        );
 
         transaction.set(
           reviewRef,

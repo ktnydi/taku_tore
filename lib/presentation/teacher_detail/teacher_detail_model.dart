@@ -84,6 +84,8 @@ class TeacherDetailModel extends ChangeNotifier {
     final query = FirebaseFirestore.instance
         .collection('users')
         .doc(teacher.uid)
+        .collection('teachers')
+        .doc(teacher.uid)
         .collection('reviews')
         .where('fromUid', isEqualTo: currentUser.uid);
     final docs = await query.get();
@@ -131,6 +133,8 @@ class TeacherDetailModel extends ChangeNotifier {
     final collection = FirebaseFirestore.instance
         .collection('users')
         .doc(teacher.uid)
+        .collection('teachers')
+        .doc(teacher.uid)
         .collection('reviews')
         .orderBy('createdAt', descending: true)
         .limit(2);
@@ -166,6 +170,8 @@ class TeacherDetailModel extends ChangeNotifier {
     }
     final collection = FirebaseFirestore.instance
         .collection('users')
+        .doc(teacher.uid)
+        .collection('teachers')
         .doc(teacher.uid)
         .collection('reviews')
         .orderBy('createdAt', descending: true)
