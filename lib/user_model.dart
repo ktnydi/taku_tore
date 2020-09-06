@@ -130,7 +130,7 @@ class UserModel extends ChangeNotifier {
     final studentRoomRef = userRef.collection('rooms');
     final teacherRoomRef = teacherRef.collection('rooms');
     final bookmarkRef = userRef.collection('bookmarks');
-    final reviewRef = userRef.collection('reviews');
+    final reviewRef = teacherRef.collection('reviews');
     final noticeRef = userRef.collection('notices');
 
     // rooms, messagesのデータ削除
