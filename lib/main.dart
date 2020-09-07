@@ -2,11 +2,13 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
+import 'package:takutore/presentation/version_update/version_update_page.dart';
 import 'package:timeago/timeago.dart';
 import 'presentation/auth/auth_page.dart';
 import 'bottom_tab_navigator.dart';
 import 'presentation/common/loading.dart';
 import 'user_model.dart';
+import 'main_model.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,39 +26,46 @@ class MyApp extends StatelessWidget {
       create: (_) => UserModel()
         ..checkUserSignIn()
         ..confirmNotification(),
-      child: Consumer<UserModel>(
-        builder: (_, model, __) {
-          return MaterialApp(
-            title: 'Flutter Demo',
-            theme: ThemeData(
-              primaryColor: Colors.red,
-              appBarTheme: AppBarTheme(
-                brightness: Brightness.light,
-                color: Colors.white,
-                elevation: 0.5,
-                iconTheme: IconThemeData(
+      builder: (context, widget) {
+        return MaterialApp(
+          title: 'Flutter Demo',
+          theme: ThemeData(
+            primaryColor: Colors.red,
+            appBarTheme: AppBarTheme(
+              brightness: Brightness.light,
+              color: Colors.white,
+              elevation: 0.5,
+              iconTheme: IconThemeData(
+                color: Colors.red,
+              ),
+              textTheme: TextTheme(
+                headline6: TextStyle(
                   color: Colors.red,
-                ),
-                textTheme: TextTheme(
-                  headline6: TextStyle(
-                    color: Colors.red,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              primarySwatch: Colors.red,
-              visualDensity: VisualDensity.adaptivePlatformDensity,
             ),
-            home: Stack(
-              children: <Widget>[
-                model.user != null ? BottomTabNavigator() : Auth(),
-                Loading(model.isLoading),
-              ],
-            ),
-          );
-        },
-      ),
+            primarySwatch: Colors.red,
+            visualDensity: VisualDensity.adaptivePlatformDensity,
+          ),
+          home: ChangeNotifierProvider<MainModel>(
+            create: (_) => MainModel()..checkVersion(),
+            builder: (context, widget) {
+              return !context.watch<MainModel>().isRequiredUpdate
+                  ? Stack(
+                      children: <Widget>[
+                        context.watch<UserModel>().user != null
+                            ? BottomTabNavigator()
+                            : Auth(),
+                        Loading(context.watch<UserModel>().isLoading),
+                      ],
+                    )
+                  : VersionUpdate(); // page to prompt update.
+            },
+          ),
+        );
+      },
     );
   }
 }
