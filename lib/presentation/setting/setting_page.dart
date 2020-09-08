@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:takutore/atoms/rounded_button.dart';
+import 'package:takutore/main_model.dart';
 import 'package:takutore/presentation/feedback_form/feedback_form_page.dart';
 import 'package:takutore/presentation/teacher_edit/teacher_edit_page.dart';
 import 'package:url_launcher/url_launcher.dart' as launcher;
@@ -305,6 +306,10 @@ class About extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final applicationVersion = context.select(
+      (MainModel value) => value.packageInfo.version,
+    );
+
     return Section(
       title: SectionTitle(title: 'アプリについて'),
       children: <Widget>[
@@ -375,7 +380,7 @@ class About extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-          content: '1.0.0',
+          content: applicationVersion,
         ),
         SectionCell(
           title: Text(
@@ -389,7 +394,7 @@ class About extends StatelessWidget {
             try {
               showLicensePage(
                 context: context,
-                applicationVersion: '1.0.0',
+                applicationVersion: applicationVersion,
                 applicationName: 'TakuTore',
               );
             } catch (e) {
