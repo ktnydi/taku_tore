@@ -61,7 +61,7 @@ class MyApp extends StatelessWidget {
                         Loading(context.watch<UserModel>().isLoading),
                       ],
                     )
-                  : VersionUpdate(); // page to prompt update.
+                  : VersionUpdate();
             },
           ),
         );
