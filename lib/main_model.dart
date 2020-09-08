@@ -6,6 +6,7 @@ import 'package:firebase_remote_config/firebase_remote_config.dart';
 
 class MainModel extends ChangeNotifier {
   bool isRequiredUpdate = false;
+  PackageInfo packageInfo;
 
   Future<void> checkVersion() async {
     final configName =
@@ -15,6 +16,7 @@ class MainModel extends ChangeNotifier {
     await remoteConfig.activateFetched();
     final supportVersion = Version.parse(remoteConfig.getString(configName));
     final packageInfo = await PackageInfo.fromPlatform();
+    this.packageInfo = packageInfo;
     final currentVersion = Version.parse(packageInfo.version);
 
     if (currentVersion < supportVersion) {
