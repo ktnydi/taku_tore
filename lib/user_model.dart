@@ -3,12 +3,14 @@ import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:takutore/config/application.dart';
 import 'domain/user.dart';
 
 class UserModel extends ChangeNotifier {
   User user;
   final FirebaseFirestore _store = FirebaseFirestore.instance;
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  final _algolia = Application.algolia.instance;
   bool isLoading = false;
 
   void beginLoading() async {
@@ -204,6 +206,8 @@ class UserModel extends ChangeNotifier {
 
     await teacherRef.delete();
 
+    await _algolia.index('teacher').object(this.user.uid).deleteObject();
+
     // userのデータ削除
     await userRef.delete();
 
@@ -249,6 +253,12 @@ class UserModel extends ChangeNotifier {
     );
 
     await batch.commit();
+
+    await updateAlgoliaTeacher(
+      {
+        'displayName': name,
+      },
+    );
 
     endLoading();
   }
@@ -321,5 +331,22 @@ class UserModel extends ChangeNotifier {
     await doc.update({
       'isTeacher': false,
     });
+  }
+
+  Future updateAlgoliaTeacher(Map<String, dynamic> data) async {
+    final currentUser = auth.FirebaseAuth.instance.currentUser;
+
+    final teacher =
+        await _algolia.index('teacher').object(currentUser.uid).getObject();
+
+    final newTeacher = {
+      ...teacher.data,
+      ...data,
+    };
+
+    await _algolia
+        .index('teacher')
+        .object(currentUser.uid)
+        .updateData(newTeacher);
   }
 }

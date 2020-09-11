@@ -6,9 +6,11 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
+import 'package:takutore/config/application.dart';
 import '../../domain/user.dart';
 
 class SettingImageModel extends ChangeNotifier {
+  final _algolia = Application.algolia.instance;
   User currentUser;
   File imageFile;
   Uint8List imageData;
@@ -115,8 +117,31 @@ class SettingImageModel extends ChangeNotifier {
 
     await batch.commit();
 
+    await updateAlgoliaTeacher(
+      {
+        'photoURL': photoURL,
+      },
+    );
+
     _isLoading = false;
     notifyListeners();
     return photoURL;
+  }
+
+  Future updateAlgoliaTeacher(Map<String, dynamic> data) async {
+    final currentUser = auth.FirebaseAuth.instance.currentUser;
+
+    final teacher =
+        await _algolia.index('teacher').object(currentUser.uid).getObject();
+
+    final newTeacher = {
+      ...teacher.data,
+      ...data,
+    };
+
+    await _algolia
+        .index('teacher')
+        .object(currentUser.uid)
+        .updateData(newTeacher);
   }
 }
