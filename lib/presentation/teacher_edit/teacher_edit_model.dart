@@ -1,11 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/material.dart';
+import 'package:takutore/config/application.dart';
 import 'package:takutore/domain/teacher.dart';
 
 class TeacherEditModel extends ChangeNotifier {
   final _auth = auth.FirebaseAuth.instance;
   final _store = FirebaseFirestore.instance;
+  final _algolia = Application.algolia.instance;
   Teacher teacher;
   bool isLoading = false;
   bool isRecruiting = false;
@@ -33,6 +35,13 @@ class TeacherEditModel extends ChangeNotifier {
         'isRecruiting': isRecruiting,
       },
     );
+
+    await updateAlgoliaTeacher(
+      {
+        'isRecruiting': isRecruiting,
+      },
+    );
+
     notifyListeners();
   }
 
@@ -84,5 +93,22 @@ class TeacherEditModel extends ChangeNotifier {
     this.isRecruiting = teacher.isRecruiting;
 
     endLoading();
+  }
+
+  Future updateAlgoliaTeacher(Map<String, dynamic> data) async {
+    final currentUser = _auth.currentUser;
+
+    final teacher =
+        await _algolia.index('teacher').object(currentUser.uid).getObject();
+
+    final newTeacher = {
+      ...teacher.data,
+      ...data,
+    };
+
+    await _algolia
+        .index('teacher')
+        .object(currentUser.uid)
+        .updateData(newTeacher);
   }
 }
