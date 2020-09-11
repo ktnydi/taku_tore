@@ -35,6 +35,7 @@ dependencies:
   flutter_slidable: ^0.5.5
   package_info: ^0.4.3
   version: ^1.2.0
+  algolia: ^0.1.7
 
   # firebase
   firebase_core: ^0.5.0

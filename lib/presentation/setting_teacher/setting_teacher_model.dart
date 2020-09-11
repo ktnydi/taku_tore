@@ -6,9 +6,11 @@ import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
+import 'package:takutore/config/application.dart';
 
 class SettingTeacherModel extends ChangeNotifier {
   final _store = FirebaseFirestore.instance;
+  final _algolia = Application.algolia.instance;
   File imageFile;
   Uint8List imageData;
   String _title = '';
@@ -130,23 +132,34 @@ class SettingTeacherModel extends ChangeNotifier {
       },
     );
 
+    Map<String, dynamic> newTeacher = {
+      'userID': userSnapshot.id,
+      'displayName': userSnapshot.data()['displayName'],
+      'photoURL': userSnapshot.data()['photoURL'],
+      'blockedUserID': userSnapshot.data()['blockedUserID'],
+      'isTeacher': true,
+      'thumbnail': thumbnail,
+      'title': this._title,
+      'about': this._about,
+      'canDo': this._canDo,
+      'recommend': this._recommend,
+      'avgRating': 0.0,
+      'numRatings': 0,
+      'isRecruiting': true,
+    };
+
     batch.set(
       teacherRef,
-      {
-        ...userSnapshot.data(),
-        'isTeacher': true, // userSnapshot.data()の内容を上書き
-        'userID': userSnapshot.id,
-        'thumbnail': thumbnail,
-        'title': this._title,
-        'about': this._about,
-        'canDo': this._canDo,
-        'recommend': this._recommend,
-        'avgRating': 0.0,
-        'numRatings': 0,
-        'isRecruiting': true,
-      },
+      newTeacher,
     );
 
     await batch.commit();
+
+    await _algolia.index('teacher').addObject(
+      {
+        'objectID': userSnapshot.id,
+        ...newTeacher,
+      },
+    );
   }
 }
