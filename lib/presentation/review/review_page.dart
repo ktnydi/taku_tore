@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:provider/provider.dart';
-import '../../domain/user.dart';
+import 'package:takutore/domain/teacher.dart';
 import 'review_model.dart';
 
 class Review extends StatelessWidget {
   Review({this.teacher});
 
-  final User teacher;
+  final Teacher teacher;
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(

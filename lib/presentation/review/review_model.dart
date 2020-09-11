@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../domain/user.dart';
+import 'package:takutore/config/application.dart';
+import 'package:takutore/domain/teacher.dart';
 
 class ReviewModel extends ChangeNotifier {
   final formKey = GlobalKey<FormState>();
-  User _teacher;
+  final _algolia = Application.algolia.instance;
+  Teacher _teacher;
   double _rating = 0;
   String _comment = '';
   bool isLoading = false;
@@ -33,7 +35,7 @@ class ReviewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  set teacher(User user) {
+  set teacher(Teacher user) {
     this._teacher = user;
   }
 
@@ -75,6 +77,35 @@ class ReviewModel extends ChangeNotifier {
       },
     );
 
+    final double avgRating = this._teacher.avgRating;
+    final int numRatings = this._teacher.numRatings;
+    final double sumRating = avgRating * numRatings;
+    final double newSumRating = sumRating + this._rating;
+    final int newNumRatings = numRatings + 1;
+    final double newAvgRating = (newSumRating / newNumRatings).toDouble();
+
+    this.updateAlgoliaTeacher(
+      {
+        'avgRating': newAvgRating,
+        'numRatings': newNumRatings,
+      },
+    );
+
     endLoading();
+  }
+
+  Future updateAlgoliaTeacher(Map<String, dynamic> data) async {
+    final teacher =
+        await _algolia.index('teacher').object(this._teacher.uid).getObject();
+
+    final newTeacher = {
+      ...teacher.data,
+      ...data,
+    };
+
+    await _algolia
+        .index('teacher')
+        .object(this._teacher.uid)
+        .updateData(newTeacher);
   }
 }
