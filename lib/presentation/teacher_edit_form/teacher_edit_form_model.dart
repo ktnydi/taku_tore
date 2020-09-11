@@ -7,9 +7,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:takutore/config/application.dart';
 import 'package:takutore/domain/teacher.dart';
 
 class TeacherEditFormModel extends ChangeNotifier {
+  final _auth = auth.FirebaseAuth.instance;
+  final _algolia = Application.algolia.instance;
   Teacher teacher;
   String thumbnail;
   TextEditingController title;
@@ -123,5 +126,32 @@ class TeacherEditFormModel extends ChangeNotifier {
       'recommend': this.recommend.text,
       'about': this.about.text,
     });
+
+    await updateAlgoliaTeacher(
+      {
+        'thumbnail': this.thumbnail,
+        'title': this.title.text,
+        'canDo': this.canDo.text,
+        'recommend': this.recommend.text,
+        'about': this.about.text,
+      },
+    );
+  }
+
+  Future updateAlgoliaTeacher(Map<String, dynamic> data) async {
+    final currentUser = _auth.currentUser;
+
+    final teacher =
+        await _algolia.index('teacher').object(currentUser.uid).getObject();
+
+    final newTeacher = {
+      ...teacher.data,
+      ...data,
+    };
+
+    await _algolia
+        .index('teacher')
+        .object(currentUser.uid)
+        .updateData(newTeacher);
   }
 }
