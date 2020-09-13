@@ -21,7 +21,7 @@ class RemoveTeacher extends StatelessWidget {
           titleText: '成功',
           contentText: '登録を解除しました。',
         );
-        Navigator.pop(context);
+        Navigator.popUntil(context, (route) => route.isFirst);
       } catch (e) {
         model.endLoading();
         await _showDialog(
