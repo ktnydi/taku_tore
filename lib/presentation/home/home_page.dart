@@ -3,6 +3,7 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:takutore/domain/teacher.dart';
 import 'package:takutore/domain/user.dart';
+import 'package:takutore/presentation/search_teacher/search_teacher_page.dart';
 import 'package:takutore/presentation/teacher_detail/teacher_detail_page.dart';
 import 'home_model.dart';
 
@@ -416,6 +417,20 @@ class Home extends StatelessWidget {
         title: Text(
           '講師を探す',
         ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.search),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  fullscreenDialog: true,
+                  builder: (context) => SearchTeacher(),
+                ),
+              );
+            },
+          )
+        ],
       ),
       body: ChangeNotifierProvider<HomeModel>(
         create: (_) => HomeModel()
