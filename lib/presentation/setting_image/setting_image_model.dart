@@ -108,20 +108,24 @@ class SettingImageModel extends ChangeNotifier {
       },
     );
 
-    batch.update(
-      doc.collection('teachers').doc(this.currentUser.uid),
-      {
-        'photoURL': photoURL,
-      },
-    );
+    if (this.currentUser.isTeacher) {
+      batch.update(
+        doc.collection('teachers').doc(this.currentUser.uid),
+        {
+          'photoURL': photoURL,
+        },
+      );
+    }
 
     await batch.commit();
 
-    await updateAlgoliaTeacher(
-      {
-        'photoURL': photoURL,
-      },
-    );
+    if (this.currentUser.isTeacher) {
+      await updateAlgoliaTeacher(
+        {
+          'photoURL': photoURL,
+        },
+      );
+    }
 
     _isLoading = false;
     notifyListeners();
