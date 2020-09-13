@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:takutore/presentation/search_teacher_list/search_teacher_list_page.dart';
 
 class SearchTeacher extends StatelessWidget {
   @override
@@ -10,12 +11,20 @@ class SearchTeacher extends StatelessWidget {
           children: [
             Flexible(
               child: TextField(
+                autofocus: true,
                 decoration: InputDecoration(
                   border: InputBorder.none,
                   hintText: '検索',
                 ),
                 onSubmitted: (value) {
-                  // TODO: search teachers.
+                  if (value.isEmpty) return;
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SearchTeacherList(text: value),
+                    ),
+                  );
                 },
               ),
             ),
