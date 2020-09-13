@@ -245,20 +245,25 @@ class UserModel extends ChangeNotifier {
       },
     );
 
-    batch.update(
-      doc.collection('teachers').doc(this.user.uid),
-      {
-        'displayName': name,
-      },
-    );
+    if (this.user.isTeacher) {
+      batch.update(
+        doc.collection('teachers').doc(this.user.uid),
+        {
+          'displayName': name,
+        },
+      );
+    }
 
     await batch.commit();
 
-    await updateAlgoliaTeacher(
-      {
-        'displayName': name,
-      },
-    );
+    if (this.user.isTeacher) {
+      print('update');
+      await updateAlgoliaTeacher(
+        {
+          'displayName': name,
+        },
+      );
+    }
 
     endLoading();
   }
