@@ -5,18 +5,19 @@ iOS：https://apps.apple.com/us/app/id1529380989
 
 
 
-**モチベーション**
+## モチベーション
 
 本格的なフィットネスを行うためにはジムに行くことが多いと思いますが、コロナ禍で外出を控えるようになりオンライン上で行えるようにはできないかと思って開発しました。
 
 
 
-**機能**
+## 機能
 
 - ユーザー認証機能
 - SNS認証機能
 - 画像投稿機能
 - 講師登録機能
+- 講師検索機能
 - レビュー機能
 - ブックマーク機能
 - 1対1のリアルタイムチャット機能
@@ -27,10 +28,10 @@ iOS：https://apps.apple.com/us/app/id1529380989
 - 通知機能
 - 強制アップデート機能
 
-**追加予定の機能**
+## 追加予定の機能
 
-- 検索機能
-- 決済機能
+- [x] 検索機能
+- [ ] 決済機能
 
 UI部分はFlutter、機能部分は主にFirebaseを使って実装しました。
 
@@ -40,7 +41,11 @@ UI部分はFlutter、機能部分は主にFirebaseを使って実装しました
 
 検索機能はAlgolia、決済機能はStripeまたはPaypalを使ってみたいなと思っています。
 
-**使用技術**
+### 追記
+**(2020/9/13)**
+- Algoliaで講師を検索できる機能を追加しました。
+
+## 使用技術
 
 - Flutter
 - Firebase
@@ -50,5 +55,6 @@ UI部分はFlutter、機能部分は主にFirebaseを使って実装しました
   - Cloud Storage
   - Firebase Cloud Messaging
   - Firebase Remote Config
+- Algolia
 - Google Spread Sheet
 - Google App Script
