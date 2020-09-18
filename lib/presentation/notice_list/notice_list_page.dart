@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:takutore/user_model.dart';
 import '../chat_room/chat_room_page.dart';
 import 'notice_list_model.dart';
 
@@ -97,44 +98,47 @@ class NoticeList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentUser = context.select((UserModel model) => model.user);
     return Scaffold(
       appBar: AppBar(
         title: Text('通知'),
       ),
-      body: ChangeNotifierProvider<NoticeListModel>(
-        create: (_) => NoticeListModel()
-          ..fetchNotices()
-          ..readNotice(),
-        child: Consumer<NoticeListModel>(
-          builder: (_, model, __) {
-            if (model.isLoading) {
-              return Center(
-                child: CircularProgressIndicator(),
-              );
-            }
+      body: currentUser != null
+          ? ChangeNotifierProvider<NoticeListModel>(
+              create: (_) => NoticeListModel()
+                ..fetchNotices()
+                ..readNotice(),
+              child: Consumer<NoticeListModel>(
+                builder: (_, model, __) {
+                  if (model.isLoading) {
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
 
-            if (model.notices.isEmpty) {
-              return Center(
-                child: Text(
-                  '新しい通知はありません。',
-                ),
-              );
-            }
+                  if (model.notices.isEmpty) {
+                    return Center(
+                      child: Text(
+                        '新しい通知はありません。',
+                      ),
+                    );
+                  }
 
-            return ListView.separated(
-              itemBuilder: (context, index) {
-                return _buildNoticeCell(
-                  context,
-                  index,
-                  model,
-                );
-              },
-              separatorBuilder: (context, index) => Divider(height: 0.5),
-              itemCount: model.notices.length,
-            );
-          },
-        ),
-      ),
+                  return ListView.separated(
+                    itemBuilder: (context, index) {
+                      return _buildNoticeCell(
+                        context,
+                        index,
+                        model,
+                      );
+                    },
+                    separatorBuilder: (context, index) => Divider(height: 0.5),
+                    itemCount: model.notices.length,
+                  );
+                },
+              ),
+            )
+          : SizedBox(),
     );
   }
 }

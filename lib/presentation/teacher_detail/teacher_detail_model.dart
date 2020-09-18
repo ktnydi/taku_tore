@@ -52,12 +52,18 @@ class TeacherDetailModel extends ChangeNotifier {
 
   Future checkAuthor({Teacher teacher}) async {
     final currentUser = auth.FirebaseAuth.instance.currentUser;
+
+    if (currentUser == null) return;
+
     this.isAuthor = teacher.uid == currentUser.uid;
     notifyListeners();
   }
 
   Future checkBookmark({Teacher teacher}) async {
     final currentUser = auth.FirebaseAuth.instance.currentUser;
+
+    if (currentUser == null) return;
+
     final query = FirebaseFirestore.instance
         .collection('users')
         .doc(currentUser.uid)
@@ -74,6 +80,8 @@ class TeacherDetailModel extends ChangeNotifier {
   Future checkBlocked({Teacher teacher}) async {
     final currentUser = auth.FirebaseAuth.instance.currentUser;
 
+    if (currentUser == null) return;
+
     this.isBlocked = teacher.blockedUserID.contains(currentUser.uid);
 
     notifyListeners();
@@ -81,6 +89,9 @@ class TeacherDetailModel extends ChangeNotifier {
 
   Future checkReview({Teacher teacher}) async {
     final currentUser = auth.FirebaseAuth.instance.currentUser;
+
+    if (currentUser == null) return;
+
     final query = FirebaseFirestore.instance
         .collection('users')
         .doc(teacher.uid)
@@ -98,6 +109,8 @@ class TeacherDetailModel extends ChangeNotifier {
   Future addBookmark() async {
     final user = auth.FirebaseAuth.instance.currentUser;
 
+    if (user == null) return;
+
     final collection = FirebaseFirestore.instance
         .collection('users')
         .doc(user.uid)
@@ -111,6 +124,9 @@ class TeacherDetailModel extends ChangeNotifier {
 
   Future deleteBookmark() async {
     final currentUser = auth.FirebaseAuth.instance.currentUser;
+
+    if (currentUser == null) return;
+
     final query = FirebaseFirestore.instance
         .collection('users')
         .doc(currentUser.uid)
@@ -208,6 +224,8 @@ class TeacherDetailModel extends ChangeNotifier {
     beginLoading();
     final currentUser = auth.FirebaseAuth.instance.currentUser;
 
+    if (currentUser == null) return;
+
     final query = FirebaseFirestore.instance
         .collection('users')
         .doc(currentUser.uid)
@@ -223,6 +241,8 @@ class TeacherDetailModel extends ChangeNotifier {
 
   Future<Room> addRoom() async {
     final currentUser = auth.FirebaseAuth.instance.currentUser;
+
+    if (currentUser == null) return null;
 
     if (this.teacher.uid == currentUser.uid) {
       throw ('自分には相談できません。');

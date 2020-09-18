@@ -5,6 +5,7 @@ import 'package:takutore/domain/teacher.dart';
 import 'package:takutore/domain/user.dart';
 import 'package:takutore/presentation/search_teacher/search_teacher_page.dart';
 import 'package:takutore/presentation/teacher_detail/teacher_detail_page.dart';
+import 'package:takutore/user_model.dart';
 import 'home_model.dart';
 
 class Home extends StatelessWidget {
@@ -311,101 +312,111 @@ class Home extends StatelessWidget {
   }
 
   Widget _cell(BuildContext context, HomeModel model, Teacher teacher) {
-    return Material(
-      color: Colors.white,
-      child: InkWell(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (BuildContext context) =>
-                  TeacherDetail(teacher: teacher),
-            ),
-          );
-        },
-        onLongPress: () async {
-          await _showModalBottomSheet(context, teacher, model);
-        },
-        child: Container(
-          padding: EdgeInsets.fromLTRB(15, 10, 0, 10),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              CircleAvatar(
-                backgroundColor: Colors.transparent,
-                backgroundImage: NetworkImage(teacher.photoURL),
-                radius: 25,
-              ),
-              SizedBox(width: 15),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      teacher.title,
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.black87,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 5),
-                    Text(
-                      teacher.displayName,
-                      style: TextStyle(
-                        color: Colors.black54,
-                        fontSize: 13,
-                      ),
-                    ),
-                    SizedBox(height: 5),
-                    Row(
+    return Builder(
+      builder: (context) {
+        final currentUser = context.select((UserModel model) => model.user);
+        return Material(
+          color: Colors.white,
+          child: InkWell(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (BuildContext context) =>
+                      TeacherDetail(teacher: teacher),
+                ),
+              );
+            },
+            onLongPress: currentUser != null
+                ? () async {
+                    await _showModalBottomSheet(context, teacher, model);
+                  }
+                : null,
+            child: Container(
+              padding: EdgeInsets.fromLTRB(15, 10, 0, 10),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  CircleAvatar(
+                    backgroundColor: Colors.transparent,
+                    backgroundImage: NetworkImage(teacher.photoURL),
+                    radius: 25,
+                  ),
+                  SizedBox(width: 15),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        RatingBarIndicator(
-                          rating: teacher.avgRating.toDouble(),
-                          itemBuilder: (context, index) => Icon(
-                            Icons.star,
-                            color: Colors.amber,
-                          ),
-                          itemCount: 5,
-                          itemSize: 20,
-                        ),
-                        SizedBox(width: 3),
                         Text(
-                          '${teacher.avgRating}',
+                          teacher.title,
                           style: TextStyle(
-                            color: Colors.black54,
-                            fontSize: 13,
+                            fontSize: 16,
+                            color: Colors.black87,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(width: 3),
+                        SizedBox(height: 5),
                         Text(
-                          '(${teacher.numRatings})',
+                          teacher.displayName,
                           style: TextStyle(
                             color: Colors.black54,
                             fontSize: 13,
                           ),
                         ),
+                        SizedBox(height: 5),
+                        Row(
+                          children: <Widget>[
+                            RatingBarIndicator(
+                              rating: teacher.avgRating.toDouble(),
+                              itemBuilder: (context, index) => Icon(
+                                Icons.star,
+                                color: Colors.amber,
+                              ),
+                              itemCount: 5,
+                              itemSize: 20,
+                            ),
+                            SizedBox(width: 3),
+                            Text(
+                              '${teacher.avgRating}',
+                              style: TextStyle(
+                                color: Colors.black54,
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(width: 3),
+                            Text(
+                              '(${teacher.numRatings})',
+                              style: TextStyle(
+                                color: Colors.black54,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
-                  ],
-                ),
-              ),
-              Transform.translate(
-                offset: Offset(0, -10),
-                child: IconButton(
-                  icon: Icon(
-                    Icons.more_vert,
                   ),
-                  onPressed: () async {
-                    await _showModalBottomSheet(context, teacher, model);
-                  },
-                ),
+                  currentUser != null
+                      ? Transform.translate(
+                          offset: Offset(0, -10),
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.more_vert,
+                            ),
+                            onPressed: () async {
+                              await _showModalBottomSheet(
+                                  context, teacher, model);
+                            },
+                          ),
+                        )
+                      : SizedBox(width: 15),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 

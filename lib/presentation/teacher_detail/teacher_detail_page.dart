@@ -88,6 +88,8 @@ class TeacherDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentUser = context.select((UserModel model) => model.user);
+
     return ChangeNotifierProvider<TeacherDetailModel>(
       create: (_) => TeacherDetailModel()
         ..checkBlocked(teacher: teacher)
@@ -127,7 +129,8 @@ class TeacherDetail extends StatelessWidget {
                   ),
                   Consumer2<UserModel, TeacherDetailModel>(
                     builder: (_, userModel, teacherDetailModel, __) {
-                      if (teacher.uid == userModel.user.uid) {
+                      if (currentUser == null ||
+                          teacher.uid == userModel.user.uid) {
                         return Container();
                       }
 
@@ -180,12 +183,14 @@ class TeacherDetail extends StatelessWidget {
                         ),
                       ),
                     ),
-                    AnimatedPositioned(
-                      duration: Duration(milliseconds: 250),
-                      curve: Curves.easeInOut,
-                      bottom: model.isLoading ? -100 : 15,
-                      child: _buildFloatingButton(model),
-                    ),
+                    currentUser != null
+                        ? AnimatedPositioned(
+                            duration: Duration(milliseconds: 250),
+                            curve: Curves.easeInOut,
+                            bottom: model.isLoading ? -100 : 15,
+                            child: _buildFloatingButton(model),
+                          )
+                        : SizedBox(),
                   ],
                 );
               },
