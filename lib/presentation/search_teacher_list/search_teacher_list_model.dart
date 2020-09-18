@@ -118,6 +118,9 @@ class SearchTeacherListModel extends ChangeNotifier {
 
   Future blockedUser({User user}) async {
     final currentUser = auth.FirebaseAuth.instance.currentUser;
+
+    if (currentUser == null) return;
+
     final document =
         FirebaseFirestore.instance.collection('users').doc(currentUser.uid);
 
@@ -137,7 +140,7 @@ class SearchTeacherListModel extends ChangeNotifier {
 
     final currentUser = auth.FirebaseAuth.instance.currentUser;
 
-    if (user.uid == currentUser.uid) return;
+    if (currentUser == null || user.uid == currentUser.uid) return;
 
     final collection = FirebaseFirestore.instance.collection('reports');
 

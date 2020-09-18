@@ -23,48 +23,53 @@ class _ChatState extends State<Chat> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final currentUser = context.select((UserModel model) => model.user);
     return Scaffold(
       appBar: AppBar(
         title: Text('チャット'),
-        bottom: PreferredSize(
-          preferredSize: Size(double.infinity, 50),
-          child: Container(
-            height: 50,
-            child: TabBar(
-              labelPadding: EdgeInsets.symmetric(horizontal: 0),
+        bottom: currentUser != null
+            ? PreferredSize(
+                preferredSize: Size(double.infinity, 50),
+                child: Container(
+                  height: 50,
+                  child: TabBar(
+                    labelPadding: EdgeInsets.symmetric(horizontal: 0),
+                    controller: _tabController,
+                    indicatorSize: TabBarIndicatorSize.label,
+                    labelStyle: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    labelColor: Theme.of(context).primaryColor,
+                    unselectedLabelColor: Colors.black45,
+                    tabs: [
+                      Tab(
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: Text('講師'),
+                        ),
+                      ),
+                      Tab(
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: Text('受講生'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            : null,
+      ),
+      body: currentUser != null
+          ? TabBarView(
               controller: _tabController,
-              indicatorSize: TabBarIndicatorSize.label,
-              labelStyle: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-              labelColor: Theme.of(context).primaryColor,
-              unselectedLabelColor: Colors.black45,
-              tabs: [
-                Tab(
-                  child: Align(
-                    alignment: Alignment.center,
-                    child: Text('講師'),
-                  ),
-                ),
-                Tab(
-                  child: Align(
-                    alignment: Alignment.center,
-                    child: Text('受講生'),
-                  ),
-                ),
+              children: <Widget>[
+                ChatList(tabName: 'teacher'),
+                ChatList(tabName: 'student'),
               ],
-            ),
-          ),
-        ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: <Widget>[
-          ChatList(tabName: 'teacher'),
-          ChatList(tabName: 'student'),
-        ],
-      ),
+            )
+          : SizedBox(),
     );
   }
 }

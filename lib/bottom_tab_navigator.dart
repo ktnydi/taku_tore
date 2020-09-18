@@ -32,6 +32,8 @@ class _BottomTabNavigator extends State<BottomTabNavigator> {
   Future<void> _newMessageSnapshot() async {
     final currentUser = _auth.currentUser;
 
+    if (currentUser == null) return;
+
     final studentRooms = _store
         .collection('users')
         .doc(currentUser.uid)
@@ -87,6 +89,8 @@ class _BottomTabNavigator extends State<BottomTabNavigator> {
 
   Future<void> _newNoticeSnapshot() async {
     final currentUser = _auth.currentUser;
+
+    if (currentUser == null) return;
 
     final notices = _store
         .collection('users')

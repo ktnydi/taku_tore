@@ -5,6 +5,7 @@ import 'package:takutore/domain/teacher.dart';
 import 'package:takutore/domain/user.dart';
 import 'package:takutore/presentation/search_teacher_list/search_teacher_list_model.dart';
 import 'package:takutore/presentation/teacher_detail/teacher_detail_page.dart';
+import 'package:takutore/user_model.dart';
 
 class SearchTeacherList extends StatelessWidget {
   SearchTeacherList({this.text});
@@ -326,107 +327,117 @@ class SearchTeacherList extends StatelessWidget {
 
   Widget _cell(
       BuildContext context, Teacher teacher, SearchTeacherListModel model) {
-    return Card(
-      margin: EdgeInsets.all(0),
-      elevation: 0,
-      child: InkWell(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => TeacherDetail(teacher: teacher),
-            ),
-          );
-        },
-        onLongPress: () async {
-          await _showModalBottomSheet(context, teacher, model);
-        },
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(15, 10, 0, 10),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(25),
-                  border: Border.all(color: Colors.black12, width: 0.5),
-                  image: DecorationImage(
-                    image: NetworkImage(teacher.photoURL),
-                  ),
+    return Builder(
+      builder: (context) {
+        final currentUser = context.select((UserModel model) => model.user);
+        return Card(
+          margin: EdgeInsets.all(0),
+          elevation: 0,
+          child: InkWell(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => TeacherDetail(teacher: teacher),
                 ),
-              ),
-              SizedBox(width: 15),
-              Flexible(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      teacher.title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
+              );
+            },
+            onLongPress: currentUser != null
+                ? () async {
+                    await _showModalBottomSheet(context, teacher, model);
+                  }
+                : null,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(15, 10, 0, 10),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(25),
+                      border: Border.all(color: Colors.black12, width: 0.5),
+                      image: DecorationImage(
+                        image: NetworkImage(teacher.photoURL),
                       ),
                     ),
-                    Text(
-                      teacher.displayName,
-                      style: TextStyle(
-                        color: Colors.black54,
-                        fontSize: 13,
-                      ),
-                    ),
-                    Row(
-                      children: <Widget>[
-                        RatingBarIndicator(
-                          rating: teacher.avgRating.toDouble(),
-                          itemBuilder: (context, index) => Icon(
-                            Icons.star,
-                            color: Colors.amber,
-                          ),
-                          itemCount: 5,
-                          itemSize: 20,
-                        ),
-                        SizedBox(width: 3),
+                  ),
+                  SizedBox(width: 15),
+                  Flexible(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                         Text(
-                          '${teacher.avgRating}',
+                          teacher.title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            color: Colors.black54,
-                            fontSize: 13,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(width: 3),
                         Text(
-                          '(${teacher.numRatings})',
+                          teacher.displayName,
                           style: TextStyle(
                             color: Colors.black54,
                             fontSize: 13,
                           ),
                         ),
+                        Row(
+                          children: <Widget>[
+                            RatingBarIndicator(
+                              rating: teacher.avgRating.toDouble(),
+                              itemBuilder: (context, index) => Icon(
+                                Icons.star,
+                                color: Colors.amber,
+                              ),
+                              itemCount: 5,
+                              itemSize: 20,
+                            ),
+                            SizedBox(width: 3),
+                            Text(
+                              '${teacher.avgRating}',
+                              style: TextStyle(
+                                color: Colors.black54,
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(width: 3),
+                            Text(
+                              '(${teacher.numRatings})',
+                              style: TextStyle(
+                                color: Colors.black54,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
-                  ],
-                ),
-              ),
-              Transform.translate(
-                offset: Offset(0, -8),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(20),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Icon(Icons.more_vert),
                   ),
-                  onTap: () async {
-                    await _showModalBottomSheet(context, teacher, model);
-                  },
-                ),
+                  currentUser != null
+                      ? Transform.translate(
+                          offset: Offset(0, -8),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(20),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Icon(Icons.more_vert),
+                            ),
+                            onTap: () async {
+                              await _showModalBottomSheet(
+                                  context, teacher, model);
+                            },
+                          ),
+                        )
+                      : SizedBox(width: 15),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 

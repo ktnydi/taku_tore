@@ -18,32 +18,35 @@ import '../blocked_user_list/blocked_user_list_page.dart';
 class Setting extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final currentUser = context.select((UserModel model) => model.user);
     return Scaffold(
       appBar: AppBar(
         title: Text(
           '設定',
         ),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 15),
-          child: Column(
-            children: <Widget>[
-              CurrentAccount(),
-              SizedBox(height: 15),
-              AccountSetting(),
-              SizedBox(height: 15),
-              BlockedUser(),
-              SizedBox(height: 15),
-              Bookmark(),
-              SizedBox(height: 15),
-              About(),
-              SizedBox(height: 15),
-              Danger(),
-            ],
-          ),
-        ),
-      ),
+      body: currentUser != null
+          ? SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 15),
+                child: Column(
+                  children: <Widget>[
+                    CurrentAccount(),
+                    SizedBox(height: 15),
+                    AccountSetting(),
+                    SizedBox(height: 15),
+                    BlockedUser(),
+                    SizedBox(height: 15),
+                    Bookmark(),
+                    SizedBox(height: 15),
+                    About(),
+                    SizedBox(height: 15),
+                    Danger(),
+                  ],
+                ),
+              ),
+            )
+          : SizedBox(),
     );
   }
 }

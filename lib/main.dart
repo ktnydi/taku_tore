@@ -4,7 +4,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:takutore/presentation/version_update/version_update_page.dart';
 import 'package:timeago/timeago.dart';
-import 'presentation/auth/auth_page.dart';
 import 'bottom_tab_navigator.dart';
 import 'presentation/common/loading.dart';
 import 'user_model.dart';
@@ -55,9 +54,7 @@ class MyApp extends StatelessWidget {
               return !context.watch<MainModel>().isRequiredUpdate
                   ? Stack(
                       children: <Widget>[
-                        context.watch<UserModel>().user != null
-                            ? BottomTabNavigator()
-                            : Auth(),
+                        BottomTabNavigator(),
                         Loading(context.watch<UserModel>().isLoading),
                       ],
                     )

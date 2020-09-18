@@ -115,6 +115,9 @@ class HomeModel extends ChangeNotifier {
 
   Future checkBlockedUser() async {
     final currentUser = auth.FirebaseAuth.instance.currentUser;
+
+    if (currentUser == null) return;
+
     final document =
         FirebaseFirestore.instance.collection('users').doc(currentUser.uid);
     final doc = await document.get();
@@ -124,6 +127,9 @@ class HomeModel extends ChangeNotifier {
 
   Future blockedUser({User user}) async {
     final currentUser = auth.FirebaseAuth.instance.currentUser;
+
+    if (currentUser == null) return;
+
     final document =
         FirebaseFirestore.instance.collection('users').doc(currentUser.uid);
 
@@ -143,7 +149,7 @@ class HomeModel extends ChangeNotifier {
 
     final currentUser = auth.FirebaseAuth.instance.currentUser;
 
-    if (user.uid == currentUser.uid) return;
+    if (currentUser == null || user.uid == currentUser.uid) return;
 
     final collection = FirebaseFirestore.instance.collection('reports');
 
