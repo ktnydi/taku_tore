@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:takutore/molecule/login_prompt.dart';
 import 'package:timeago/timeago.dart';
 import '../chat_room/chat_room_page.dart';
 import '../chat/chat_model.dart';
@@ -69,7 +70,17 @@ class _ChatState extends State<Chat> with TickerProviderStateMixin {
                 ChatList(tabName: 'student'),
               ],
             )
-          : SizedBox(),
+          : Stack(
+              alignment: Alignment.center,
+              children: [
+                Icon(
+                  Icons.chat,
+                  size: 280,
+                  color: Colors.black.withOpacity(0.03),
+                ),
+                LoginPrompt(),
+              ],
+            ),
     );
   }
 }

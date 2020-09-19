@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:takutore/molecule/login_prompt.dart';
 import 'package:takutore/user_model.dart';
 import '../chat_room/chat_room_page.dart';
 import 'notice_list_model.dart';
@@ -138,7 +139,17 @@ class NoticeList extends StatelessWidget {
                 },
               ),
             )
-          : SizedBox(),
+          : Stack(
+              alignment: Alignment.center,
+              children: [
+                Icon(
+                  Icons.notifications,
+                  size: 280,
+                  color: Colors.black.withOpacity(0.03),
+                ),
+                LoginPrompt(),
+              ],
+            ),
     );
   }
 }
