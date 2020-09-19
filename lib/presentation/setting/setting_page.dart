@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:takutore/atoms/rounded_button.dart';
 import 'package:takutore/main_model.dart';
+import 'package:takutore/molecule/login_prompt.dart';
 import 'package:takutore/presentation/feedback_form/feedback_form_page.dart';
 import 'package:takutore/presentation/teacher_edit/teacher_edit_page.dart';
 import 'package:url_launcher/url_launcher.dart' as launcher;
@@ -46,7 +47,17 @@ class Setting extends StatelessWidget {
                 ),
               ),
             )
-          : SizedBox(),
+          : Stack(
+              alignment: Alignment.center,
+              children: [
+                Icon(
+                  Icons.settings,
+                  size: 280,
+                  color: Colors.black.withOpacity(0.03),
+                ),
+                LoginPrompt(),
+              ],
+            ),
     );
   }
 }
