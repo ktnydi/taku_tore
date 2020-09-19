@@ -1,13 +1,13 @@
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:apple_sign_in/apple_sign_in.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 
-class AuthModel extends ChangeNotifier {
+class LoginModel extends ChangeNotifier {
   auth.FirebaseAuth _auth = auth.FirebaseAuth.instance;
   FirebaseFirestore _store = FirebaseFirestore.instance;
   FirebaseStorage _storage = FirebaseStorage.instance;
@@ -16,7 +16,7 @@ class AuthModel extends ChangeNotifier {
   FacebookLogin _facebookLogin = FacebookLogin();
   bool isLoading = false;
 
-  Future signUpWithGoogle() async {
+  Future signInWithGoogle() async {
     GoogleSignInAccount googleUser = await _googleSignIn.signIn();
 
     if (googleUser == null) return;
@@ -40,11 +40,11 @@ class AuthModel extends ChangeNotifier {
 
     final deviceToken = await _messaging.getToken();
     final document = _store.collection('users').doc(user.uid);
-    bool registered = await hasAlreadyRegistered(userID: user.uid);
+    final isRegister = (await document.get()).exists;
 
-    if (!registered) {
-      await _store.runTransaction(
-        (transaction) async {
+    await _store.runTransaction(
+      (transaction) async {
+        if (!isRegister) {
           transaction.set(
             document,
             {
@@ -55,28 +55,19 @@ class AuthModel extends ChangeNotifier {
               'createdAt': FieldValue.serverTimestamp(),
             },
           );
+        }
 
-          if (deviceToken != null && deviceToken.isNotEmpty) {
-            transaction.set(
-              document.collection('tokens').doc(deviceToken),
-              {
-                'deviceToken': deviceToken,
-                'createdAt': FieldValue.serverTimestamp(),
-              },
-            );
-          }
-        },
-      );
-    } else {
-      if (deviceToken != null && deviceToken.isNotEmpty) {
-        await document.collection('tokens').doc(deviceToken).set(
-          {
-            'deviceToken': deviceToken,
-            'createdAt': FieldValue.serverTimestamp(),
-          },
-        );
-      }
-    }
+        if (deviceToken != null && deviceToken.isNotEmpty) {
+          transaction.set(
+            document.collection('tokens').doc(deviceToken),
+            {
+              'deviceToken': deviceToken,
+              'createdAt': FieldValue.serverTimestamp(),
+            },
+          );
+        }
+      },
+    );
 
     isLoading = false;
     notifyListeners();
@@ -93,7 +84,6 @@ class AuthModel extends ChangeNotifier {
         requestedScopes: [Scope.email, Scope.fullName],
       ),
     ]);
-    // TODO: result.status を見てエラーハンドリング
 
     if (result.status == AuthorizationStatus.cancelled) {
       return print('cancel');
@@ -128,11 +118,11 @@ class AuthModel extends ChangeNotifier {
 
       final deviceToken = await _messaging.getToken();
       final document = _store.collection('users').doc(user.uid);
-      bool registered = await hasAlreadyRegistered(userID: user.uid);
+      final isRegister = (await document.get()).exists;
 
-      if (!registered) {
-        await _store.runTransaction(
-          (transaction) async {
+      await _store.runTransaction(
+        (transaction) async {
+          if (!isRegister) {
             transaction.set(
               document,
               {
@@ -143,28 +133,19 @@ class AuthModel extends ChangeNotifier {
                 'createdAt': FieldValue.serverTimestamp(),
               },
             );
+          }
 
-            if (deviceToken != null && deviceToken.isNotEmpty) {
-              transaction.set(
-                document.collection('tokens').doc(deviceToken),
-                {
-                  'deviceToken': deviceToken,
-                  'createdAt': FieldValue.serverTimestamp(),
-                },
-              );
-            }
-          },
-        );
-      } else {
-        if (deviceToken != null && deviceToken.isNotEmpty) {
-          await document.collection('tokens').doc(deviceToken).set(
-            {
-              'deviceToken': deviceToken,
-              'createdAt': FieldValue.serverTimestamp(),
-            },
-          );
-        }
-      }
+          if (deviceToken != null && deviceToken.isNotEmpty) {
+            transaction.set(
+              document.collection('tokens').doc(deviceToken),
+              {
+                'deviceToken': deviceToken,
+                'createdAt': FieldValue.serverTimestamp(),
+              },
+            );
+          }
+        },
+      );
 
       isLoading = false;
       notifyListeners();
@@ -199,12 +180,11 @@ class AuthModel extends ChangeNotifier {
 
     final deviceToken = await _messaging.getToken();
     final document = _store.collection('users').doc(user.uid);
-    bool registered = await hasAlreadyRegistered(userID: user.uid);
+    final isRegister = (await document.get()).exists;
 
-    if (!registered) {
-      await user.updateEmail(user.email);
-      await _store.runTransaction(
-        (transaction) async {
+    await _store.runTransaction(
+      (transaction) async {
+        if (!isRegister) {
           transaction.set(
             document,
             {
@@ -215,28 +195,19 @@ class AuthModel extends ChangeNotifier {
               'createdAt': FieldValue.serverTimestamp(),
             },
           );
+        }
 
-          if (deviceToken != null && deviceToken.isNotEmpty) {
-            transaction.set(
-              document.collection('tokens').doc(deviceToken),
-              {
-                'deviceToken': deviceToken,
-                'createdAt': FieldValue.serverTimestamp(),
-              },
-            );
-          }
-        },
-      );
-    } else {
-      if (deviceToken != null && deviceToken.isNotEmpty) {
-        await document.collection('tokens').doc(deviceToken).set(
-          {
-            'deviceToken': deviceToken,
-            'createdAt': FieldValue.serverTimestamp(),
-          },
-        );
-      }
-    }
+        if (deviceToken != null && deviceToken.isNotEmpty) {
+          transaction.set(
+            document.collection('tokens').doc(deviceToken),
+            {
+              'deviceToken': deviceToken,
+              'createdAt': FieldValue.serverTimestamp(),
+            },
+          );
+        }
+      },
+    );
 
     isLoading = false;
     notifyListeners();
@@ -251,11 +222,5 @@ class AuthModel extends ChangeNotifier {
     final photoRef = _storage.ref().child(path);
     String photoURL = await photoRef.getDownloadURL();
     return photoURL;
-  }
-
-  Future<bool> hasAlreadyRegistered({String userID}) async {
-    final user = _store.collection('users').doc(userID);
-    final doc = await user.get();
-    return doc.exists;
   }
 }
