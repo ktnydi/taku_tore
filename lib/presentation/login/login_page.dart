@@ -1,7 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:takutore/presentation/auth/auth_model.dart';
+import 'package:takutore/presentation/login/login_model.dart';
 import 'package:takutore/presentation/login_email/login_email_page.dart';
 import 'package:url_launcher/url_launcher.dart' as launcher;
 import '../../atoms/rounded_button.dart';
@@ -32,9 +32,9 @@ class Login extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<AuthModel>(
-      create: (_) => AuthModel(),
-      child: Consumer<AuthModel>(
+    return ChangeNotifierProvider<LoginModel>(
+      create: (_) => LoginModel(),
+      child: Consumer<LoginModel>(
         builder: (_, model, __) {
           return Stack(
             children: <Widget>[
@@ -157,7 +157,7 @@ class Login extends StatelessWidget {
 class AuthButtonList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Consumer<AuthModel>(
+    return Consumer<LoginModel>(
       builder: (_, model, __) {
         return Column(
           children: <Widget>[
@@ -204,7 +204,7 @@ class EmailButton extends StatelessWidget {
 class GoogleButton extends StatelessWidget {
   GoogleButton(this.model);
 
-  final AuthModel model;
+  final LoginModel model;
   @override
   Widget build(BuildContext context) {
     return RoundedButton(
@@ -228,7 +228,7 @@ class GoogleButton extends StatelessWidget {
       color: Colors.white,
       onPressed: () async {
         try {
-          await model.signUpWithGoogle();
+          await model.signInWithGoogle();
           Navigator.pop(context);
         } catch (e) {
           print(e.toString());
@@ -241,7 +241,7 @@ class GoogleButton extends StatelessWidget {
 class AppleButton extends StatelessWidget {
   AppleButton(this.model);
 
-  final AuthModel model;
+  final LoginModel model;
   @override
   Widget build(BuildContext context) {
     return RoundedButton(
@@ -279,7 +279,7 @@ class AppleButton extends StatelessWidget {
 class FacebookButton extends StatelessWidget {
   FacebookButton(this.model);
 
-  final AuthModel model;
+  final LoginModel model;
   @override
   Widget build(BuildContext context) {
     return RoundedButton(
