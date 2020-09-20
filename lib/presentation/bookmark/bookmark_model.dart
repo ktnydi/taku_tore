@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http;
 import 'package:takutore/domain/teacher.dart';
 import '../../domain/user.dart';
 
@@ -80,5 +82,58 @@ class BookmarkModel extends ChangeNotifier {
     newTeachers.removeWhere((tc) => tc.uid == teacher.uid);
     this.teachers = newTeachers;
     notifyListeners();
+  }
+
+  Future blockedUser({User user}) async {
+    final currentUser = auth.FirebaseAuth.instance.currentUser;
+
+    if (currentUser == null) return;
+
+    final document =
+        FirebaseFirestore.instance.collection('users').doc(currentUser.uid);
+
+    await document.update(
+      {
+        'blockedUserID': FieldValue.arrayUnion(
+          [user.uid],
+        ),
+      },
+    );
+  }
+
+  Future report({User user, String contentType}) async {
+    final contentTypes = ['inappropriate', 'spam'];
+
+    if (!contentTypes.contains(contentType)) return;
+
+    final currentUser = auth.FirebaseAuth.instance.currentUser;
+
+    if (currentUser == null || user.uid == currentUser.uid) return;
+
+    final collection = FirebaseFirestore.instance.collection('reports');
+
+    final result = await collection.add(
+      {
+        'userID': user.uid,
+        'senderID': currentUser.uid,
+        'contentType': contentType,
+        'createdAt': FieldValue.serverTimestamp(),
+      },
+    );
+
+    final doc = await result.get();
+
+    // gasで作成したgssに報告データを追加するweb apiを呼ぶ
+    final webAppURL = DotEnv().env['GOOGLE_WEB_APP_URL'];
+    http.post(
+      webAppURL,
+      body: {
+        'documentID': doc.id,
+        'userID': doc.data()['userID'],
+        'senderID': doc.data()['senderID'],
+        'contentType': doc.data()['contentType'],
+        'createdAt': doc.data()['createdAt'].toDate().toString(),
+      },
+    );
   }
 }
