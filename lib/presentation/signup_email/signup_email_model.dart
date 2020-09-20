@@ -85,6 +85,8 @@ class SignUpEmailModel extends ChangeNotifier {
           }
         },
       );
+
+      await result.user.sendEmailVerification();
     }
   }
 }
