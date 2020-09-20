@@ -282,6 +282,7 @@ class UserModel extends ChangeNotifier {
       ),
     );
     await result.user.updateEmail(email);
+    await result.user.sendEmailVerification();
 
     endLoading();
   }
