@@ -10,7 +10,8 @@
 .history
 .svn/
 android/**/google-services.json
-ios/**/GoogleService-info.plist
+ios/Runner/GoogleService-info-dev.plist
+ios/Runner/GoogleService-info-release.plist
 
 # IntelliJ related
 *.iml
