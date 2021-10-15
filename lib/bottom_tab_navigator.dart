@@ -46,7 +46,8 @@ class _BottomTabNavigator extends State<BottomTabNavigator> {
         await Future.forEach(
           snapshot.docs,
           (DocumentSnapshot doc) async {
-            messageBadger += doc.data()['numNewMessage'];
+            final map = doc.data() as Map<String, dynamic>;
+            messageBadger += map['numNewMessage'];
           },
         );
         setState(
@@ -73,7 +74,8 @@ class _BottomTabNavigator extends State<BottomTabNavigator> {
         await Future.forEach(
           snapshot.docs,
           (DocumentSnapshot doc) async {
-            messageBadger += doc.data()['numNewMessage'];
+            final map = doc.data() as Map<String, dynamic>;
+            messageBadger += map['numNewMessage'];
           },
         );
         setState(
@@ -134,25 +136,25 @@ class _BottomTabNavigator extends State<BottomTabNavigator> {
             items: <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.home),
-                title: Text('ホーム'),
+                label: 'ホーム',
               ),
               BottomNavigationBarItem(
                 icon: Badge(
                   counter: this.messageBadger,
                   child: Icon(Icons.message),
                 ),
-                title: Text('チャット'),
+                label: 'チャット',
               ),
               BottomNavigationBarItem(
                 icon: Badge(
                   counter: this.noticeBadger,
                   child: Icon(Icons.notifications),
                 ),
-                title: Text('通知'),
+                label: '通知',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.settings),
-                title: Text('設定'),
+                label: '設定',
               ),
             ],
             currentIndex: currentIndex,

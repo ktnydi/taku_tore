@@ -97,14 +97,16 @@ class TeacherFormConfirm extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
                     ),
-                    child: FlatButton(
-                      color: Theme.of(context).primaryColor,
+                    child: TextButton(
                       child: Text(
                         'この内容で講師に登録する',
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                         ),
+                      ),
+                      style: TextButton.styleFrom(
+                        backgroundColor: Theme.of(context).primaryColor,
                       ),
                       onPressed: () async {
                         try {
@@ -120,7 +122,7 @@ class TeacherFormConfirm extends StatelessWidget {
                               return AlertDialog(
                                 title: Text(e.toString()),
                                 actions: <Widget>[
-                                  FlatButton(
+                                  TextButton(
                                     child: Text('OK'),
                                     onPressed: () => Navigator.pop(context),
                                   ),

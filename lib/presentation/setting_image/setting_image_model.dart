@@ -1,16 +1,20 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:algolia/algolia.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
-import 'package:takutore/config/application.dart';
+import 'package:takutore/config.dart';
 import '../../domain/user.dart';
 
 class SettingImageModel extends ChangeNotifier {
-  final _algolia = Application.algolia.instance;
+  final _algolia = Algolia.init(
+    applicationId: Config.algoliaApplicationId,
+    apiKey: Config.algoliaApiKey,
+  );
   User currentUser;
   File imageFile;
   Uint8List imageData;
@@ -45,8 +49,8 @@ class SettingImageModel extends ChangeNotifier {
   }
 
   Future fetchImageFile() async {
-    final PickedFile pickedFile =
-        await ImagePicker().getImage(source: ImageSource.gallery);
+    final pickedFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile == null) {
       return null;
     }
@@ -84,17 +88,16 @@ class SettingImageModel extends ChangeNotifier {
 
     // Firebase Storageに画像をアップロード
     final path = '/images/${this.currentUser.uid}.jpg';
-    final StorageReference storageRef =
-        FirebaseStorage.instance.ref().child(path);
+    final Reference storageRef = FirebaseStorage.instance.ref().child(path);
     // 以下をを指定しないとiOSではcontentTypeがapplication/octet-streamになる。
-    final metaData = StorageMetadata(contentType: "image/jpg");
-    final StorageUploadTask uploadTask = storageRef.putData(
+    final metaData = SettableMetadata(contentType: "image/jpg");
+    final uploadTask = storageRef.putData(
       this.imageData,
       metaData,
     );
 
     // 画像の保存完了時にFirebaseにURLを保存する。
-    StorageTaskSnapshot snapshot = await uploadTask.onComplete;
+    final snapshot = uploadTask.snapshot;
     String photoURL = await snapshot.ref.getDownloadURL();
     final doc = FirebaseFirestore.instance
         .collection('users')

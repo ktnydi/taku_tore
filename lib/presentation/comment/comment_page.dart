@@ -37,13 +37,21 @@ class Comment extends StatelessWidget {
                           initialRating: 4.0,
                           allowHalfRating: true,
                           itemSize: 20,
-                          itemBuilder: (BuildContext context, int index) {
-                            return Icon(
+                          onRatingUpdate: (_) {},
+                          ratingWidget: RatingWidget(
+                            full: Icon(
                               Icons.star,
                               color: Colors.amber,
-                            );
-                          },
-                          onRatingUpdate: (_) {},
+                            ),
+                            half: Icon(
+                              Icons.star_half,
+                              color: Colors.amber,
+                            ),
+                            empty: Icon(
+                              Icons.star_border,
+                              color: Colors.amber,
+                            ),
+                          ),
                         ),
                         SizedBox(width: 10),
                         Text(

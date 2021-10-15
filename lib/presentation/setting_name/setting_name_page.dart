@@ -34,7 +34,7 @@ class _SettingNameState extends State<SettingName>
           return AlertDialog(
             title: Text('名前を更新しました。'),
             actions: <Widget>[
-              FlatButton(
+              TextButton(
                 child: Text('OK'),
                 onPressed: () => Navigator.pop(context),
               ),
@@ -52,7 +52,7 @@ class _SettingNameState extends State<SettingName>
           return AlertDialog(
             title: Text(error.toString()),
             actions: <Widget>[
-              FlatButton(
+              TextButton(
                 child: Text('OK'),
                 onPressed: () => Navigator.pop(context),
               ),

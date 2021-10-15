@@ -14,34 +14,25 @@ class Notice {
   bool isRead;
   FirebaseFirestore _store = FirebaseFirestore.instance;
 
-  Notice(DocumentSnapshot doc) {
-    this.type = doc.data()['type'];
-    this.data = doc.data()['data'];
-    this.createdAt = format(doc.data()['createdAt'].toDate(), locale: 'ja');
-    this.message = _typeParser(doc.data()['type']);
-    this._senderID = doc.data()['senderID'];
-    this.isRead = doc.data()['isRead'];
-  }
-
-  String _typeParser(String type) {
-    switch (type) {
-      case 'add room':
-        return 'トークルームを作成しました';
-      default:
-        return '';
-    }
-  }
+  Notice(Map<String, dynamic> map)
+      : this.type = map['type'],
+        this.data = map['data'],
+        this.createdAt = format(map['createdAt'].toDate(), locale: 'ja'),
+        this.message = map['type'],
+        this._senderID = map['senderID'],
+        this.isRead = map['isRead'];
 
   Future<User> _fetchUserFromFirebase({String uid}) async {
     final document = _store.collection('users').doc(uid);
     final doc = await document.get();
+    final map = doc.data();
     final user = User(
       uid: doc.id,
-      displayName: doc.data()['displayName'],
-      photoURL: doc.data()['photoURL'],
-      isTeacher: doc.data()['isTeacher'],
-      createdAt: doc.data()['createdAt'],
-      blockedUserID: doc.data()['blockedUserID'],
+      displayName: map['displayName'],
+      photoURL: map['photoURL'],
+      isTeacher: map['isTeacher'],
+      createdAt: map['createdAt'],
+      blockedUserID: map['blockedUserID'],
     );
     return user;
   }

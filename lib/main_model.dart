@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:package_info/package_info.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:version/version.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 
@@ -11,9 +11,8 @@ class MainModel extends ChangeNotifier {
   Future<void> checkVersion() async {
     final configName =
         Platform.isIOS ? 'support_version_ios' : 'support_version_android';
-    final remoteConfig = await RemoteConfig.instance;
-    await remoteConfig.fetch(expiration: const Duration(seconds: 0));
-    await remoteConfig.activateFetched();
+    final remoteConfig = RemoteConfig.instance;
+    await remoteConfig.fetchAndActivate();
     final supportVersion = Version.parse(remoteConfig.getString(configName));
     final packageInfo = await PackageInfo.fromPlatform();
     this.packageInfo = packageInfo;

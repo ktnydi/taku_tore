@@ -1,13 +1,17 @@
+import 'package:algolia/algolia.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/material.dart';
-import 'package:takutore/config/application.dart';
+import 'package:takutore/config.dart';
 import 'package:takutore/domain/teacher.dart';
 
 class TeacherEditModel extends ChangeNotifier {
   final _auth = auth.FirebaseAuth.instance;
   final _store = FirebaseFirestore.instance;
-  final _algolia = Application.algolia.instance;
+  final _algolia = Algolia.init(
+    applicationId: Config.algoliaApplicationId,
+    apiKey: Config.algoliaApiKey,
+  );
   Teacher teacher;
   bool isLoading = false;
   bool isRecruiting = false;

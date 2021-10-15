@@ -4,13 +4,13 @@
 *.pyc
 *.swp
 .DS_Store
-.env*
 .atom/
 .buildlog/
 .history
 .svn/
 android/**/google-services.json
 ios/**/GoogleService-info.plist
+lib/config.dart
 
 # IntelliJ related
 *.iml

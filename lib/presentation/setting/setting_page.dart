@@ -303,7 +303,7 @@ class About extends StatelessWidget {
           title: Text('エラー'),
           content: Text(errorText),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: Text(
                 'OK',
                 style: TextStyle(
@@ -430,14 +430,14 @@ class Danger extends StatelessWidget {
         return AlertDialog(
           title: Text('ロウアウトしますか？'),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: Text(
                 'キャンセル',
                 style: TextStyle(color: Colors.blueAccent),
               ),
               onPressed: () => Navigator.pop(context, false),
             ),
-            FlatButton(
+            TextButton(
               child: Text(
                 'ログアウト',
                 style: TextStyle(color: Colors.redAccent),

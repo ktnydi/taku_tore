@@ -36,7 +36,7 @@ class NoticeListModel extends ChangeNotifier {
     await Future.forEach(
       newNoticeDocs.docs,
       (DocumentSnapshot doc) async {
-        if (doc.data()['isRead']) return;
+        if ((doc.data() as Map<String, dynamic>)['isRead']) return;
 
         await doc.reference.update(
           {
@@ -73,7 +73,7 @@ class NoticeListModel extends ChangeNotifier {
     final notices = await Future.wait(
       noticeDocs.docs.map(
         (doc) async {
-          final notice = Notice(doc);
+          final notice = Notice(doc.data());
           await notice.fetchSender();
           if (notice.type == 'add room') {
             await this.fetchRoom(notice: notice);

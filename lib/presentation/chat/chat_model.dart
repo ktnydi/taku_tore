@@ -73,8 +73,9 @@ class ChatModel extends ChangeNotifier {
   }
 
   Future<Room> convertSnapshotToDomain({DocumentSnapshot doc}) async {
-    final teacherID = doc.data()['member']['teacherID'];
-    final studentID = doc.data()['member']['studentID'];
+    final map = doc.data() as Map<String, dynamic>;
+    final teacherID = map['member']['teacherID'];
+    final studentID = map['member']['studentID'];
 
     final teacher = await fetchUserFromFirebase(userId: teacherID);
     final student = await fetchUserFromFirebase(userId: studentID);
@@ -83,13 +84,13 @@ class ChatModel extends ChangeNotifier {
       documentId: doc.id,
       teacher: teacher,
       student: student,
-      lastMessage: doc.data()['lastMessage'],
-      updatedAt: doc.data()['updatedAt'],
-      createdAt: doc.data()['createdAt'],
-      lastMessageFromUid: doc.data()['lastMessageFromUid'],
-      numNewMessage: doc.data()['numNewMessage'],
-      hasNewMessage: doc.data()['numNewMessage'].toDouble() > 0,
-      isAllow: doc.data()['isAllow'],
+      lastMessage: map['lastMessage'],
+      updatedAt: map['updatedAt'],
+      createdAt: map['createdAt'],
+      lastMessageFromUid: map['lastMessageFromUid'],
+      numNewMessage: map['numNewMessage'],
+      hasNewMessage: map['numNewMessage'].toDouble() > 0,
+      isAllow: map['isAllow'],
     );
   }
 

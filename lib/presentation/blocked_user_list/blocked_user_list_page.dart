@@ -11,7 +11,7 @@ class BlockedUserList extends StatelessWidget {
           title: Text('エラー'),
           content: Text(errorText),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: Text(
                 'OK',
                 style: TextStyle(
@@ -43,14 +43,16 @@ class BlockedUserList extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
-          child: FlatButton(
-            color: Colors.redAccent,
+          child: TextButton(
             child: Text(
               'ブロック中',
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
               ),
+            ),
+            style: TextButton.styleFrom(
+              primary: Colors.redAccent,
             ),
             onPressed: () async {
               try {

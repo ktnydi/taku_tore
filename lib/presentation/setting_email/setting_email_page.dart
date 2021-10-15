@@ -168,7 +168,7 @@ class _UpdateEmailFormState extends State<UpdateEmailForm>
                                           return AlertDialog(
                                             title: Text('メールアドレスを更新しました。'),
                                             actions: <Widget>[
-                                              FlatButton(
+                                              TextButton(
                                                 child: Text('OK'),
                                                 onPressed: () =>
                                                     Navigator.pop(context),
@@ -187,7 +187,7 @@ class _UpdateEmailFormState extends State<UpdateEmailForm>
                                           return AlertDialog(
                                             title: Text(error.toString()),
                                             actions: <Widget>[
-                                              FlatButton(
+                                              TextButton(
                                                 child: Text('OK'),
                                                 onPressed: () =>
                                                     Navigator.pop(context),

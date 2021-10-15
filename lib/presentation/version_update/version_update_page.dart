@@ -16,7 +16,7 @@ class _VersionUpdateState extends State<VersionUpdate> {
         child: Center(
           child: Stack(
             alignment: Alignment.topCenter,
-            overflow: Overflow.visible,
+            clipBehavior: Clip.none,
             children: [
               Container(
                 padding: EdgeInsets.fromLTRB(15, 55, 15, 30),
@@ -60,9 +60,7 @@ class _VersionUpdateState extends State<VersionUpdate> {
                             ],
                           ),
                         ),
-                        child: FlatButton(
-                          padding: EdgeInsets.all(0),
-                          textColor: Colors.white,
+                        child: TextButton(
                           onPressed: () {
                             final appStoreURL =
                                 'https://apps.apple.com/jp/app/takutore/id1529380989';
@@ -71,6 +69,10 @@ class _VersionUpdateState extends State<VersionUpdate> {
 
                             launcher.launch(storeURL);
                           },
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.all(0),
+                            primary: Colors.white,
+                          ),
                           child: Center(
                             child: Text(
                               '今すぐアップデートする',

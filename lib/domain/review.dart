@@ -2,11 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'user.dart';
 
 class Review {
-  Review(DocumentSnapshot doc, User user) {
-    documentID = doc.id;
-    rating = doc.data()['rating'].toDouble();
-    comment = doc.data()['comment'];
-    createdAt = doc.data()['createdAt'];
+  Review(Map<String, dynamic> map, User user) {
+    documentID = map['id'];
+    rating = map['rating'].toDouble();
+    comment = map['comment'];
+    createdAt = map['createdAt'];
     fromUser = user;
   }
 

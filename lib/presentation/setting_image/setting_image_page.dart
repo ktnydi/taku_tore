@@ -15,7 +15,7 @@ class SettingImage extends StatelessWidget {
           return AlertDialog(
             title: Text(error.toString()),
             actions: <Widget>[
-              FlatButton(
+              TextButton(
                 child: Text('OK'),
                 onPressed: () => Navigator.pop(context),
               ),
@@ -37,7 +37,7 @@ class SettingImage extends StatelessWidget {
           return AlertDialog(
             title: Text(e.toString()),
             actions: <Widget>[
-              FlatButton(
+              TextButton(
                 child: Text('OK'),
                 onPressed: () => Navigator.pop(context),
               ),

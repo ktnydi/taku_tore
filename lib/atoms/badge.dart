@@ -10,7 +10,7 @@ class Badge extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       alignment: Alignment.topRight,
-      overflow: Overflow.visible,
+      clipBehavior: Clip.none,
       children: <Widget>[
         child,
         this.counter > 0

@@ -12,7 +12,7 @@ class RemoveUser extends StatelessWidget {
           title: Text('アカウントを削除'),
           content: Text('アカウントを削除します。本当に削除してよろしいですか？'),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: Text(
                 'キャンセル',
                 style: TextStyle(
@@ -21,7 +21,7 @@ class RemoveUser extends StatelessWidget {
               ),
               onPressed: () => Navigator.pop(context, false),
             ),
-            FlatButton(
+            TextButton(
               child: Text(
                 '削除',
                 style: TextStyle(
@@ -125,7 +125,7 @@ class RemoveUser extends StatelessWidget {
                               return AlertDialog(
                                 title: Text(error.toString()),
                                 actions: <Widget>[
-                                  FlatButton(
+                                  TextButton(
                                     child: Text('OK'),
                                     onPressed: () {
                                       Navigator.pop(context);

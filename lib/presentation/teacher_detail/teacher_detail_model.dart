@@ -172,7 +172,7 @@ class TeacherDetailModel extends ChangeNotifier {
           createdAt: data.data()['createdAt'],
           blockedUserID: data.data()['blockedUserID'],
         );
-        return Review(doc, fromUser);
+        return Review(doc.data(), fromUser);
       }),
     );
     this.reviews = reviews;
@@ -211,7 +211,7 @@ class TeacherDetailModel extends ChangeNotifier {
           createdAt: data.data()['createdAt'],
           blockedUserID: data.data()['blockedUserID'],
         );
-        return Review(doc, fromUser);
+        return Review(doc.data(), fromUser);
       }).toList(),
     );
 
