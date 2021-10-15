@@ -86,7 +86,7 @@ class _CurrentPasswordSectionState extends State<CurrentPasswordSection> {
           return AlertDialog(
             title: Text('パスワードを更新しました。'),
             actions: <Widget>[
-              FlatButton(
+              TextButton(
                 child: Text('OK'),
                 onPressed: () => Navigator.pop(context),
               ),
@@ -104,7 +104,7 @@ class _CurrentPasswordSectionState extends State<CurrentPasswordSection> {
           return AlertDialog(
             title: Text(error.toString()),
             actions: <Widget>[
-              FlatButton(
+              TextButton(
                 child: Text('OK'),
                 onPressed: () => Navigator.pop(context),
               ),
@@ -153,14 +153,15 @@ class _CurrentPasswordSectionState extends State<CurrentPasswordSection> {
                       child: ButtonTheme(
                         minWidth: 0,
                         padding: EdgeInsets.all(0),
-                        child: FlatButton(
-                          materialTapTargetSize:
-                              MaterialTapTargetSize.shrinkWrap,
+                        child: TextButton(
                           child: Text(
                             'パスワードをお忘れですか？',
                             style: TextStyle(
                               color: Theme.of(context).primaryColor,
                             ),
+                          ),
+                          style: TextButton.styleFrom(
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           ),
                           onPressed: () {
                             Navigator.push(

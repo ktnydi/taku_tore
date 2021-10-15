@@ -1,6 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:takutore/presentation/version_update/version_update_page.dart';
 import 'package:timeago/timeago.dart';
@@ -13,7 +13,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   setLocaleMessages('ja', JaMessages());
-  await DotEnv().load('.env');
 
   runApp(MyApp());
 }
@@ -31,18 +30,21 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(
             primaryColor: Colors.red,
             appBarTheme: AppBarTheme(
-              brightness: Brightness.light,
+              systemOverlayStyle: SystemUiOverlayStyle.dark,
               color: Colors.white,
               elevation: 0.5,
               iconTheme: IconThemeData(
                 color: Colors.red,
               ),
-              textTheme: TextTheme(
-                headline6: TextStyle(
-                  color: Colors.red,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+              toolbarTextStyle: TextStyle(
+                color: Colors.red,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+              titleTextStyle: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Typography.material2018().black.headline6.color,
               ),
             ),
             primarySwatch: Colors.red,

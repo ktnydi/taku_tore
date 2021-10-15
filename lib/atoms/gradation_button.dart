@@ -31,10 +31,12 @@ class GradationButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(22),
           gradient: this.gradient,
         ),
-        child: FlatButton(
-          padding: EdgeInsets.all(0),
-          textColor: this.textColor,
+        child: TextButton(
           child: this.child,
+          style: TextButton.styleFrom(
+            primary: this.textColor,
+            padding: EdgeInsets.zero,
+          ),
           onPressed: this.onPressed,
         ),
       ),

@@ -42,14 +42,14 @@ class RemoveTeacher extends StatelessWidget {
           title: Text('確認'),
           content: Text('講師登録を解除します'),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: Text(
                 'キャンセル',
                 style: TextStyle(color: Colors.blueAccent),
               ),
               onPressed: () => Navigator.pop(context, false),
             ),
-            FlatButton(
+            TextButton(
               child: Text(
                 '解除',
                 style: TextStyle(color: Colors.redAccent),
@@ -71,7 +71,7 @@ class RemoveTeacher extends StatelessWidget {
           title: Text(titleText),
           content: Text(contentText),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: Text(
                 'OK',
                 style: TextStyle(color: Colors.blueAccent),

@@ -65,13 +65,15 @@ class LoginEmail extends StatelessWidget {
                             alignment: Alignment.centerRight,
                             child: ButtonTheme(
                               minWidth: 0,
-                              child: FlatButton(
-                                padding: EdgeInsets.all(0),
+                              child: TextButton(
                                 child: Text(
                                   'パスワードをお忘れですか？',
                                   style: TextStyle(
                                     color: Theme.of(context).primaryColor,
                                   ),
+                                ),
+                                style: TextButton.styleFrom(
+                                  padding: EdgeInsets.zero,
                                 ),
                                 onPressed: () {
                                   Navigator.push(
@@ -120,7 +122,7 @@ class LoginEmail extends StatelessWidget {
                                     return AlertDialog(
                                       title: Text(error.toString()),
                                       actions: <Widget>[
-                                        FlatButton(
+                                        TextButton(
                                           child: Text('OK'),
                                           onPressed: () =>
                                               Navigator.pop(context),

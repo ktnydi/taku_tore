@@ -78,13 +78,23 @@ class ReviewForm extends StatelessWidget {
                     direction: Axis.horizontal,
                     allowHalfRating: true,
                     minRating: 1,
-                    itemBuilder: (context, _) => Icon(
-                      Icons.star,
-                      color: Colors.amber,
-                    ),
                     onRatingUpdate: (rating) {
                       model.rating = rating;
                     },
+                    ratingWidget: RatingWidget(
+                      full: Icon(
+                        Icons.star,
+                        color: Colors.amber,
+                      ),
+                      half: Icon(
+                        Icons.star_half,
+                        color: Colors.amber,
+                      ),
+                      empty: Icon(
+                        Icons.star_border,
+                        color: Colors.amber,
+                      ),
+                    ),
                   ),
                   SizedBox(
                     width: 10,
@@ -152,14 +162,14 @@ class Submit extends StatelessWidget {
           title: Text(title),
           content: Text(message),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: Text(
                 'キャンセル',
                 style: TextStyle(color: Colors.blueAccent),
               ),
               onPressed: () => Navigator.pop(context, false),
             ),
-            FlatButton(
+            TextButton(
               child: Text(
                 'OK',
                 style: TextStyle(color: Colors.blueAccent),
@@ -183,7 +193,7 @@ class Submit extends StatelessWidget {
           title: Text(title),
           content: Text(message),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: Text(
                 'OK',
                 style: TextStyle(color: Colors.blueAccent),
@@ -234,9 +244,7 @@ class Submit extends StatelessWidget {
             ButtonTheme(
               minWidth: double.infinity,
               height: 50,
-              child: FlatButton(
-                color: Colors.amber,
-                disabledColor: Colors.amber,
+              child: TextButton(
                 child: !model.isLoading
                     ? Text(
                         '投稿する',
@@ -251,8 +259,11 @@ class Submit extends StatelessWidget {
                           Colors.white,
                         ),
                       ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(25.0),
+                style: TextButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25.0),
+                  ),
+                  primary: Colors.amber,
                 ),
                 onPressed: !model.isLoading
                     ? () async {
@@ -267,7 +278,7 @@ class Submit extends StatelessWidget {
             ButtonTheme(
               minWidth: double.infinity,
               height: 50,
-              child: FlatButton(
+              child: TextButton(
                 child: Text(
                   '閉じる',
                   style: TextStyle(
@@ -275,8 +286,10 @@ class Submit extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(25.0),
+                style: TextButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25.0),
+                  ),
                 ),
                 onPressed: !model.isLoading
                     ? () async {

@@ -160,7 +160,7 @@ class TeacherEdit extends StatelessWidget {
                                 title: Text('エラー'),
                                 content: Text(e.toString()),
                                 actions: <Widget>[
-                                  FlatButton(
+                                  TextButton(
                                     child: Text(
                                       'OK',
                                       style: TextStyle(

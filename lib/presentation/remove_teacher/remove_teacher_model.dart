@@ -1,12 +1,16 @@
+import 'package:algolia/algolia.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:takutore/config/application.dart';
+import 'package:takutore/config.dart';
 import '../../domain/user.dart';
 
 class RemoveTeacherModel extends ChangeNotifier {
   final _store = FirebaseFirestore.instance;
-  final _algolia = Application.algolia.instance;
+  final _algolia = Algolia.init(
+    applicationId: Config.algoliaApplicationId,
+    apiKey: Config.algoliaApiKey,
+  );
   User user;
   String _password = '';
   bool isLoading = false;

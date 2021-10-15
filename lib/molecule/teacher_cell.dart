@@ -30,7 +30,7 @@ class TeacherCell extends StatelessWidget {
           title: Text('エラー'),
           content: Text(errorText),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: Text(
                 'OK',
                 style: TextStyle(
@@ -57,7 +57,7 @@ class TeacherCell extends StatelessWidget {
             '今後、${teacher.displayName}さんに関する情報は表示されなくなります。${teacher.displayName}さんをブロックしますか？',
           ),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: Text(
                 'キャンセル',
                 style: TextStyle(
@@ -68,7 +68,7 @@ class TeacherCell extends StatelessWidget {
                 Navigator.pop(context, false);
               },
             ),
-            FlatButton(
+            TextButton(
               child: Text(
                 'ブロック',
                 style: TextStyle(
@@ -100,7 +100,7 @@ class TeacherCell extends StatelessWidget {
 
       Navigator.pop(context);
 
-      scaffoldKey.currentState.showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('ご報告ありがとうございます'),
         ),
@@ -134,7 +134,7 @@ class TeacherCell extends StatelessWidget {
         ),
       );
 
-      scaffoldKey.currentState.showSnackBar(snackBar);
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
       await model.loading();
     } catch (e) {
@@ -144,7 +144,7 @@ class TeacherCell extends StatelessWidget {
         ),
       );
 
-      scaffoldKey.currentState.showSnackBar(snackBar);
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
   }
 
@@ -164,7 +164,7 @@ class TeacherCell extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   ButtonTheme(
-                    child: FlatButton(
+                    child: TextButton(
                       child: Row(
                         children: <Widget>[
                           Icon(
@@ -266,7 +266,7 @@ class TeacherCell extends StatelessWidget {
                     ),
                   ),
                   ButtonTheme(
-                    child: FlatButton(
+                    child: TextButton(
                       child: Row(
                         children: <Widget>[
                           Icon(
@@ -292,7 +292,7 @@ class TeacherCell extends StatelessWidget {
                     ),
                   ),
                   ButtonTheme(
-                    child: FlatButton(
+                    child: TextButton(
                       child: Row(
                         children: <Widget>[
                           Icon(

@@ -1,10 +1,9 @@
+import 'package:algolia/algolia.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:takutore/config/application.dart';
+import 'package:takutore/config.dart';
 import 'package:takutore/domain/teacher.dart';
 import 'package:takutore/domain/user.dart';
-import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 
 class SearchTeacherListModel extends ChangeNotifier {
@@ -12,7 +11,10 @@ class SearchTeacherListModel extends ChangeNotifier {
 
   final String text;
   final scrollController = ScrollController();
-  final _algolia = Application.algolia.instance;
+  final _algolia = Algolia.init(
+    applicationId: Config.algoliaApplicationId,
+    apiKey: Config.algoliaApiKey,
+  );
   final hitsPerPage = 50;
   List<Teacher> teachers = [];
   int maxPage = 0;
@@ -50,7 +52,7 @@ class SearchTeacherListModel extends ChangeNotifier {
         .index('teacher')
         .setHitsPerPage(this.hitsPerPage)
         .setPage(this.page);
-    query = query.search(this.text);
+    query = query.query(this.text);
     final snap = await query.getObjects();
     if (this.page == snap.nbPages - 1) {
       this.forbidScroll = true;
@@ -86,7 +88,7 @@ class SearchTeacherListModel extends ChangeNotifier {
         .index('teacher')
         .setHitsPerPage(this.hitsPerPage)
         .setPage(this.page);
-    query = query.search(this.text);
+    query = query.query(this.text);
     final snap = await query.getObjects();
     if (this.page == this.maxPage) {
       this.forbidScroll = true;
@@ -134,38 +136,6 @@ class SearchTeacherListModel extends ChangeNotifier {
   }
 
   Future report({User user, String contentType}) async {
-    final contentTypes = ['inappropriate', 'spam'];
-
-    if (!contentTypes.contains(contentType)) return;
-
-    final currentUser = auth.FirebaseAuth.instance.currentUser;
-
-    if (currentUser == null || user.uid == currentUser.uid) return;
-
-    final collection = FirebaseFirestore.instance.collection('reports');
-
-    final result = await collection.add(
-      {
-        'userID': user.uid,
-        'senderID': currentUser.uid,
-        'contentType': contentType,
-        'createdAt': FieldValue.serverTimestamp(),
-      },
-    );
-
-    final doc = await result.get();
-
-    // gasで作成したgssに報告データを追加するweb apiを呼ぶ
-    final webAppURL = DotEnv().env['GOOGLE_WEB_APP_URL'];
-    http.post(
-      webAppURL,
-      body: {
-        'documentID': doc.id,
-        'userID': doc.data()['userID'],
-        'senderID': doc.data()['senderID'],
-        'contentType': doc.data()['contentType'],
-        'createdAt': doc.data()['createdAt'].toDate().toString(),
-      },
-    );
+    // TODO: firestoreに保存し、functionsでSlackに通知する。
   }
 }

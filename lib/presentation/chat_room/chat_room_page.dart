@@ -32,9 +32,12 @@ class _ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
       return false;
     }
 
-    final beforeDate = getDate(documents[index - 1].data()['createdAt']);
-    final currentDate = getDate(documents[index].data()['createdAt']);
-    return documents[index - 1].data()['fromUid'] == model.user.uid &&
+    final beforeDate = getDate(
+        (documents[index - 1].data() as Map<String, dynamic>)['createdAt']);
+    final currentDate =
+        getDate((documents[index].data() as Map<String, dynamic>)['createdAt']);
+    return (documents[index - 1].data() as Map<String, dynamic>)['fromUid'] ==
+            model.user.uid &&
         beforeDate == currentDate;
   }
 
@@ -47,9 +50,12 @@ class _ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
       return false;
     }
 
-    final beforeDate = getDate(documents[index - 1].data()['createdAt']);
-    final currentDate = getDate(documents[index].data()['createdAt']);
-    return documents[index - 1].data()['fromUid'] != model.user.uid &&
+    final beforeDate = getDate(
+        (documents[index - 1].data() as Map<String, dynamic>)['createdAt']);
+    final currentDate =
+        getDate((documents[index].data() as Map<String, dynamic>)['createdAt']);
+    return (documents[index - 1].data() as Map<String, dynamic>)['fromUid'] !=
+            model.user.uid &&
         beforeDate == currentDate;
   }
 
@@ -61,11 +67,12 @@ class _ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
     List<Widget> messages = [];
     documents.asMap().forEach(
       (index, doc) {
+        final map = doc.data() as Map<String, dynamic>;
         final message = Message(
-          fromUid: doc.data()['fromUid'],
-          toUid: doc.data()['toUid'],
-          content: doc.data()['content'],
-          createdAt: doc.data()['createdAt'],
+          fromUid: map['fromUid'],
+          toUid: map['toUid'],
+          content: map['content'],
+          createdAt: map['createdAt'],
         );
 
         final isLastMessageRight = this.isLastMessageRight(
@@ -420,7 +427,7 @@ class SendMessageField extends StatelessWidget {
           return AlertDialog(
             title: Text(error.toString()),
             actions: <Widget>[
-              FlatButton(
+              TextButton(
                 child: Text('OK'),
                 onPressed: () => Navigator.pop(context),
               ),
@@ -510,13 +517,13 @@ class SendMessageField extends StatelessWidget {
                   height: 40,
                   padding: EdgeInsets.symmetric(horizontal: 0),
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  child: FlatButton(
-                    disabledTextColor:
-                        Theme.of(context).primaryColor.withOpacity(0.6),
-                    textColor: Theme.of(context).primaryColor,
+                  child: TextButton(
                     child: Icon(
                       Icons.send,
                       size: 30,
+                    ),
+                    style: TextButton.styleFrom(
+                      primary: Theme.of(context).primaryColor,
                     ),
                     onPressed: model.message.isNotEmpty
                         ? () async {

@@ -9,7 +9,7 @@ class LoginEmailModel extends ChangeNotifier {
   final FocusNode myFocusNode = FocusNode();
   final auth.FirebaseAuth _auth = auth.FirebaseAuth.instance;
   final FirebaseFirestore _store = FirebaseFirestore.instance;
-  final FirebaseMessaging _message = FirebaseMessaging();
+  final FirebaseMessaging _message = FirebaseMessaging.instance;
   bool isLoading = false;
 
   @override

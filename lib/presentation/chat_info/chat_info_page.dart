@@ -23,7 +23,7 @@ class ChatInfo extends StatelessWidget {
           title: title,
           content: content,
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: Text(
                 'キャンセル',
                 style: TextStyle(
@@ -32,7 +32,7 @@ class ChatInfo extends StatelessWidget {
               ),
               onPressed: () => Navigator.pop(context, false),
             ),
-            FlatButton(
+            TextButton(
               child: done,
               onPressed: () => Navigator.pop(context, true),
             )
@@ -50,7 +50,7 @@ class ChatInfo extends StatelessWidget {
           title: Text('エラー'),
           content: Text(errorText),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: Text(
                 'OK',
                 style: TextStyle(color: Colors.blueAccent),

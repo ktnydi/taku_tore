@@ -78,7 +78,7 @@ class SignUpEmail extends StatelessWidget {
                                 padding: EdgeInsets.symmetric(
                                   horizontal: 0.0,
                                 ),
-                                child: FlatButton(
+                                child: TextButton(
                                   child: Text(
                                     model.isObscureText ? '表示' : '隠す',
                                     style: TextStyle(
@@ -86,8 +86,6 @@ class SignUpEmail extends StatelessWidget {
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  splashColor: Colors.transparent,
-                                  highlightColor: Colors.transparent,
                                   onPressed: () {
                                     model.toggleObscureText();
                                   },
@@ -134,7 +132,7 @@ class SignUpEmail extends StatelessWidget {
                                     return AlertDialog(
                                       title: Text(error.toString()),
                                       actions: <Widget>[
-                                        FlatButton(
+                                        TextButton(
                                           child: Text('OK'),
                                           onPressed: () =>
                                               Navigator.pop(context),

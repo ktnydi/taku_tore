@@ -34,19 +34,16 @@ class RoundedButton extends StatelessWidget {
     return ButtonTheme(
       minWidth: minWidth,
       height: height,
-      child: FlatButton(
-        color: color,
-        disabledColor: disabledColor,
-        textColor: textColor,
-        disabledTextColor: disabledTextColor,
-        focusColor: focusColor,
-        highlightColor: highlightColor,
-        splashColor: splashColor,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(25),
-          side: side,
-        ),
+      child: TextButton(
         child: child,
+        style: TextButton.styleFrom(
+          primary: textColor,
+          backgroundColor: color,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(25),
+            side: side,
+          ),
+        ),
         onPressed: onPressed,
       ),
     );

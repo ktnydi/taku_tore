@@ -15,7 +15,7 @@ class FeedbackForm extends StatelessWidget {
           title: Text('確認'),
           content: Text('フィードバックを送信しますか？'),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: Text(
                 'キャンセル',
                 style: TextStyle(
@@ -24,7 +24,7 @@ class FeedbackForm extends StatelessWidget {
               ),
               onPressed: () => Navigator.pop(context, false),
             ),
-            FlatButton(
+            TextButton(
               child: Text(
                 '送信',
                 style: TextStyle(
@@ -47,7 +47,7 @@ class FeedbackForm extends StatelessWidget {
           title: Text('エラー'),
           content: Text(errorText),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: Text(
                 'OK',
                 style: TextStyle(
@@ -78,7 +78,7 @@ class FeedbackForm extends StatelessWidget {
 
       await model.addFeedback(content: model.controller.text);
 
-      _scaffoldKey.currentState.showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('フィードバックを送信しました'),
         ),
@@ -113,7 +113,7 @@ class FeedbackForm extends StatelessWidget {
                   appBar: AppBar(
                     title: Text('フィードバック'),
                     actions: <Widget>[
-                      FlatButton(
+                      TextButton(
                         child: Text(
                           '送信',
                           style: TextStyle(
@@ -121,8 +121,9 @@ class FeedbackForm extends StatelessWidget {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        textColor: Theme.of(context).primaryColor,
-                        disabledTextColor: Colors.black38,
+                        style: TextButton.styleFrom(
+                          primary: Theme.of(context).primaryColor,
+                        ),
                         onPressed: () async {
                           await _addFeedback(context, model: model);
                         },
@@ -136,7 +137,6 @@ class FeedbackForm extends StatelessWidget {
                       child: Form(
                         key: _formKey,
                         child: FormField<String>(
-                          autovalidate: false,
                           initialValue: '',
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {

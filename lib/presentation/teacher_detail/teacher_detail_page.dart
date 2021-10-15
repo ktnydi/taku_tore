@@ -31,7 +31,7 @@ class TeacherDetail extends StatelessWidget {
           return AlertDialog(
             title: Text(error.toString()),
             actions: <Widget>[
-              FlatButton(
+              TextButton(
                 child: Text('OK'),
                 onPressed: () => Navigator.pop(context),
               )
@@ -59,7 +59,7 @@ class TeacherDetail extends StatelessWidget {
           return AlertDialog(
             title: Text(error.toString()),
             actions: <Widget>[
-              FlatButton(
+              TextButton(
                 child: Text('OK'),
                 onPressed: () => Navigator.pop(context),
               )
@@ -113,8 +113,7 @@ class TeacherDetail extends StatelessWidget {
               title: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  FlatButton(
-                    padding: EdgeInsets.all(16),
+                  TextButton(
                     child: Transform.translate(
                       offset: Offset(-1, 0),
                       child: Icon(
@@ -123,8 +122,11 @@ class TeacherDetail extends StatelessWidget {
                         size: 18,
                       ),
                     ),
-                    color: Colors.black45,
-                    shape: CircleBorder(),
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.all(16),
+                      backgroundColor: Colors.black45,
+                      shape: CircleBorder(),
+                    ),
                     onPressed: () => Navigator.pop(context),
                   ),
                   Consumer2<UserModel, TeacherDetailModel>(
@@ -134,7 +136,7 @@ class TeacherDetail extends StatelessWidget {
                         return Container();
                       }
 
-                      return FlatButton(
+                      return TextButton(
                         child: Icon(
                           teacherDetailModel.isBookmarked
                               ? Icons.bookmark
@@ -142,9 +144,11 @@ class TeacherDetail extends StatelessWidget {
                           color: Colors.white,
                           size: 18,
                         ),
-                        color: Colors.black45,
-                        padding: EdgeInsets.all(16),
-                        shape: CircleBorder(),
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.all(16),
+                          shape: CircleBorder(),
+                          backgroundColor: Colors.black45,
+                        ),
                         onPressed: () async {
                           if (teacherDetailModel.isBookmarked) {
                             await deleteBookmark(
@@ -263,7 +267,7 @@ class ConsultButton extends StatelessWidget {
           ),
           content: Text(content),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: Text(
                 'キャンセル',
                 style: TextStyle(
@@ -272,7 +276,7 @@ class ConsultButton extends StatelessWidget {
               ),
               onPressed: () => Navigator.pop(context, false),
             ),
-            FlatButton(
+            TextButton(
               child: Text(
                 '相談する',
                 style: TextStyle(
@@ -329,7 +333,7 @@ class ConsultButton extends StatelessWidget {
             title: Text('エラー'),
             content: Text(e.toString()),
             actions: <Widget>[
-              FlatButton(
+              TextButton(
                 child: Text(
                   'OK',
                   style: TextStyle(color: Colors.blueAccent),

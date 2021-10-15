@@ -42,7 +42,7 @@ class _SettingTeacherState extends State<SettingTeacher> {
           return AlertDialog(
             title: Text(error.toString()),
             actions: <Widget>[
-              FlatButton(
+              TextButton(
                 child: Text('OK'),
                 onPressed: () => Navigator.pop(context),
               ),
@@ -69,7 +69,7 @@ class _SettingTeacherState extends State<SettingTeacher> {
                 ),
               ),
               actions: <Widget>[
-                FlatButton(
+                TextButton(
                   child: Text(
                     '次へ',
                     style: TextStyle(
@@ -135,7 +135,7 @@ class BecomeTeacher extends StatelessWidget {
             return AlertDialog(
               title: Text('講師に登録しました。'),
               actions: <Widget>[
-                FlatButton(
+                TextButton(
                   child: Text('OK'),
                   onPressed: () => Navigator.pop(context),
                 ),
@@ -153,7 +153,7 @@ class BecomeTeacher extends StatelessWidget {
           return AlertDialog(
             title: Text(error.toString()),
             actions: <Widget>[
-              FlatButton(
+              TextButton(
                 child: Text('OK'),
                 onPressed: () => Navigator.pop(context),
               ),
@@ -208,8 +208,7 @@ class BecomeTeacher extends StatelessWidget {
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(25),
                                   ),
-                                  child: FlatButton(
-                                    color: Theme.of(context).primaryColor,
+                                  child: TextButton(
                                     child: Text(
                                       '入力した内容を確認する',
                                       style: TextStyle(
@@ -217,7 +216,9 @@ class BecomeTeacher extends StatelessWidget {
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    disabledColor: Colors.black38,
+                                    style: TextButton.styleFrom(
+                                      primary: Theme.of(context).primaryColor,
+                                    ),
                                     onPressed: !model.disabled()
                                         ? () {
                                             Navigator.push(

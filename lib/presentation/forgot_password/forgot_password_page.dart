@@ -34,7 +34,7 @@ class ForgotPassword extends StatelessWidget {
           title: Text('エラー'),
           content: Text(errorText),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: Text(
                 'OK',
                 style: TextStyle(
@@ -105,9 +105,7 @@ class ForgotPassword extends StatelessWidget {
                     actions: <Widget>[
                       ButtonTheme(
                         minWidth: 0,
-                        child: FlatButton(
-                          materialTapTargetSize:
-                              MaterialTapTargetSize.shrinkWrap,
+                        child: TextButton(
                           child: Text(
                             '送信',
                             style: TextStyle(
@@ -115,6 +113,9 @@ class ForgotPassword extends StatelessWidget {
                               fontWeight: FontWeight.bold,
                               fontSize: 18,
                             ),
+                          ),
+                          style: TextButton.styleFrom(
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           ),
                           onPressed: () async {
                             await _submit(context, model);

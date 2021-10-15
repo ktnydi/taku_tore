@@ -21,7 +21,7 @@ class _BookmarkListState extends State<BookmarkList> {
           title: Text('エラー'),
           content: Text(errorText),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: Text(
                 'OK',
                 style: TextStyle(

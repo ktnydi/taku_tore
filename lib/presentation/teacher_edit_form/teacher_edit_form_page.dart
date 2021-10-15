@@ -28,7 +28,7 @@ class TeacherEditForm extends StatelessWidget {
           return AlertDialog(
             title: Text(error.toString()),
             actions: <Widget>[
-              FlatButton(
+              TextButton(
                 child: Text('OK'),
                 onPressed: () => Navigator.pop(context),
               ),
@@ -78,8 +78,7 @@ class TeacherEditForm extends StatelessWidget {
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(25),
                                   ),
-                                  child: FlatButton(
-                                    color: Theme.of(context).primaryColor,
+                                  child: TextButton(
                                     child: Text(
                                       '講義内容を更新する',
                                       style: TextStyle(
@@ -87,7 +86,10 @@ class TeacherEditForm extends StatelessWidget {
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    disabledColor: Colors.black38,
+                                    style: TextButton.styleFrom(
+                                      backgroundColor:
+                                          Theme.of(context).primaryColor,
+                                    ),
                                     onPressed: !model.disabled()
                                         ? () async {
                                             this.updateTeacher(context, model);

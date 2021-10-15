@@ -60,13 +60,15 @@ class LoginPrompt extends StatelessWidget {
               ],
             ),
           ),
-          FlatButton(
-            textColor: Theme.of(context).textTheme.headline5.color,
+          TextButton(
             child: Text(
               'アカウントを作成する',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
               ),
+            ),
+            style: TextButton.styleFrom(
+              primary: Theme.of(context).textTheme.headline5.color,
             ),
             onPressed: () {
               Navigator.push(

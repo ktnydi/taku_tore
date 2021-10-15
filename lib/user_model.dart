@@ -1,16 +1,20 @@
+import 'package:algolia/algolia.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:takutore/config/application.dart';
+import 'package:takutore/config.dart';
 import 'domain/user.dart';
 
 class UserModel extends ChangeNotifier {
   User user;
   final FirebaseFirestore _store = FirebaseFirestore.instance;
-  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
-  final _algolia = Application.algolia.instance;
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+  final _algolia = Algolia.init(
+    applicationId: Config.algoliaApplicationId,
+    apiKey: Config.algoliaApiKey,
+  );
   bool isLoading = false;
 
   void beginLoading() async {
@@ -24,31 +28,11 @@ class UserModel extends ChangeNotifier {
   }
 
   Future confirmNotification() async {
-    await _firebaseMessaging.requestNotificationPermissions(
-      const IosNotificationSettings(
-        sound: true,
-        badge: true,
-        alert: true,
-        provisional: false,
-      ),
-    );
-
-    _firebaseMessaging.onIosSettingsRegistered.listen(
-      (IosNotificationSettings settings) {
-        print("Settings registered: $settings");
-      },
-    );
-
-    _firebaseMessaging.configure(
-      onMessage: (Map<String, dynamic> message) async {
-        print("onMessage: $message");
-      },
-      onLaunch: (Map<String, dynamic> message) async {
-        print("onLaunch: $message");
-      },
-      onResume: (Map<String, dynamic> message) async {
-        print("onResume: $message");
-      },
+    await _firebaseMessaging.requestPermission(
+      sound: true,
+      badge: true,
+      alert: true,
+      provisional: false,
     );
   }
 
